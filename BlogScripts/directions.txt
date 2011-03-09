@@ -1,0 +1,5 @@
+download (with wget) the index file from the website you want to get images from
+GetAllBlogPages2.sh index.html
+this will create a whole bunch of search=... pages
+cat index.html search[tab]* > filelist.txt
+GetBlogImages[NoClobber].sh filelist
