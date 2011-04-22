@@ -98,11 +98,10 @@ function GivePageReturnTimeRemainingInSeconds()
 #two forms setupTimerBar or setupWMTimerBar
 #    TimeRemainingInSeconds=`grep setupWMTimerBar ${1} | sed 's/.*(//' | sed 's/,.*//'   `
     TimeRemainingInSeconds=`grep "TimerBar" ${1} | sed 's/.*(//' | sed 's/,.*//'   `
-#if the value somehow comes out negative then we'll just wait 5 more seconds and hit it again
+#if the value somehow comes out negative then we'll just wait X more seconds and hit it again
     if [ ${TimeRemainingInSeconds} -lt 0 ]
     then
-	TimeRemainingInSeconds=5
-	printf "Uh the time remaining was negative!"
+	TimeRemainingInSeconds=1
     fi
     echo ${TimeRemainingInSeconds}
 }
