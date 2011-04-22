@@ -102,43 +102,16 @@ function GivePageReturnTimeRemainingInSeconds()
     then
 	TimeRemainingInSeconds=5
 	printf "Uh the time remaining was negative!"
-#else
-#	TimeRemainingInSeconds=5
-	#printf "Uh the time remaining wasn't a number!"
-#using printf will also get captured as a "returned" value so we can't use it
     fi
     echo ${TimeRemainingInSeconds}
 }
 
 function GiveTimeReturnDealEndTime()
 {
-echo "Emptyfornow"
+    echo "Emptyfornow"
 }
 
-function GetPageReturnText()
-{
-#this function gets a webpage and echoes the name of the file that holds the desired text
-    Webpage=`mktemp`
-    wget ${1} -O ${Webpage} -q
-    OutputText=`grep "<title>" ${Webpage} | sed 's/<title>//' | sed 's/<\/title>//' `
-    echo ${OutputText}
-}
 
-function GetPageReturnImage()
-{
-#this function gets a webpage and echoes the name of the file that holds the desired image
-    Webpage=`mktemp`
-    wget ${1} -O ${Webpage} -q
-    case ${1} in 
-	"http://www.steepandcheap.com") 
-	    OutputText=`grep "item_image" ${Webpage} | sed 's/<div id=\"item_image\"><img src=\"//' | sed 's/".*//' `;;
-	"http://www.whiskeymilitia.com"|"http://www.chainlove.com"|"http://www.bonktown.com")
-	    OutputText=`grep "mainimage" ${Webpage} | sed 's/<img name=\"mainimage\" src=\"//' | sed 's/".*//' `;;
-    esac
-    Image=`mktemp`
-    wget ${OutputText} -O ${Image} -q
-    echo ${Image}
-}
 
 #--------------------------
 # BEGIN MAIN PART OF SCRIPT
@@ -151,12 +124,12 @@ BonktownTemp=""
 ChainloveTemp=""
 while [ 1 ] ; do 
     SteepAndCheapPage=$(GetPageReturnFile http://www.steepandcheap.com)
-SnCDurationOfDealInMinutes=$(GivePageReturnDurationOfDealInMinutes ${SteepAndCheapPage} )
+    SnCDurationOfDealInMinutes=$(GivePageReturnDurationOfDealInMinutes ${SteepAndCheapPage} )
 #echo "Duration of Deal" ${SnCDurationOfDealInMinutes}
     SnCTimeRemainingOfTotal=$(GivePageReturnTimeRemainingOfTotalTime ${SteepAndCheapPage} )
 #echo "Time remaining of total"  ${SnCTimeRemainingOfTotal}
     SteepAndCheapTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${SteepAndCheapPage} )
-SnCTimeLeftSeconds=${SteepAndCheapTimeLeftSeconds}
+    SnCTimeLeftSeconds=${SteepAndCheapTimeLeftSeconds}
 
  #   echo ${SteepAndCheapTimeLeftSeconds}
     SnCTimeLeftMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SteepAndCheapTimeLeftSeconds})
@@ -172,14 +145,19 @@ SnCTimeLeftSeconds=${SteepAndCheapTimeLeftSeconds}
     #echo ${Bobo}
     Bobo=${SnCTimeRemainingOfTotal}" "${SnCQuantityRemainingOfTotalQuantity}
     #echo ${Bobo}
-    SteepAndCheap=$(GivePageReturnText ${SteepAndCheapPage} http://www.steepandcheap.com )
-#$(GetPageReturnText http://www.steepandcheap.com )
+    SteepAndCheap=$(GivePageReturnText ${SteepAndCheapPage} )
+
+#if there are changes to the item description then we update and print the new info
     if [ "${SteepAndCheap}" != "${SteepAndCheapTemp}" ]
     then
-	SteepAndCheapImage=$(GetPageReturnImage http://www.steepandcheap.com )
+#obtain the image
+	SteepAndCheapImage=$(GivePageAndWebsiteReturnImage ${SteepAndCheapPage} http://www.steepandcheap.com )
+#output the text description in the terminal
 	echo ${SteepAndCheap} 
-#	date
+#send out the info using notify-send for a popup
 	notify-send "$SteepAndCheap" -i ${SteepAndCheapImage} -t 3
+#copy content to our temp holder so we can see if things changed.
+	SteepAndCheapTemp=`echo ${SteepAndCheap}`
     fi
 
     WhiskeyMilitiaPage=$(GetPageReturnFile http://www.whiskeymilitia.com)
@@ -188,61 +166,63 @@ SnCTimeLeftSeconds=${SteepAndCheapTimeLeftSeconds}
 
     WMTotalQuantity=$(GivePageReturnTotalQuantity ${WhiskeyMilitiaPage} )
 
- WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${WhiskeyMilitiaPage})
-#echo "WM" ${WMTimeLeftSeconds}
+    WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${WhiskeyMilitiaPage})
 
-WhiskeyMilitia=$(GivePageReturnText ${WhiskeyMilitiaPage} http://www.whiskeymilitia.com ) 
-#$(GetPageReturnText http://www.whiskeymilitia.com )
+
+    WhiskeyMilitia=$(GivePageReturnText ${WhiskeyMilitiaPage} )
+
 
     if [ "${WhiskeyMilitia}" != "${WhiskeyMilitiaTemp}" ]
     then
 
-	WhiskeyMilitiaImage=$(GetPageReturnImage http://www.whiskeymilitia.com )
+	WhiskeyMilitiaImage=$(GivePageAndWebsiteReturnImage ${WhiskeyMilitiaPage} http://www.whiskeymilitia.com )
 	echo ${WhiskeyMilitia}
-#	date
+
 	notify-send  "$WhiskeyMilitia" -i ${WhiskeyMilitiaImage} -t 3
+	WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
     fi
-#    WILL NEED TO PERFORM CHECK TO SEE IF THE OUTPUT ISNT EMPTY DUE TO NOT REPORTING TIME LEFT ON ITEM -> STATE NO TIME LIMIT GIVEN
+
     BonktownPage=$(GetPageReturnFile http://www.bonktown.com)
     BTQuantityRemaining=$(GivePageReturnQuantityRemaining ${BonktownPage} )
     BTTotalQuantity=$(GivePageReturnTotalQuantity ${BonktownPage} )
     BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
-#echo "BT"${BTTimeLeftSeconds}"-"
-    Bonktown=$(GivePageReturnText ${BonktownPage} http://www.bonktown.com )
-#$(GetPageReturnText http://www.bonktown.com )
+
+    Bonktown=$(GivePageReturnText ${BonktownPage} )
+
 
     if [ "${Bonktown}" != "${BonktownTemp}" ]
     then
 
-	BonktownImage=$(GetPageReturnImage http://www.bonktown.com )
+	BonktownImage=$(GivePageAndWebsiteReturnImage ${BonktownPage} http://www.bonktown.com )
 	echo ${Bonktown}
-#	date
+
 	notify-send  "$Bonktown" -i ${BonktownImage} -t 3
+	BonktownTemp=`echo ${Bonktown}`
     fi
-   
+    
     ChainlovePage=$(GetPageReturnFile http://www.chainlove.com)
     CLQuantityRemaining=$(GivePageReturnQuantityRemaining ${ChainlovePage} )
     CLTotalQuantity=$(GivePageReturnTotalQuantity ${ChainlovePage} )
     CLTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${ChainlovePage})
-#echo "CL-"${CLTimeLeftSeconds}"-"
-    Chainlove=$(GetPageReturnText http://www.chainlove.com )
+
+    Chainlove=$(GivePageReturnText ${ChainlovePage} )
 
     if [ "${Chainlove}" != "${ChainloveTemp}" ]
     then
 
-	ChainloveImage=$(GetPageReturnImage http://www.chainlove.com )
+	ChainloveImage=$(GivePageAndWebsiteReturnImage ${ChainlovePage} http://www.chainlove.com )
 	echo ${Chainlove}
-#	date
+
 	notify-send  "$Chainlove" -i ${ChainloveImage} -t 3
+	ChainloveTemp=`echo ${Chainlove}`
     fi
 
-    SteepAndCheapTemp=`echo ${SteepAndCheap}`
-    WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
-    BonktownTemp=`echo ${Bonktown}`
-    ChainloveTemp=`echo ${Chainlove}`
+
+
+
+
+
     
-#    need to almost thread this so that each deal is being updated at just the right time.
-#    Or just update all whenever the next deal goes up. Then find the new deal with the shortest time left and update again. And reevaluate again when that deal is up.
     SleepTime=${SnCTimeLeftSeconds}
     NextDeal="SteepAndCheap"
     if [ ${WMTimeLeftSeconds} -lt ${SleepTime} ]
@@ -259,10 +239,12 @@ WhiskeyMilitia=$(GivePageReturnText ${WhiskeyMilitiaPage} http://www.whiskeymili
 	NextDeal="Chainlove"
     fi
 #it'd be nice if we could print the time ticking down and then refresh with the new deals. use "print" maybe?
-#echo "Sleeping for ${SleepTime} seconds"
-SleepTimeMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SleepTime})
-echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes"
-echo "SnC:${SnCTimeLeftSeconds} (${SnCQuantityRemaining}/${SnCTotalQuantity})  WM:${WMTimeLeftSeconds} (${WMQuantityRemaining}/${WMTotalQuantity}) BT:${BTTimeLeftSeconds} (${BTQuantityRemaining}/${BTTotalQuantity}) CL:${CLTimeLeftSeconds} (${CLQuantityRemaining}/${CLTotalQuantity})"
+
+#Having porblems with the math failing on these guys. SOmetimes BT is next but isn't chosen and other times CL is next but not chosen.
+
+    SleepTimeMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SleepTime})
+    echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes"
+    echo "SnC:${SnCTimeLeftSeconds} (${SnCQuantityRemaining}/${SnCTotalQuantity})  WM:${WMTimeLeftSeconds} (${WMQuantityRemaining}/${WMTotalQuantity}) BT:${BTTimeLeftSeconds} (${BTQuantityRemaining}/${BTTotalQuantity}) CL:${CLTimeLeftSeconds} (${CLQuantityRemaining}/${CLTotalQuantity})"
     sleep ${SleepTime}s
 #sleep 5m
 done
