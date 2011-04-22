@@ -91,7 +91,8 @@ function GiveSecondsReturnMinutesAndSeconds()
     fi
 }
 
-
+#Input: webpage file
+#output: extracts time remaining of the item for sale on the page
 function GivePageReturnTimeRemainingInSeconds()
 {
 #two forms setupTimerBar or setupWMTimerBar
@@ -222,33 +223,39 @@ while [ 1 ] ; do
 
 
 
-    
+    #I had been making a logic error here for quite some time.
+#I didn't understand why sometimes the "math" would be off and a smaller value wouldn't be assigned to the SleepTime
+#It was due to me using a if.then.elif.then.elif.then cascade. I was
+#mistakenly thinking that this was the correct method to get the smallest value
+#into SleepTime. This was wrong because if WMTimeLeftSeconds was smaller than 
+#the one for SnC then it would be assigned to SLeepTime and it would kick out of the loop. As long as ONE of the conditions held it'd kick out and not go futher and evaluate any more of the logic tests. DUH. yet this took me a while to figure out.
     SleepTime=${SnCTimeLeftSeconds}
     NextDeal="SteepAndCheap"
     if [ ${WMTimeLeftSeconds} -lt ${SleepTime} ]
     then
 	SleepTime=${WMTimeLeftSeconds}
 	NextDeal="WhiskeyMilitia"
-    elif [ ${BTTimeLeftSeconds} -lt ${SleepTime} ] 
+    fi
+    if [ ${BTTimeLeftSeconds} -lt ${SleepTime} ] 
     then
 	SleepTime=${BTTimeLeftSeconds}
 	NextDeal="Bonktown"
-    elif [ ${CLTimeLeftSeconds} -lt ${SleepTime} ]
+    fi
+    if [ ${CLTimeLeftSeconds} -lt ${SleepTime} ]
     then
 	SleepTime=${CLTimeLeftSeconds} 
 	NextDeal="Chainlove"
     fi
-#it'd be nice if we could print the time ticking down and then refresh with the new deals. use "print" maybe?
 
-#Having porblems with the math failing on these guys. SOmetimes BT is next but isn't chosen and other times CL is next but not chosen.
+#it'd be nice if we could print the time ticking down and then refresh with the new deals. use "print" maybe?
 
     SleepTimeMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SleepTime})
     echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes"
     echo "SnC:${SnCTimeLeftSeconds} (${SnCQuantityRemaining}/${SnCTotalQuantity})  WM:${WMTimeLeftSeconds} (${WMQuantityRemaining}/${WMTotalQuantity}) BT:${BTTimeLeftSeconds} (${BTQuantityRemaining}/${BTTotalQuantity}) CL:${CLTimeLeftSeconds} (${CLQuantityRemaining}/${CLTotalQuantity})"
     sleep ${SleepTime}s
-#sleep 5m
+
 done
 
 
-#Add items up for sale to a database. it should include item, price, percent off, and date of deal- put in sqlite database
+#Add items up for sale to a database. it should include item, price, percent off,quantity,time duration of sale and date of deal- put in sqlite database
 #have it ignore womens/mens items 
