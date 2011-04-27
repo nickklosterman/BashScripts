@@ -9,10 +9,27 @@
 #since there is no compiling I was having the program stop because I was trying to reference a variable that didn't exist bc I had spelled the name wrong.
 #This just caused the program to stop dead in its tracks and not progress farther
 #At the end you see that SleepTime gets printed as well as SleepTimeMinutesSeconds when I call to print SleepTimeMinutesSeconds. Maybe this has to do with variable name length being too long and too similar?
+function on_exit()
+{
+#remove temporary files
+echo "Ok, caught Ctrl-c, exiting after clean up"
+if [ -e /tmp/WebsitePage  ]
+then 
+rm /tmp/WebsitePage
+fi
+
+if [ -e /tmp/ProductImage ] 
+then 
+rm /tmp/ProductImage
+fi
+
+exit 1
+}
+
 function GetPageReturnFile()
 {
 #this function gets a webpage and echoes the name of the file that holds the desired text
-    Webpage=`mktemp`
+    Webpage='/tmp/WebsitePage' #`mktemp`
     wget ${1} -O ${Webpage} -q
     echo ${Webpage}
 }
@@ -32,7 +49,7 @@ function GivePageAndWebsiteReturnImage()
 	"http://www.whiskeymilitia.com"|"http://www.chainlove.com"|"http://www.bonktown.com")
 	    OutputText=`grep "mainimage" ${Webpage} | sed 's/<img name=\"mainimage\" src=\"//' | sed 's/".*//' `;;
     esac
-    Image=`mktemp`
+    Image='/tmp/ProductImage' #`mktemp`
     wget ${OutputText} -O ${Image} -q
     echo ${Image}
 }
@@ -74,7 +91,8 @@ function GiveSecondsReturnMinutesAndSeconds()
 {
     input=${1}
     echo ${1}
-    if [ ${input} == "\r" ] # \n check if null with -z ${input}
+#you need to quote the variable otherwise 
+    if [ "${input}" == "" ] # \n check if null with -z ${input}
     then 
 	echo "Null time"
 	input=99999
@@ -82,13 +100,15 @@ function GiveSecondsReturnMinutesAndSeconds()
     let "minutes = ${1} / 60"
     let "seconds = ${1} % 60 "
 #    echo ${minutes} ${seconds}
-    if [ ${seconds} -lt 10 ];
-    then 
-	echo ${minutes}:0${seconds}
-    else
-	echo ${minutes}:${seconds} 
+printf "%d:%02d" ${minutes} ${seconds}
+
+#    if [ ${seconds} -lt 10 ];
+#    then 
+#	echo ${minutes}:0${seconds} #could've jsut used printf
+#    else
+#	echo ${minutes}:${seconds} 
 #FML the seconds need to be padded with zeros--well I suppose this is one way to do it
-    fi
+#    fi
 }
 
 #Input: webpage file
@@ -101,14 +121,17 @@ function GivePageReturnTimeRemainingInSeconds()
 #if the value somehow comes out negative then we'll just wait X more seconds and hit it again
     if [ ${TimeRemainingInSeconds} -lt 0 ]
     then
-	TimeRemainingInSeconds=1
+	TimeRemainingInSeconds=2
     fi
     echo ${TimeRemainingInSeconds}
 }
 
-function GiveTimeReturnDealEndTime()
+function GiveTimeInSecondsReturnDealEndTime()
 {
-    echo "Emptyfornow"
+#this was found here:http://www.askdavetaylor.com/date_math_in_linux_shell_script.html about 2/3 of the way down you'll see a post by marcus that is where it came from
+NumDaysAdjust=0
+Output=`date --date @$(($(date +%s)-(3600*24*${NumDaysAdjust})+${1} )) +%T`
+echo ${Output}
 }
 
 
@@ -122,6 +145,11 @@ SteepAndCheapTemp=""
 WhiskeyMilitiaTemp=""
 BonktownTemp=""
 ChainloveTemp=""
+#clean up our temp files if we receive a kill signal
+    #trap on_exit SIGKILL
+    #trap on_exit SIGTERM
+    trap on_exit SIGINT #2
+    #on_exit
 while [ 1 ] ; do 
     SteepAndCheapPage=$(GetPageReturnFile http://www.steepandcheap.com)
     SnCDurationOfDealInMinutes=$(GivePageReturnDurationOfDealInMinutes ${SteepAndCheapPage} )
@@ -249,9 +277,15 @@ while [ 1 ] ; do
 #it'd be nice if we could print the time ticking down and then refresh with the new deals. use "print" maybe?
 
     SleepTimeMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SleepTime})
-    echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes"
+    echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes from" `date +%T `
+DealEndTime=$( GiveTimeInSecondsReturnDealEndTime ${SleepTime} )
+echo ${DealEndTime}
     echo "SnC:${SnCTimeLeftSeconds} (${SnCQuantityRemaining}/${SnCTotalQuantity})  WM:${WMTimeLeftSeconds} (${WMQuantityRemaining}/${WMTotalQuantity}) BT:${BTTimeLeftSeconds} (${BTQuantityRemaining}/${BTTotalQuantity}) CL:${CLTimeLeftSeconds} (${CLQuantityRemaining}/${CLTotalQuantity})"
+
+
+
     sleep ${SleepTime}s
+
 
 done
 
