@@ -68,7 +68,7 @@ function GivePageReturnThumbnailImage()
 # BEGIN MAIN PART OF SCRIPT
 #--------------------------
 
-Woot=$(GetPageReturnFile http://www.woot.com )
+Woot=$(GetPageReturnFile http://kids.woot.com )
 #Description
 GivePageReturnDescription ${Woot}
 GivePageReturnPrice ${Woot}

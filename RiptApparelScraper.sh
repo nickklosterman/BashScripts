@@ -18,3 +18,4 @@ feh http://riptapparel.com/ript/wp-content/uploads/${dateyearstring}/${datemonth
  
 echo "wget http://riptapparel.com/ript/wp-content/uploads/${dateyearstring}/${datemonthstring_formatted}/detail-${short_dateyearstring}${datemonthstring_formatted}${datedaystring_formatted}.jpg"
 
+echo "I'm not really sure how to capture the sidebar for RiptApparel\n key off sidebar? is it in every post?"
