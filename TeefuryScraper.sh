@@ -17,7 +17,8 @@ function GivePageReturnImage()
 function GivePageReturnAdditionalArtistArt
 {
     Webpage=${1}
-    OutputText=`grep "images/articles" ${Webpage} |  sed 's/.*src=\"images\/articles\//http:\/\/www.teefury.com\/images\/articles\//' | sed 's/".*//'  ` ;
+    OutputText=`grep "src=\"images/articles" ${Webpage} | sed 's/.*img src=\x27/http:\/\/www.teefury.com\//;s/\x27.*//' `
+# sed 's/.*img src=\x27images\/articles\//http:\/\/www.teefury.com\/images\/articles\//;s/\x27.*//'  ` ; #for some reason they use single quotes here instead of double quotes
     echo ${OutputText}
 }
 

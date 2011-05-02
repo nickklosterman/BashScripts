@@ -46,7 +46,7 @@ function checkdiskspace()
 	"K")
 	    Output=0;;
 	"M")
-	    Output=1
+	    Output=0
             if [ $digits -lt  $diskspacelimit ]
             then 
 		Output=0
@@ -59,14 +59,14 @@ function checkdiskspace()
 
 function checktmpdiskspace()
 {
-Output=$(checkdiskspace /tmp 10 )
+Output=$( checkdiskspace /tmp 10 )
 echo ${Output}
 }
 
 function checkhomediskspace()
 {
 #check that /home has at least 10MB fo storage available
-Output=$(checkdiskspace /home 10 )
+Output=$( checkdiskspace /home 10 )
 echo ${Output}
 }
 
@@ -302,7 +302,7 @@ fi
 TmpDiskSpaceStatus=$( checktmpdiskspace )
 HomeDiskSpaceStatus=$( checkhomediskspace )
 NetStatus=$( checknet )
-while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -eq 1 ]] ; do 
+while [[ $TmpDiskSpaceStatus && $HomeDiskSpaceStatus && $NetStatus ]] ; do 
     SteepAndCheapPage=$(GetPageReturnFile http://www.steepandcheap.com)
     SteepAndCheap=$(GivePageReturnText ${SteepAndCheapPage} )
 
@@ -351,18 +351,17 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db Backcountrydeals  ${ChainlovePage} 3
 	ChainloveTemp=`echo ${Chainlove}`
     fi
-    SCTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${SteepAndCheapPage})
+
     WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${WhiskeyMilitiaPage})
     BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
     CLTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${ChainlovePage})
-
     #I had been making a logic error here for quite some time.
 #I didn't understand why sometimes the "math" would be off and a smaller value wouldn't be assigned to the SleepTime
 #It was due to me using a if.then.elif.then.elif.then cascade. I was
 #mistakenly thinking that this was the correct method to get the smallest value
 #into SleepTime. This was wrong because if WMTimeLeftSeconds was smaller than 
 #the one for SnC then it would be assigned to SLeepTime and it would kick out of the loop. As long as ONE of the conditions held it'd kick out and not go futher and evaluate any more of the logic tests. DUH. yet this took me a while to figure out.
-    SleepTime=${SCTimeLeftSeconds}
+    SleepTime=${SnCTimeLeftSeconds}
     NextDeal="SteepAndCheap"
     if [ ${WMTimeLeftSeconds} -lt ${SleepTime} ]
     then
@@ -385,12 +384,9 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
     SleepTimeMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SleepTime})
     echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes from" `date +%T `
     sleep ${SleepTime}s
-    TmpDiskSpaceStatus=$(checktmpdiskspace )
-    HomeDiskSpaceStatus=$(checkhomediskspace )
-    NetStatus=$(checknet )
-
-    
-done
+    TmpDiskSpaceStatus=$( checktmpdiskspace )
+    HomeDiskSpaceStatus=$( checkhomediskspace )
+    NetStatus=$( checknet )
     if [ "$TmpDiskSpaceStatus" -ne 1 ]
     then
 	echo "Tmp disk space too low. Exiting"
@@ -403,6 +399,9 @@ done
     then
 	echo "The internet is unreachable. Exiting"
     fi
+    
+done
+
 
 #Add items up for sale to a database. it should include item, price, percent off,quantity,time duration of sale and date of deal- put in sqlite database
 #have it ignore womens/mens items 

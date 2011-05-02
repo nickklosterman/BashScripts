@@ -13,14 +13,19 @@ else
     
     while [ 1 ] #continue looping until we hit our minute pausing 2minutes between loops
     do 
+
 	
 	HomeDiskSpace=$(df -h | grep 'home' | awk '{ print $4  }' )
+#this can also be achieved using this 
+	HomeDiskSpace=$(df -h /home | grep -v Filesystem | awk '{ print $4  }' )
+#What the hell we don't even use the variable HomeDiskSpace
 #echo $HomeDiskSpace
 	digits=$(df -h | grep 'home' | awk '{ print $4  }'| sed 's/.$//' )
 #echo $digits
 	BytesLetter=$(df -h | grep 'home' | awk '{ print $4  }'| sed 's/[0-9]//g' )
 #echo $BytesLetter
 	
+#this should probably be a case statement
 	if [ $BytesLetter = "K" ] 
 	then
 	    kill $PID
