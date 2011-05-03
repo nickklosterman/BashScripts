@@ -1,0 +1,7 @@
+#!/bin/bash
+
+numitems=22 #${1}
+for items in `ls -rt *.[Mm][Pp]3`
+do 
+
+done
