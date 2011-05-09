@@ -34,11 +34,25 @@ function GivePageReturnFullImage()
     OutputText=`grep "class=\"photo\""  ${Webpage} | grep "sale.images" | sed 's/.*http:/http:/' | sed 's/".*//'` ;
     echo ${OutputText}
 }
+function GivePageReturnFullShirtImage()
+{
+    Webpage=${1}
+    OutputText=`grep "class=\"photo\""  ${Webpage} | grep "sale.images" | sed 's/.*href=\"http:/http:/;s/".*//'` ;
+    echo ${OutputText}
+}
 
 function GivePageReturnDetailImage()
 {
     Webpage=${1}
-    OutputText=`grep "class=\"lightBox\"" ${Webpage} | sed 's/.*http:\/\/sale.images/http:\/\/sale.images/' | sed 's/".*//' `;
+
+    OutputText=`grep "class=\"lightBox\"" ${Webpage} | sed 's/.*http:\/\/sale.images/http:\/\/sale.images/g;s/".*//' `;
+    echo ${OutputText}
+}
+function GivePageReturnDetailShirtImage()
+{
+    Webpage=${1}
+    OutputText=`grep "class=\"lightBox\"" ${Webpage} | sed 's/.*href=\"http:\/\/sale.images/http:\/\/sale.images/g;s/".*//' `;
+
     echo ${OutputText}
 }
 function GivePageReturnThumbnailImage()
@@ -75,9 +89,16 @@ else
     
     GivePageReturnCondition ${Woot} 
     GivePageReturnTechnicalDescription ${Woot}
-    Thumbnail=$(GivePageReturnThumbnailImage ${Woot} )
-    feh ${Thumbnail} & 
+#    Thumbnail=$(GivePageReturnThumbnailImage ${Woot} )
+#    feh ${Thumbnail} & 
+
+if [ "${Website}" == "shirt.woot.com" ]
+then
+    Full=$(GivePageReturnFullShirtImage ${Woot} )
+else
     Full=$(GivePageReturnFullImage ${Woot} )
+fi
+
     Detail=$(GivePageReturnDetailImage ${Woot} )
     GivePageReturnDetailImage ${Woot} 
     feh ${Full} & 
