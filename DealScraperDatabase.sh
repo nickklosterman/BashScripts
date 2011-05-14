@@ -242,7 +242,10 @@ function GivePageReturnTimeRemainingInSeconds()
 #if the value somehow comes out negative then we'll just wait X more seconds and hit it again
 
     Quantity=$(GivePageReturnTotalQuantity ${1} )
-    if [ $Quantity -lt 5 ] 
+    Price=$(GivePageReturnPrice  ${1})
+#since price is floating point value we need to use bc to perform the math comparison
+#alternatively, since we don't require any great precision, we could use printf and only have the digits before the decimal point used.
+    if [ $Quantity -lt 5 ] && [ $(echo "$Price < 300" | bc ) -eq 1 ] 
     then
 # if there is a low quantity we run the risk of the item selling out and moving on to the next deal so we set the timer manually just in case this happens
 	TimeRemainingInSeconds=180 # 3minutes

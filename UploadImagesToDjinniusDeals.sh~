@@ -1,0 +1,12 @@
+#!/bin/bash
+HOST='djinnius.com'
+USER='djinnius'
+PASSWORD=${1}
+
+ftp -i $HOST <<EOF
+user $USER $PASSWORD
+cd Deals
+binary
+put "${2}"
+quit
+EOF

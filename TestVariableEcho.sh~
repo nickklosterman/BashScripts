@@ -1,0 +1,5 @@
+#!/bin/bash
+filelisting=`ls -alch *.txt`
+shtuff=`echo README`
+duo=$filelisting$shtuff
+echo "${duo}"

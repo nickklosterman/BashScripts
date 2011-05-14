@@ -1,0 +1,15 @@
+set style data points 
+#dots
+set datafile separator "|"
+#set xrange [-1:4]
+set xlabel "Price"
+set ylabel "Percent off MSRP"
+set title "Price vs. Percent off MSRP"
+#I could color code by websitecode?...I'm sure I could
+#set key title  "0 = Steep and Cheap\n1=Whiskey Militia\n2=Bonktown\n3=Chainlove"
+#plot "< sqlite3 test.db 'select * from Backcountrydeals'" using 2 title "Website Code", "" using 4 title "Price"
+plot '< sqlite3 test.db "select price,percentOffMSRP from Backcountrydeals"' using 1:2 title "Price vs. Percent off MSRP"
+#if we don't set the title in the line above then the query becomes the title :(
+set terminal png
+set output "PricevsPercentOffMSRPGnuplot.png"
+replot
