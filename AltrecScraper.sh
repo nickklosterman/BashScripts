@@ -30,7 +30,9 @@ function cleanup
 function GivePageReturnImage()
 {
     Webpage=${1}
-    OutputText=`grep "img id=\"swatchImage"  ${Webpage} |  sed 's/.*src=\"/http:\/\/www.altrec.com\//;s/".*//'` ;
+#    OutputText=`grep "img id=\"swatchImage"  ${Webpage} |  sed 's/.*src=\"/http:\/\/www.altrec.com\//;s/".*//'` ;
+    OutputText=`grep "img id=\"swatchImage"  ${Webpage}  |  sed 's/.*src=\"//;s/".*//'` ;
+#http:\/\/www/http:\/\/static.altrec.com\//;s/".*//'` ;
     echo ${OutputText}
 }
 
@@ -43,5 +45,6 @@ REI=$(GetPageReturnFile http://outlet.altrec.com/ )
 GivePageReturnDescription ${REI}
 GivePageReturnPrice ${REI}
 Full=$(GivePageReturnImage ${REI} )
+#echo ${Full}
 feh ${Full} & 
 cleanup

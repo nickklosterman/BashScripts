@@ -95,21 +95,7 @@ function GetPageReturnFile()
     wget ${1} -O ${Webpage} -q
     echo ${Webpage}
 }
-function GiveWebsiteCodeGetWebpageTempFile()
-{
-    case ${2} in
-	0)
-	    Webpage='/tmp/SteepAndCheapPage';;
-	1)
-	    Webpage='/tmp/WhiskeyMilitiaPage';;
-	2)
-	    Webpage='/tmp/BonktownPage';;
-	3)
-	    Webpage='/tmp/ChainlovePage';;
-    esac
-    wget ${1} -O ${Webpage} -q
-    echo ${Webpage}
-}
+
 function GivePageReturnText()
 {
     OutputText=`grep "<title>" ${1} | sed 's/<title>//' | sed 's/<\/title>//' `
@@ -224,7 +210,7 @@ function GivePageReturnDurationOfDealInMinutes()
 function GiveSecondsReturnMinutesAndSeconds()
 {
     input=${1}
-#    echo ${1}
+    echo ${1}
 #YOU WEREN"T QUOTING YOUR VARIABLE! THAT IS WHY THIS WAS FAILING
 #    if [ ${input} == "\r" ] # \n check if null with -z ${input}
     if [ "${1}" == "" ] # \n check if null with -z ${input}
@@ -235,14 +221,13 @@ function GiveSecondsReturnMinutesAndSeconds()
     let "minutes = ${1} / 60"
     let "seconds = ${1} % 60 "
 #    echo ${minutes} ${seconds}
-printf "%d:%02d" ${minutes} ${seconds}
-#    if [ ${seconds} -lt 10 ];
-#    then 
-#	echo ${minutes}:0${seconds}
-#    else
-#	echo ${minutes}:${seconds} 
+    if [ ${seconds} -lt 10 ];
+    then 
+	echo ${minutes}:0${seconds}
+    else
+	echo ${minutes}:${seconds} 
 #FML the seconds need to be padded with zeros--well I suppose this is one way to do it
- #   fi
+    fi
 }
 
 #Input: webpage file
@@ -273,7 +258,8 @@ function GivePageReturnTimeRemainingInSeconds()
 
 function GiveTimeInSecondsReturnDealEndTime()
 {
-#this was found here:http://www.askdavetaylor.com/date_math_in_linux_shell_script.html about 2/3 of the way down you'll see a post by marcus that is where it came from                                                                                                                                                  
+#this was found here:http://www.askdavetaylor.com/date_math_in_linux_shell_script.html about 2/3 of the way down you'll see a post by marcus that is where i\
+t came from                                                                                                                                                  
 NumDaysAdjust=0
 Output=`date --date @$(($(date +%s)-(3600*24*${NumDaysAdjust})+${1} )) +%T`
 echo ${Output}
@@ -328,8 +314,7 @@ TmpDiskSpaceStatus=$( checktmpdiskspace )
 HomeDiskSpaceStatus=$( checkhomediskspace )
 NetStatus=$( checknet )
 while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -eq 1 ]] ; do 
-    #SteepAndCheapPage=$(GetPageReturnFile http://www.steepandcheap.com)
-    SteepAndCheapPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.steepandcheap.com 0 )
+    SteepAndCheapPage=$(GetPageReturnFile http://www.steepandcheap.com)
     SteepAndCheap=$(GivePageReturnText ${SteepAndCheapPage} )
     SCTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${SteepAndCheapPage})
 #if there are changes to the item description then we update and print the new info
@@ -346,8 +331,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	SteepAndCheapTemp=`echo ${SteepAndCheap}`
     fi
 
-#    WhiskeyMilitiaPage=$(GetPageReturnFile http://www.whiskeymilitia.com)
-    WhiskeyMilitiaPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.whiskeymilitia.com 1 )
+    WhiskeyMilitiaPage=$(GetPageReturnFile http://www.whiskeymilitia.com)
     WhiskeyMilitia=$(GivePageReturnText ${WhiskeyMilitiaPage} )
     WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${WhiskeyMilitiaPage})
 
@@ -358,8 +342,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
     fi
 
-#    BonktownPage=$(GetPageReturnFile http://www.bonktown.com)
-    BonktownPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.bonktown.com 2 )
+    BonktownPage=$(GetPageReturnFile http://www.bonktown.com)
     Bonktown=$(GivePageReturnText ${BonktownPage} )
     BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
 
@@ -370,8 +353,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	BonktownTemp=`echo ${Bonktown}`
     fi
     
-#    ChainlovePage=$(GetPageReturnFile http://www.chainlove.com)
-    ChainlovePage=$(GiveWebsiteCodeGetWebpageTempFile http://www.chainlove.com 3 )
+    ChainlovePage=$(GetPageReturnFile http://www.chainlove.com)
     Chainlove=$(GivePageReturnText ${ChainlovePage} )
     CLTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${ChainlovePage})
     if [ "${Chainlove}" != "${ChainloveTemp}" ]
@@ -380,16 +362,16 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db Backcountrydeals  ${ChainlovePage} 3
 	ChainloveTemp=`echo ${Chainlove}`
     fi
- #   echo $SCTimeLeftSeconds $WMTimeLeftSeconds $BTTimeLeftSeconds $CLTimeLeftSeconds
-#for some reason it appears that the XXXXPage was going out of scope and we were only using the last page seen..i.e. ChainlovePage for all the functions here. NO it was the reuse of the /tmp/Webpage that was screwing things up.
-#    SCTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${SteepAndCheapPage})
+    echo $SCTimeLeftSeconds $WMTimeLeftSeconds $BTTimeLeftSeconds $CLTimeLeftSeconds
+#for some reason it appears that the XXXXPage was going out of scope and we were only using the last page seen..i.e. ChainlovePage for all the functions here.
+    SCTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${SteepAndCheapPage})
 #    echo $SCTimeLeftSeconds 
-#    WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds "${WhiskeyMilitiaPage}")
+    WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds "${WhiskeyMilitiaPage}")
 #    echo $WMTimeLeftSeconds 
- #   BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
+    BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
 #    echo $BTTimeLeftSeconds 
-  #  CLTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${ChainlovePage})
-#    echo $SCTimeLeftSeconds $WMTimeLeftSeconds $BTTimeLeftSeconds $CLTimeLeftSeconds
+    CLTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${ChainlovePage})
+    echo $SCTimeLeftSeconds $WMTimeLeftSeconds $BTTimeLeftSeconds $CLTimeLeftSeconds
     #I had been making a logic error here for quite some time.
 #I didn't understand why sometimes the "math" would be off and a smaller value wouldn't be assigned to the SleepTime
 #It was due to me using a if.then.elif.then.elif.then cascade. I was
@@ -417,8 +399,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 #it'd be nice if we could print the time ticking down and then refresh with the new deals. use "print" maybe?
 
     SleepTimeMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SleepTime})
-    DealEndTime=$( GiveTimeInSecondsReturnDealEndTime ${SleepTime} )
-    echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes from" `date +%T ` "which occurs at ${DealEndTime}"
+    echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes from" `date +%T `
     sleep ${SleepTime}s
     TmpDiskSpaceStatus=$(checktmpdiskspace )
     HomeDiskSpaceStatus=$(checkhomediskspace )

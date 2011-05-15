@@ -26,6 +26,22 @@ fi
 exit 1
 }
 
+function GiveWebsiteCodeGetWebpageTempFile()
+{
+    case ${2} in
+        0)
+            Webpage='/tmp/SteepAndCheapPage';;
+        1)
+            Webpage='/tmp/WhiskeyMilitiaPage';;
+        2)
+            Webpage='/tmp/BonktownPage';;
+        3)
+            Webpage='/tmp/ChainlovePage';;
+    esac
+    wget ${1} -O ${Webpage} -q
+    echo ${Webpage}
+}
+
 function GetPageReturnFile()
 {
 #this function gets a webpage and echoes the name of the file that holds the desired text
@@ -90,12 +106,12 @@ function GivePageReturnDurationOfDealInMinutes()
 function GiveSecondsReturnMinutesAndSeconds()
 {
     input=${1}
-    echo ${1}
+#    echo ${1}
 #you need to quote the variable otherwise 
     if [ "${input}" == "" ] # \n check if null with -z ${input}
     then 
 	echo "Null time"
-	input=99999
+	input=0
     fi
     let "minutes = ${1} / 60"
     let "seconds = ${1} % 60 "
@@ -151,7 +167,8 @@ ChainloveTemp=""
     trap on_exit SIGINT #2
     #on_exit
 while [ 1 ] ; do 
-    SteepAndCheapPage=$(GetPageReturnFile http://www.steepandcheap.com)
+#    SteepAndCheapPage=$(GetPageReturnFile http://www.steepandcheap.com)
+    SteepAndCheapPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.steepandcheap.com 0 )
     SnCDurationOfDealInMinutes=$(GivePageReturnDurationOfDealInMinutes ${SteepAndCheapPage} )
 #echo "Duration of Deal" ${SnCDurationOfDealInMinutes}
     SnCTimeRemainingOfTotal=$(GivePageReturnTimeRemainingOfTotalTime ${SteepAndCheapPage} )
@@ -188,8 +205,8 @@ while [ 1 ] ; do
 	SteepAndCheapTemp=`echo ${SteepAndCheap}`
     fi
 
-    WhiskeyMilitiaPage=$(GetPageReturnFile http://www.whiskeymilitia.com)
-
+#    WhiskeyMilitiaPage=$(GetPageReturnFile http://www.whiskeymilitia.com)
+    WhiskeyMilitiaPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.whiskeymilitia.com 1 )
     WMQuantityRemaining=$(GivePageReturnQuantityRemaining ${WhiskeyMilitiaPage} )
 
     WMTotalQuantity=$(GivePageReturnTotalQuantity ${WhiskeyMilitiaPage} )
@@ -210,7 +227,8 @@ while [ 1 ] ; do
 	WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
     fi
 
-    BonktownPage=$(GetPageReturnFile http://www.bonktown.com)
+#    BonktownPage=$(GetPageReturnFile http://www.bonktown.com)
+    BonktownPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.bonktown.com 2 )
     BTQuantityRemaining=$(GivePageReturnQuantityRemaining ${BonktownPage} )
     BTTotalQuantity=$(GivePageReturnTotalQuantity ${BonktownPage} )
     BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
@@ -228,7 +246,8 @@ while [ 1 ] ; do
 	BonktownTemp=`echo ${Bonktown}`
     fi
     
-    ChainlovePage=$(GetPageReturnFile http://www.chainlove.com)
+#    ChainlovePage=$(GetPageReturnFile http://www.chainlove.com)
+    ChainlovePage=$(GiveWebsiteCodeGetWebpageTempFile http://www.chainlove.com 3 )
     CLQuantityRemaining=$(GivePageReturnQuantityRemaining ${ChainlovePage} )
     CLTotalQuantity=$(GivePageReturnTotalQuantity ${ChainlovePage} )
     CLTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${ChainlovePage})
@@ -244,10 +263,6 @@ while [ 1 ] ; do
 	notify-send  "$Chainlove" -i ${ChainloveImage} -t 3
 	ChainloveTemp=`echo ${Chainlove}`
     fi
-
-
-
-
 
 
     #I had been making a logic error here for quite some time.
@@ -277,12 +292,11 @@ while [ 1 ] ; do
 #it'd be nice if we could print the time ticking down and then refresh with the new deals. use "print" maybe?
 
     SleepTimeMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SleepTime})
-    echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes from" `date +%T `
-DealEndTime=$( GiveTimeInSecondsReturnDealEndTime ${SleepTime} )
-echo ${DealEndTime}
+    DealEndTime=$( GiveTimeInSecondsReturnDealEndTime ${SleepTime} )
+echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes from" `date +%T ` "which occurs at ${DealEndTime}"
+
+#    echo ${DealEndTime}
     echo "SnC:${SnCTimeLeftSeconds} (${SnCQuantityRemaining}/${SnCTotalQuantity})  WM:${WMTimeLeftSeconds} (${WMQuantityRemaining}/${WMTotalQuantity}) BT:${BTTimeLeftSeconds} (${BTQuantityRemaining}/${BTTotalQuantity}) CL:${CLTimeLeftSeconds} (${CLQuantityRemaining}/${CLTotalQuantity})"
-
-
 
     sleep ${SleepTime}s
 
