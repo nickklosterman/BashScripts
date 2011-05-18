@@ -1,0 +1,3 @@
+#!/bin/bash
+MensClothe="Men's CLothing"
+echo "${MensClothe}"

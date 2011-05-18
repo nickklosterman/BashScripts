@@ -263,6 +263,7 @@ echo "We have a match at ${Match}"
 echo "sending ${1} to ${phonenumber} and ${email}"
 #    sendTexttoPhone "${1}" "$phonenumber" #quotes on phone not necessary...
 #    sendEmail "${1}" "${email}"
+# perl  sendEmail -f inkydinky@djinnius.com -t 5079909052@tmomail.net -u 'Subject line' -m 'Message Body' -s mail.djinnius.com:587 -xu user -xp password
 fi
 done < "${2}"
 }

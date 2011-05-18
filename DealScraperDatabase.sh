@@ -26,11 +26,11 @@
 function checknet()
 {
 #this doesn't seem super robust but I suppose it works
-if eval "ping -c 1 www.djinnius.com > /dev/null"; then
-    echo "1"
-else
-    echo "0"
-fi
+    if eval "ping -c 1 www.djinnius.com > /dev/null"; then
+	echo "1"
+    else
+	echo "0"
+    fi
 }
 
 function checkdiskspace()
@@ -59,32 +59,32 @@ function checkdiskspace()
 
 function checktmpdiskspace()
 {
-Output=$(checkdiskspace /tmp 10 )
-echo ${Output}
+    Output=$(checkdiskspace /tmp 10 )
+    echo ${Output}
 }
 
 function checkhomediskspace()
 {
 #check that /home has at least 10MB fo storage available
-Output=$(checkdiskspace /home 10 )
-echo ${Output}
+    Output=$(checkdiskspace /home 10 )
+    echo ${Output}
 }
 
 function on_exit()
 {
 #remove temporary files                                                         
-echo "Ok, caught Ctrl-c, exiting after clean up"
-if [ -e /tmp/WebsitePage  ]
-then
-rm /tmp/WebsitePage
-fi
+    echo "Ok, caught Ctrl-c, exiting after clean up"
+    if [ -e /tmp/WebsitePage  ]
+    then
+	rm /tmp/WebsitePage
+    fi
 
-if [ -e /tmp/ProductImage ]
-then
-rm /tmp/ProductImage
-fi
+    if [ -e /tmp/ProductImage ]
+    then
+	rm /tmp/ProductImage
+    fi
 
-exit 1
+    exit 1
 
 }
 
@@ -122,7 +122,7 @@ function GivePageReturnProductDescription()
 
 #    OutputText=`grep "<title>" ${1} |  sed 's/\<title\>(Steep and Cheap:|WhiskeyMilitia.com:|BonkTown.com:|Chainlove.com:) //' | sed 's/ - \$.*//' | sed 's/\x27/\x27\x27/g' ` #not sure why this didn't work
 
-OutputText=`grep "<title>" ${1} |  sed -n 's/[^:]*://p' | sed 's/ - \$.*//' | sed 's/\x27/\x27\x27/g' ` #this was causing problems with descriptions that had multiple instances of the colon i.e. there was a colon in the description that caused the front part  of the description to be cut off.
+    OutputText=`grep "<title>" ${1} |  sed -n 's/[^:]*://p' | sed 's/ - \$.*//' | sed 's/\x27/\x27\x27/g' ` #this was causing problems with descriptions that had multiple instances of the colon i.e. there was a colon in the description that caused the front part  of the description to be cut off.
 #Explanation: replace everything up to the colon that isn't a colon with nothing, print the rest
 
 #    OutputText=`grep "<title>" ${1} |  sed 's/.*: //' | sed 's/ - \$.*//' | sed 's/\x27/\x27\x27/g' ` #this was causing problems with descriptions that had multiple instances of the colon i.e. there was a colon in the description that caused the front part  of the description to be cut off.
@@ -157,13 +157,13 @@ function GivePageReturnPercentOffMSRP()
 
 GiveDatabaseTablenameDataEnterIntoDatabase()
 {
-sqlite3 ${1} "insert into ${2} (websiteCode, product, price, percentOffMSRP, quantity, dealdurationinminutes) values ( '${3}', '${4}', '${5}', '${6}', '${7}', '${8}' );"
+    sqlite3 ${1} "insert into ${2} (websiteCode, product, price, percentOffMSRP, quantity, dealdurationinminutes) values ( '${3}', '${4}', '${5}', '${6}', '${7}', '${8}' );"
 }
 
 function GiveWebsiteAndDatabaseReturnWebsiteCodeFromDatabase()
 {
-Website=${1}
-Database=${2}
+    Website=${1}
+    Database=${2}
 
 }
 
@@ -235,7 +235,7 @@ function GiveSecondsReturnMinutesAndSeconds()
     let "minutes = ${1} / 60"
     let "seconds = ${1} % 60 "
 #    echo ${minutes} ${seconds}
-printf "%d:%02d" ${minutes} ${seconds}
+    printf "%d:%02d" ${minutes} ${seconds}
 #    if [ ${seconds} -lt 10 ];
 #    then 
 #	echo ${minutes}:0${seconds}
@@ -254,7 +254,7 @@ function GivePageReturnTimeRemainingInSeconds()
     TimeRemainingInSeconds=`grep "TimerBar" ${1} | sed 's/.*(//' | sed 's/,.*//'   `
 #if the value somehow comes out negative then we'll just wait X more seconds and hit it again
 
-    Quantity=$(GivePageReturnTotalQuantity ${1} )
+    Quantity=$(GivePageReturnTotalQuantity ${1})
     Price=$(GivePageReturnPrice  ${1})
 #since price is floating point value we need to use bc to perform the math comparison
 #alternatively, since we don't require any great precision, we could use printf and only have the digits before the decimal point used.
@@ -274,9 +274,9 @@ function GivePageReturnTimeRemainingInSeconds()
 function GiveTimeInSecondsReturnDealEndTime()
 {
 #this was found here:http://www.askdavetaylor.com/date_math_in_linux_shell_script.html about 2/3 of the way down you'll see a post by marcus that is where it came from                                                                                                                                                  
-NumDaysAdjust=0
-Output=`date --date @$(($(date +%s)-(3600*24*${NumDaysAdjust})+${1} )) +%T`
-echo ${Output}
+    NumDaysAdjust=0
+    Output=`date --date @$(($(date +%s)-(3600*24*${NumDaysAdjust})+${1} )) +%T`
+    echo ${Output}
 }
 
 
@@ -287,17 +287,129 @@ function GiveTimeReturnDealEndTime()
 
 function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase()
 {
+    Database=${1}
+    Table=${2}
+    Webpage=${3}
+    WebsiteCode=${4}
 #enter data into database
-ProductDescription=$(GivePageReturnProductDescription ${3} )
-Price=$(GivePageReturnPrice ${3} )
-PercentOffMSRP=$(GivePageReturnPercentOffMSRP ${3} )
-TotalQuantity=$(GivePageReturnTotalQuantity ${3} )
-DurationInMinutes=$(GivePageReturnDurationOfDealInMinutes ${3} )
+    ProductDescription=$(GivePageReturnProductDescription ${Webpage} ) #3} )
+    Price=$(GivePageReturnPrice ${Webpage} ) #3} )
+    PercentOffMSRP=$(GivePageReturnPercentOffMSRP ${Webpage} ) #3} )
+    TotalQuantity=$(GivePageReturnTotalQuantity ${Webpage} ) #3} )
+    DurationInMinutes=$(GivePageReturnDurationOfDealInMinutes ${Webpage} ) #3} )
 #echo "Duration:-${DurationInMinutes}-"
 #echo ${ProductDescription} ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
-GiveDatabaseTablenameDataEnterIntoDatabase  ${1} ${2} ${4} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
+    PreviousProduct=$( GiveDatabaseTableNameWebsiteCodeGetLastProductEntryFromDatabase  ${Database} ${Table} ${WebsiteCode} )
+    PreviousTimeEnter=$( GiveDatabaseTableNameWebsiteCodeGetLastTimeEnterEntryFromDatabase  ${Database} ${Table} ${WebsiteCode} )
+    PreviousDealDurationInMinutes=$( GiveDatabaseTableNameWebsiteCodeGetLastDealDurationInMinutesEntryFromDatabase  ${Database} ${Table} ${WebsiteCode} )
+PreviousProductDescription=${PreviousProduct/\'/\'\'} #\x27/\x27\x27}"
+#echo "-" "${PreviousProduct}" "-" "${ProductDescription}" "-" "${PreviousProductDescription}" "-"
+
+#We need to compare to the variable with the double single quotes since that is how we need to enter the string into the database
+    if [ "${PreviousProductDescription}" != "${ProductDescription}" ]
+    then
+echo "Entering new product info into database."
+	GiveDatabaseTablenameDataEnterIntoDatabase  ${Database} ${Table} ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
+    else
+#prevent duplicate entries sequentially but allow duplicates if a certain period has passed therefore giving a check saying that we are pretty sure that this is just a repeat that day/week/whatever
+#	CompareDateToNow "$PreviousTimeEnter" ${PreviousDealDurationInMinutes} 
+	#echo "PrevDealDura" ${PreviousDealDurationInMinutes}
+	TimeComparison=$( CompareDateToNow "$PreviousTimeEnter" ${PreviousDealDurationInMinutes} )
+	One=1
+#	echo "TiemComp" ${TimeComparison} " one"${One}
+	if [ "$TimeComparison" -eq "$One" ] 
+	then 
+	    echo "Entering new product info into database."
+	    GiveDatabaseTablenameDataEnterIntoDatabase  ${Database} ${Table} ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
+	else
+	    echo "Product the same, but time difference too little from previous entry."
+	fi
+
+	
+    fi
+
 }
 
+function CompareDateToNow
+{
+#The problem I was having was that i was comparing utc time from the db to local time, i needed to compare utc to utc times.
+
+#I wish I could use this: but I'm not sure how my fake calculation method would work
+    DateToCompare="${1}"
+#echo "toCompare:" "${DateToCompare}" "Date:" `date --utc +%F' '%T`
+    MinuteThreshold=${2}
+#we'll use the TC suffix to mean ToCompare
+    YearTC="${DateToCompare:0:4}" #don't leave a space btw the = and " or I won't work
+#echo "YearTC:" ${YearTC}
+    MonthTC="${DateToCompare:5:2}" 
+    DayTC="${DateToCompare:8:2}" 
+    HourTC="${DateToCompare:11:2}" 
+    MinutesTC="${DateToCompare:14:2}" 
+    SecondsTC="${DateToCompare:17:2}" 
+#echo  ${YearTC} ${MonthTC} ${DayTC} ${HourTC} ${MinutesTC} ${SecondsTC} "${DateToCompare}"
+    YearTCSeconds=$(( 365*24*60*60*($YearTC-1970) ))
+#`expr 365*24*60*60*($YearTC-1970) ` #this is supposed to work but didn't. maybe I'm donig something wrong
+# we add the 10# infront of the variable to force the base to be decimal instead of octal (since we might get times that are 08 and then eprform math on them.  This will cause and error of "value too great for base (error token is "09")" or "08" this is because in octal 07 is the highest it can go.
+    MonthTCSeconds=$(( 10#$MonthTC*31*24*60*60 ))  #`expr $MonthTC*31*24*60*60`
+    DayTCSeconds=$(( 10#$DayTC*24*60*60 ))
+    HourTCSeconds=$(( 10#$HourTC*60*60 ))
+    MinutesTCSeconds=$(( 10#$MinutesTC*60  ))
+    SecondsTCTotalSince1970=$(( $YearTCSeconds+$MonthTCSeconds+$DayTCSeconds+$HourTCSeconds+$MinutesTCSeconds+10#$SecondsTC ))
+#echo $SecondsTCTotalSince1970
+    Year=$( date --utc +%Y )
+    Month=$( date --utc +%m )
+    Day=$( date --utc +%d )
+    Hour=$( date --utc +%H )
+    Minute=$( date --utc +%M )
+    Second=$( date --utc +%S )
+    SecondsTotalSince1970=$(( (10#${Year}-1970)*365*24*60*60+10#${Month}*31*24*60*60+10#${Day}*24*60*60+10#${Hour}*60*60+10#${Minute}*60+10#${Second} ))
+#echo $SecondsTCTotalSince1970 $SecondsTotalSince1970
+#echo "SecsTC" $SecondsTCTotalSince1970 "SecsTotal" $SecondsTotalSince1970
+    SecondsBetweenTimes=$(( $SecondsTotalSince1970-$SecondsTCTotalSince1970 ))
+    Threshold=$(( ${MinuteThreshold}*60 ))
+ #   echo "SEcsbtwTimes" $SecondsBetweenTimes "Thresh" $Threshold
+    if  [ "$SecondsBetweenTimes" -lt "$Threshold" ] 
+    then 
+#We don't want to add the item into the database bc the product names are the same and the time difference isn't enough
+	echo "0"
+    else
+#the time difference iis enough that we want to enter the item into the database even if the product names are the same.
+	echo "1"
+    fi
+
+}
+
+function GiveDatabaseTableNameWebsiteCodeGetLastDealDurationInMinutesEntryFromDatabase
+{
+    Database=${1}
+    TableName=${2}
+    WebsiteCode=$3
+#echo $Database $TableName $WebsiteCode
+    Query="select dealdurationinminutes from ${TableName} where websitecode=${WebsiteCode} order by Bkey desc limit 1"
+    sqlite3 ${Database} "${Query}"
+}
+
+function GiveDatabaseTableNameWebsiteCodeGetLastProductEntryFromDatabase
+{
+
+    Database=${1}
+    TableName=${2}
+    WebsiteCode=$3
+#echo $Database $TableName $WebsiteCode
+    Query="select product from ${TableName} where websitecode=${WebsiteCode} order by Bkey desc limit 1"
+    sqlite3 ${Database} "${Query}"
+}
+
+function GiveDatabaseTableNameWebsiteCodeGetLastTimeEnterEntryFromDatabase
+{
+
+    Database=${1}
+    TableName=${2}
+    WebsiteCode=$3
+#echo $Database $TableName $WebsiteCode
+    Query="select timeEnter from ${TableName} where websitecode=${WebsiteCode} order by Bkey desc limit 1"
+    sqlite3 ${Database} "${Query}"
+}
 
 #--------------------------
 # BEGIN MAIN PART OF SCRIPT
@@ -312,13 +424,13 @@ trap on_exit SIGINT
 #check that the database exists and create if it doesn't
 if [ !  -e  "test.db"  ]
 then
-        echo "database nonexistent, creating"
-sqlite3 test.db "create table Backcountrydeals (Bkey INTEGER PRIMARY KEY, websiteCode int, product TEXT, price double, percentOffMSRP int, quantity int, dealdurationinminutes int, timeEnter DATE);"
-sqlite3 test.db "create table WebsiteCodes (WKey INTEGER PRIMARY KEY, website TEXT, websiteCode int);"
-sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('Steep and Cheap', 0);"
-sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('WhiskeyMilitia', 1);"
-sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('Bonktown', 2);"
-sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('Chainlove', 3);"
+    echo "database nonexistent, creating"
+    sqlite3 test.db "create table Backcountrydeals (Bkey INTEGER PRIMARY KEY, websiteCode int, product TEXT, price double, percentOffMSRP int, quantity int, dealdurationinminutes int, timeEnter DATE);"
+    sqlite3 test.db "create table WebsiteCodes (WKey INTEGER PRIMARY KEY, website TEXT, websiteCode int);"
+    sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('Steep and Cheap', 0);"
+    sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('WhiskeyMilitia', 1);"
+    sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('Bonktown', 2);"
+    sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('Chainlove', 3);"
 #enter some fake data
 #sqlite3 test.db "insert into Backcountrydeals (websiteCode, product, price, quantity, dealdurationinminutes) values (0,'some test info', 12.99, 12, 25);"
 #sqlite3 test.db "insert into Backcountrydeals (websiteCode, product, price, quantity, dealdurationinminutes) values (10,'A bike', 1320.99,2,25 );"
@@ -426,18 +538,18 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 
     
 done
-    if [ "$TmpDiskSpaceStatus" -ne 1 ]
-    then
-	echo "Tmp disk space too low. Exiting"
-    fi
-    if [ "$HomeDiskSpaceStatus" -ne 1 ]
-    then
-	echo "Home disk space too low. Exiting"
-    fi
-    if [ "$NetStatus" -ne 1 ]
-    then
-	echo "The internet is unreachable. Exiting"
-    fi
+if [ "$TmpDiskSpaceStatus" -ne 1 ]
+then
+    echo "Tmp disk space too low. Exiting"
+fi
+if [ "$HomeDiskSpaceStatus" -ne 1 ]
+then
+    echo "Home disk space too low. Exiting"
+fi
+if [ "$NetStatus" -ne 1 ]
+then
+    echo "The internet is unreachable. Exiting"
+fi
 
 #Add items up for sale to a database. it should include item, price, percent off,quantity,time duration of sale and date of deal- put in sqlite database
 #have it ignore womens/mens items 
