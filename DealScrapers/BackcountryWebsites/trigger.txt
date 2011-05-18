@@ -1,0 +1,10 @@
+ -- ********************************************************************
+     --   Creating a trigger for timeEnter
+     --     Run as follows:
+     --            $ sqlite3 test.db < trigger1
+     -- ********************************************************************
+     CREATE TRIGGER insert__timeEnter AFTER  INSERT ON Backcountrydeals
+     BEGIN
+      UPDATE Backcountrydeals SET timeEnter = DATETIME('NOW')  WHERE rowid = new.rowid;
+     END;
+     -- ********************************************************************
