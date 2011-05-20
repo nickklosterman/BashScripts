@@ -11,7 +11,7 @@ function downloadIndividualPages ()
     for x in ${passed_array[@]} #1
     do 
 	echo "Downloading $x"
-	wget -nc -U Mozilla "$x"
+	wget -nv -nc -U Mozilla "$x"
     done
 }
 
@@ -24,6 +24,16 @@ function removeIndividualPages ()
 	rm "$x"
     done
 }
+function downloadMature ()
+{
+    passed_array=( `echo "$1"` )
+    for x in ${passed_array[@]} #1
+    do 
+	echo $x
+	wget -v $x
+   # wget -nv -nc -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt $x
+    done
+}
 
 function downloadFullImageFromFile ()
 {
@@ -34,8 +44,8 @@ function downloadFullImageFromFile ()
 	DownloadImage=$( grep "Download Image" "$x" | sed 's/.*download-button" href="//' | sed 's/" onclick.*//' )
 	if [ "$DownloadImage" != "" ]
 	then 
-#we don't want our variable to be quoted otherwise we'll get a Scheme missing error from wget
-	    wget -nc -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt $DownloadImage
+#we don't want our variable to be quoted otherwise we'll get a Scheme missing error from wget 
+	    wget -nv -nc -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt $DownloadImage
 	fi
     done
 }
@@ -46,7 +56,7 @@ function downloadallowingclobber ()
     for x in ${passed_array[@]} 
     do 
 	echo "$x"
-	wget -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt "$x"
+	wget -nv -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt "$x"
     done
 
 }
@@ -58,7 +68,7 @@ function downloadnoclobber ()
     for x in ${passed_array[@]} 
     do 
 	echo "$x"
-	wget -U Mozilla -nc  --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt "$x"
+	wget -nv -U Mozilla -nc  --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt "$x"
     done
 }
 
@@ -81,37 +91,40 @@ else
 #get gallery index
 	echo "Getting gallery index file"
 #without the trailing / it saves the file as gallery instead of index.html
-	wget -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt  http://${1}.deviantart.com/gallery/ #-O $OutputFile
+	wget -nv -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt  http://${1}.deviantart.com/gallery/ #-O $OutputFile
 #check if the gallery index has additional pages.
 	NextPageCheck=$(grep "gallery/?offset=" index.html | grep "Next Page</a>" )
 	
 #grab all pages of the gallery
 	while [ "$NextPageCheck" != "" ]
 	do 
-	    
 	    let 'offsetcounter+=1'
 	    let "offset=${offsetcounter} * 24"
 	    echo "Getting gallery index with offset of ${offset}"
-	    wget -U Mozilla http://${1}.deviantart.com/gallery/?offset=${offset} 
+	    wget -nv -U Mozilla http://${1}.deviantart.com/gallery/?offset=${offset} 
 	    NextPageCheck=$(grep "gallery/?offset=" index.html?offset=${offset}  | grep "Next Page</a>" )
 	    cat index.html?offset=${offset} >> index.html
 	done
+	rm index.html?*
 	echo "Done getting all gallery pages."
+#now everything has been cat'ed into index.html
 
 #compile arrays of the links to the fullimg, img, address of webpage, webpage file	
 	Super_FullImg=$( grep super_fullimg index.html | sed 's/.*super_fullimg="//' | sed 's/" .*//' )
 	Super_Img=$( grep super_img index.html | sed 's/.*super_img="//' | sed 's/" .*//' )
-
+	Mature=$( grep ismature index.html | sed 's/.*src=\"//;s/\">.*//;s/150\///' )
+#	feh $Mature
 if [ $GetFullSizeImages -eq 1 ]
 then 
-
 	HrefAddress=$( grep "deviantart.com/art/"  index.html | sed 's/.*<a href="//' | sed 's/" class=.*//' )
-	HrefPageName=$( grep "deviantart.com/art/"  index.html | sed 's/.*<a href="//' | sed 's/" class=.*//' | sed 's/.*art\"///' )
+#	HrefPageName=$( grep "deviantart.com/art/"  index.html | sed 's/.*<a href="//' | sed 's/" class=.*//' | sed 's/.*art\"///' )
+	HrefPageName=$( grep "deviantart.com/art/"  index.html | sed 's/.*src=\"//;s/\">.*//' )
 	DeletePageList=${HrefPageName}
 #first download the pages of each image, then attempt to download the full image.  There is no other way that I know of to guarantee getting the fullsize image without visiting the individual webpage and checking if there is a "Download Image" button present. Otherwise simply going off the gallery webpage might only get you the "super_fullimg" when there is a larger version available.	
 
 	downloadIndividualPages "$HrefAddress" #need the quotes otherwise only the first element is sent
 	downloadFullImageFromFile "$HrefPageName"	
+	downloadMature "$Mature"
 	echo "Begin deleting files:"
 	echo $DeletePageList
 	removeIndividualPages "$DeletePageList"
@@ -133,8 +146,12 @@ fi
 		downloadnoclobber "$Super_Img" 
 	fi
 	rm `ls | grep -v '\.'` #use this to rm files since my above comd wasn't working
+	downloadnoclobber "$Mature"
+#	downloadMature "$Mature"
+#	rm *.*.[0-9]
 	cd ..
 	shift 
 #this shifts the input parameters over one position.  pg 38 of bash guide. http://tldp.org/LDP/LG/issue25/dearman.html
     done
+
 fi
