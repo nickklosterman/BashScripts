@@ -72,24 +72,23 @@ function checkhomediskspace()
 
 function on_exit()
 {
-#remove temporary files                                                         
+#remove temporary files  
+WebpageArray=( "/tmp/SteepAndCheapPage" "/tmp/WhiskeyMilitiaPage" "/tmp/BonktownPage" "/tmp/ChainlovePage" )
     echo "Ok, caught Ctrl-c, exiting after clean up"
-    if [ -e /tmp/WebsitePage  ]
-    then
-	rm /tmp/WebsitePage
-    fi
-
-    if [ -e /tmp/ProductImage ]
-    then
-	rm /tmp/ProductImage
-    fi
-
+    for item in "${WebpageArray[@]}"
+    do
+	if [ -e ${item}  ]
+	then 
+	    rm ${item}
+	fi
+    done
     exit 1
 
 }
 
 function GetPageReturnFile()
 {
+# DEPRECATED
 #this function gets a webpage and echoes the name of the file that holds the desired text
     Webpage='/tmp/WebsitePage' #`mktemp`
     wget ${1} -O ${Webpage} -q
@@ -107,8 +106,15 @@ function GiveWebsiteCodeGetWebpageTempFile()
 	3)
 	    Webpage='/tmp/ChainlovePage';;
     esac
-    wget ${1} -O ${Webpage} -q
-    echo ${Webpage}
+#    wget ${1} -O ${Webpage} -q | grep "200 OK"
+    wget ${1} -O ${Webpage} 2>&1 | grep -q "200 OK"
+    WgetExitStatus=$?
+    if [ $WgetExitStatus -eq 0 ]
+    then
+	echo ${Webpage}
+    else
+	echo "Error"
+    fi
 }
 function GivePageReturnText()
 {
@@ -177,8 +183,15 @@ function GivePageAndWebsiteReturnImage()
 	    OutputText=`grep "mainimage" ${Webpage} | sed 's/<img name=\"mainimage\" src=\"//' | sed 's/".*//' `;;
     esac
     Image='/tmp/ProductImage' #`mktemp`
-    wget ${OutputText} -O ${Image} -q
-    echo ${Image}
+#    wget ${OutputText} -O ${Image} -q | grep "200 OK"
+    wget ${OutputText} -O ${Image} 2>&1| grep -q "200 OK"
+    WgetExitStatus=$?
+    if [ $WgetExitStatus -eq 0 ]
+    then
+	echo ${Image}
+    else
+	echo "Error"
+    fi
 }
 
 function GivePageReturnTotalQuantity()
@@ -302,13 +315,13 @@ function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase()
     PreviousProduct=$( GiveDatabaseTableNameWebsiteCodeGetLastProductEntryFromDatabase  ${Database} ${Table} ${WebsiteCode} )
     PreviousTimeEnter=$( GiveDatabaseTableNameWebsiteCodeGetLastTimeEnterEntryFromDatabase  ${Database} ${Table} ${WebsiteCode} )
     PreviousDealDurationInMinutes=$( GiveDatabaseTableNameWebsiteCodeGetLastDealDurationInMinutesEntryFromDatabase  ${Database} ${Table} ${WebsiteCode} )
-PreviousProductDescription=${PreviousProduct/\'/\'\'} #\x27/\x27\x27}"
+    PreviousProductDescription=${PreviousProduct/\'/\'\'} #\x27/\x27\x27}"
 #echo "-" "${PreviousProduct}" "-" "${ProductDescription}" "-" "${PreviousProductDescription}" "-"
 
 #We need to compare to the variable with the double single quotes since that is how we need to enter the string into the database
     if [ "${PreviousProductDescription}" != "${ProductDescription}" ]
     then
-echo "Entering new product info into database."
+	echo "Entering new product info into database."
 	GiveDatabaseTablenameDataEnterIntoDatabase  ${Database} ${Table} ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
     else
 #prevent duplicate entries sequentially but allow duplicates if a certain period has passed therefore giving a check saying that we are pretty sure that this is just a repeat that day/week/whatever
@@ -442,55 +455,79 @@ NetStatus=$( checknet )
 while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -eq 1 ]] ; do 
     #SteepAndCheapPage=$(GetPageReturnFile http://www.steepandcheap.com)
     SteepAndCheapPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.steepandcheap.com 0 )
-    SteepAndCheap=$(GivePageReturnText ${SteepAndCheapPage} )
-    SCTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${SteepAndCheapPage})
-#if there are changes to the item description then we update and print the new info
-    if [ "${SteepAndCheap}" != "${SteepAndCheapTemp}" ]
-    then
-	echo ${SteepAndCheap} 
+    if [ "$SteepAndCheapPage" != "Error" ] 
+    then 
+	SteepAndCheap=$(GivePageReturnText ${SteepAndCheapPage} )
 
-	GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase "test.db" "Backcountrydeals" ${SteepAndCheapPage} 0
+#if there are changes to the item description then we update and print the new info
+	if [ "${SteepAndCheap}" != "${SteepAndCheapTemp}" ]
+	then
+	    SCTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${SteepAndCheapPage})
+	    echo ${SteepAndCheap} 
+
+	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase "test.db" "Backcountrydeals" ${SteepAndCheapPage} 0
 #GiveDatabaseTablenameDataEnterIntoDatabase  test.db Backcountrydeals 0 $ProductDescription bob=$(GivePageReturnProductDescription ${SteepAndCheapPage})  (GivePageReturnPrice ${SteepAndCheapPage}) (GivePageReturnPercentOffMSRP ${SteepAndCheapPage}) (GivePageReturnTotalQuantity ${SteepAndCheapPage}) (GivePageReturnDurationOfDealInMinutes ${SteepAndCheapPage}) 
 #GiveDatabaseTablenameDataEnterIntoDatabase  test.db Backcountrydeals 0 (GivePageReturnProductDescription ${SteepAndCheapPage})  (GivePageReturnPrice ${SteepAndCheapPage}) (GivePageReturnPercentOffMSRP ${SteepAndCheapPage}) (GivePageReturnTotalQuantity ${SteepAndCheapPage}) (GivePageReturnDurationOfDealInMinutes ${SteepAndCheapPage}) 
 #	Null=$(GiveDatabaseTablenameDataEnterIntoDatabase  test.db Backcountrydeals 0 GivePageReturnProductDescription ${SteepAndCheapPage} GivePageReturnPrice ${SteepAndCheapPage} GivePageReturnPercentOffMSRP ${SteepAndCheapPage} GivePageReturnTotalQuantity ${SteepAndCheapPage} GivePageReturnDurationOfDealInMinutes ${SteepAndCheapPage} )
 #sqlite3 ${1} "insert into ${2} (websiteCode, product, price, percentOffMSRP, quantity, dealdurationinminutes) values (${3}, ${4}, ${5}, ${6},${7}, ${8} );"
 #copy content to our temp holder so we can see if things changed.
-	SteepAndCheapTemp=`echo ${SteepAndCheap}`
+	    SteepAndCheapTemp=`echo ${SteepAndCheap}`
+	fi
+    else
+	echo "Wget didn't return a 200 OK response when getting the Steep and Cheap webpage"
+	TimeLeftSeconds=120
     fi
-
 #    WhiskeyMilitiaPage=$(GetPageReturnFile http://www.whiskeymilitia.com)
     WhiskeyMilitiaPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.whiskeymilitia.com 1 )
-    WhiskeyMilitia=$(GivePageReturnText ${WhiskeyMilitiaPage} )
-    WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${WhiskeyMilitiaPage})
+    if [ "$WhiskeyMilitiaPage" != "Error" ]
+    then 
+	WhiskeyMilitia=$(GivePageReturnText ${WhiskeyMilitiaPage} )
+	WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${WhiskeyMilitiaPage})
 
-    if [ "${WhiskeyMilitia}" != "${WhiskeyMilitiaTemp}" ]
-    then
-	echo ${WhiskeyMilitia}
-	GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase "test.db" "Backcountrydeals"  ${WhiskeyMilitiaPage} 1
-	WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
+	if [ "${WhiskeyMilitia}" != "${WhiskeyMilitiaTemp}" ]
+	then
+	    echo ${WhiskeyMilitia}
+	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase "test.db" "Backcountrydeals"  ${WhiskeyMilitiaPage} 1
+	    WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
+	fi
+    else
+	echo "Wget didn't return a 200 OK response when getting the Whiskey Militia webpage"
+	WMTimeLeftSeconds=120
     fi
 
 #    BonktownPage=$(GetPageReturnFile http://www.bonktown.com)
     BonktownPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.bonktown.com 2 )
-    Bonktown=$(GivePageReturnText ${BonktownPage} )
-    BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
+    if [ "$BonktownPage" != "Error" ]
+    then 
+	Bonktown=$(GivePageReturnText ${BonktownPage} )
+	BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
 
-    if [ "${Bonktown}" != "${BonktownTemp}" ]
-    then
-	echo ${Bonktown}
-	GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db "Backcountrydeals"  ${BonktownPage} 2
-	BonktownTemp=`echo ${Bonktown}`
+	if [ "${Bonktown}" != "${BonktownTemp}" ]
+	then
+	    echo ${Bonktown}
+	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db "Backcountrydeals"  ${BonktownPage} 2
+	    BonktownTemp=`echo ${Bonktown}`
+	fi
+    else
+	echo "Wget didn't return a 200 OK response when getting the Bonktown webpage"
+	BTTimeLeftSeconds=120
     fi
     
 #    ChainlovePage=$(GetPageReturnFile http://www.chainlove.com)
     ChainlovePage=$(GiveWebsiteCodeGetWebpageTempFile http://www.chainlove.com 3 )
-    Chainlove=$(GivePageReturnText ${ChainlovePage} )
-    CLTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${ChainlovePage})
-    if [ "${Chainlove}" != "${ChainloveTemp}" ]
-    then
-	echo ${Chainlove}
-	GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db Backcountrydeals  ${ChainlovePage} 3
-	ChainloveTemp=`echo ${Chainlove}`
+    if [ "$ChainlovePage" != "Error" ]  
+    then 
+	Chainlove=$(GivePageReturnText ${ChainlovePage} )
+	CLTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${ChainlovePage})
+	if [ "${Chainlove}" != "${ChainloveTemp}" ]
+	then
+	    echo ${Chainlove}
+	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db Backcountrydeals  ${ChainlovePage} 3
+	    ChainloveTemp=`echo ${Chainlove}`
+	fi
+    else
+	echo "Wget didn't return a 200 OK response when getting the Chainlove webpage"
+	CLTimeLeftSeconds=120
     fi
  #   echo $SCTimeLeftSeconds $WMTimeLeftSeconds $BTTimeLeftSeconds $CLTimeLeftSeconds
 #for some reason it appears that the XXXXPage was going out of scope and we were only using the last page seen..i.e. ChainlovePage for all the functions here. NO it was the reuse of the /tmp/Webpage that was screwing things up.

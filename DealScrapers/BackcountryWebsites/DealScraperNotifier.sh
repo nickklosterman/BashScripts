@@ -13,11 +13,11 @@
 function checknet()
 {
 #this doesn't seem super robust but I suppose it works
-if eval "ping -c 1 www.djinnius.com > /dev/null"; then
-    echo "1"
-else
-    echo "0"
-fi
+    if eval "ping -c 1 www.djinnius.com > /dev/null"; then
+	echo "1"
+    else
+	echo "0"
+    fi
 }
 
 function checkdiskspace()
@@ -46,32 +46,32 @@ function checkdiskspace()
 
 function checktmpdiskspace()
 {
-Output=$(checkdiskspace /tmp 10 )
-echo ${Output}
+    Output=$(checkdiskspace /tmp 10 )
+    echo ${Output}
 }
 
 function checkhomediskspace()
 {
 #check that /home has at least 10MB fo storage available
-Output=$(checkdiskspace /home 10 )
-echo ${Output}
+    Output=$(checkdiskspace /home 10 )
+    echo ${Output}
 }
 
 function on_exit()
 {
 #remove temporary files                                                         
-echo "Ok, caught Ctrl-c, exiting after clean up"
-if [ -e /tmp/WebsitePage  ]
-then
-rm /tmp/WebsitePage
-fi
+    echo "Ok, caught Ctrl-c, exiting after clean up"
+    if [ -e /tmp/WebsitePage  ]
+    then
+	rm /tmp/WebsitePage
+    fi
 
-if [ -e /tmp/ProductImage ]
-then
-rm /tmp/ProductImage
-fi
+    if [ -e /tmp/ProductImage ]
+    then
+	rm /tmp/ProductImage
+    fi
 
-exit 1
+    exit 1
 
 }
 
@@ -95,7 +95,7 @@ function GivePageReturnProductDescription()
 
 #    OutputText=`grep "<title>" ${1} |  sed 's/\<title\>(Steep and Cheap:|WhiskeyMilitia.com:|BonkTown.com:|Chainlove.com:) //' | sed 's/ - \$.*//' | sed 's/\x27/\x27\x27/g' ` #not sure why this didn't work
 
-OutputText=`grep "<title>" ${1} |  sed -n 's/[^:]*://p' | sed 's/ - \$.*//' | sed 's/\x27/\x27\x27/g' ` #this was causing problems with descriptions that had multiple instances of the colon i.e. there was a colon in the description that caused the front part  of the description to be cut off.
+    OutputText=`grep "<title>" ${1} |  sed -n 's/[^:]*://p' | sed 's/ - \$.*//' | sed 's/\x27/\x27\x27/g' ` #this was causing problems with descriptions that had multiple instances of the colon i.e. there was a colon in the description that caused the front part  of the description to be cut off.
 #Explanation: replace everything up to the colon that isn't a colon with nothing, print the rest
 
 #    OutputText=`grep "<title>" ${1} |  sed 's/.*: //' | sed 's/ - \$.*//' | sed 's/\x27/\x27\x27/g' ` #this was causing problems with descriptions that had multiple instances of the colon i.e. there was a colon in the description that caused the front part  of the description to be cut off.
@@ -128,17 +128,17 @@ function GivePageReturnPercentOffMSRP()
     echo ${OutputText}
 }
 
-GiveDatabaseTablenameDataEnterIntoDatabase()
+function GiveDatabaseTablenameDataEnterIntoDatabase()
 {
-sqlite3 ${1} "insert into ${2} (websiteCode, product, price, percentOffMSRP, quantity, dealdurationinminutes) values ( '${3}', '${4}', '${5}', '${6}', '${7}', '${8}' );"
+    sqlite3 ${1} "insert into ${2} (websiteCode, product, price, percentOffMSRP, quantity, dealdurationinminutes) values ( '${3}', '${4}', '${5}', '${6}', '${7}', '${8}' );"
 }
 
 
 
 function GiveWebsiteAndDatabaseReturnWebsiteCodeFromDatabase()
 {
-Website=${1}
-Database=${2}
+    Website=${1}
+    Database=${2}
 
 }
 
@@ -247,25 +247,34 @@ function GiveTimeReturnDealEndTime()
     echo "Emptyfornow"
 }
 
+function GiveWebPageKeywordDatabaseTablethenNotify()
+{
+    Database=${1}
+    TableName=${2}
+    sqlite3 ${Database} "select * from ${TableName}" | while read databaserecords; do
+	echo $databaserecords
+    done
+    
+}
 
 function GiveWebPageKeywordTextEmailListFilethenNotify()
 {
 #echo "${1}" "${2}"
-while read keyword phonenumber email
-do 
+    while read keyword phonenumber email
+    do 
 #Match=$( echo `expr match "${keyword}" "${1}" ` ) #for some reason I couldn't get these substring matching routines to work
 #Match=$( echo `expr index "${1}" "${keyword}" ` )
 #echo ${Match}  ${keyword}
 #if [ $Match -gt 0 ]
-if  grep -q "${keyword}" <<<${1}   # we use the -q since we just want the exit code
-then 
-echo "We have a match at ${Match}"
-echo "sending ${1} to ${phonenumber} and ${email}"
+	if  grep -q "${keyword}" <<<${1}   # we use the -q since we just want the exit code
+	then 
+	    echo "We have a match at ${Match}"
+	    echo "sending ${1} to ${phonenumber} and ${email}"
 #    sendTexttoPhone "${1}" "$phonenumber" #quotes on phone not necessary...
 #    sendEmail "${1}" "${email}"
 # perl  sendEmail -f inkydinky@djinnius.com -t 5079909052@tmomail.net -u 'Subject line' -m 'Message Body' -s mail.djinnius.com:587 -xu user -xp password
-fi
-done < "${2}"
+	fi
+    done < "${2}"
 }
 
 #--------------------------

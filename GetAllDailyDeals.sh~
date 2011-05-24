@@ -1,7 +1,0 @@
-#!/bin/bash
-bash WootAll.sh
-bash Qwertee.sh
-bash TeefuryScraper.sh
-bash RiptApparelScraper.sh
-bash AltrecScraper.sh
-bash REIScraper.sh

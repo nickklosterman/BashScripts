@@ -1,9 +1,0 @@
-#!/bin/bash
-SteepAndCheap=`mktemp`
-WhiskeyMilitia=`mktemp`
-Bonktown=`mktemp`
-Chainlove=`mktemp`
-wget http://www.steepandcheap.com -O ${SteepAndCheap}
-wget http://www.whiskeymilitia.com -O ${WhiskeyMilitia}
-wget http://www.bonktown.com -O ${Bonktown}
-wget http://www.chainlove.com -O ${Chainlove}
