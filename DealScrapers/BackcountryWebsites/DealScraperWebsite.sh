@@ -5,47 +5,31 @@
 #that site has a new deal before updating.
 #It appears that time isn't linear across all websites as 
 
-#BASH programming caveats
-#since there is no compiling I was having the program stop because I was trying to reference a variable that didn't exist bc I had spelled the name wrong.
-#This just caused the program to stop dead in its tracks and not progress farther
-#At the end you see that SleepTime gets printed as well as SleepTimeMinutesSeconds when I call to print SleepTimeMinutesSeconds. Maybe this has to do with variable name length being too long and too similar?
 function on_exit()
 {
 #remove temporary files
-echo "Ok, caught Ctrl-c, exiting after clean up"
-if [ -e /tmp/WebsitePage  ]
-then 
-rm /tmp/WebsitePage
-fi
-
-if [ -e /tmp/ProductImage ] 
-then 
-rm /tmp/ProductImage
-fi
-
-if [ -e /tmp/SteepAndCheap.jpg ] 
-then 
-rm /tmp/SteepAndCheap.jpg
-fi
-if [ -e /tmp/WhiskeyMilitia.jpg ] 
-then 
-rm /tmp/WhiskeyMilitia.jpg
-fi
-if [ -e /tmp/Chainlove.jpg ] 
-then 
-rm /tmp/Chainlove.jpg
-fi
-
-if [ -e /tmp/Bonktown.jpg ] 
-then 
-rm /tmp/Bonktown.jpg
-fi
-
-
-
-#without the exit command we capture the Ctrl-C but we don't actually kill the process
-exit 1
+    echo "Ok, caught Ctrl-c, exiting after clean up"
+    
+    WebpageArray=( "/tmp/SteepAndCheapPage" "/tmp/WhiskeyMilitiaPage" "/tmp/BonktownPage" "/tmp/ChainlovePage" )
+    for item in "${WebpageArray[@]}"
+    do
+	if [ -e  "${item}" ]
+	then 
+	    rm "${item}"
+	fi
+    done
+    WebImage=( "/tmp/SteepAndCheap.jpg" "/tmp/WhiskeyMilitia.jpg" "/tmp/Chainlove.jpg" "/tmp/Bonktown.jpg" "/tmp/ProductImage")
+    for item in "${WebImage[@]}"
+    do
+	if [ -e  "${item}" ]
+	then 
+	    rm "${item}"
+	fi
+    done
+    #without the exit command we capture the Ctrl-C but we don't actually kill the process
+    exit 1
 }
+
 function GiveWebsiteCodeGetWebpageTempFile()
 {
     case ${2} in
@@ -58,14 +42,6 @@ function GiveWebsiteCodeGetWebpageTempFile()
         3)
             Webpage='/tmp/ChainlovePage';;
     esac
-    wget ${1} -O ${Webpage} -q
-    echo ${Webpage}
-}
-
-function GetPageReturnFile()
-{
-#this function gets a webpage and echoes the name of the file that holds the desired text
-    Webpage='/tmp/WebsitePage' #`mktemp`
     wget ${1} -O ${Webpage} -q
     echo ${Webpage}
 }
@@ -98,10 +74,7 @@ function GivePageReturnTotalQuantity()
 
 function GivePageReturnQuantityRemaining()
 {
-#echo "22"
     RemainingQuantity=`grep total_qty_bar.set_data\( ${1} | sed 's/.*(//' | sed 's/,.*//' `
-#echo "33"
-#printf " GivePageReturnQuantityRemaining()"
     echo ${RemainingQuantity}
 }
 
@@ -126,7 +99,7 @@ function GivePageReturnDurationOfDealInMinutes()
 function GiveSecondsReturnMinutesAndSeconds()
 {
     input=${1}
-#    echo ${1}
+
 #you need to quote the variable otherwise 
     if [ "${input}" == "" ] # \n check if null with -z ${input}
     then 
@@ -135,16 +108,9 @@ function GiveSecondsReturnMinutesAndSeconds()
     fi
     let "minutes = ${1} / 60"
     let "seconds = ${1} % 60 "
-#    echo ${minutes} ${seconds}
-printf "%d:%02d" ${minutes} ${seconds}
 
-#    if [ ${seconds} -lt 10 ];
-#    then 
-#	echo ${minutes}:0${seconds} #could've jsut used printf
-#    else
-#	echo ${minutes}:${seconds} 
-#FML the seconds need to be padded with zeros--well I suppose this is one way to do it
-#    fi
+    printf "%d:%02d" ${minutes} ${seconds}
+
 }
 
 #Input: webpage file
@@ -152,7 +118,7 @@ printf "%d:%02d" ${minutes} ${seconds}
 function GivePageReturnTimeRemainingInSeconds()
 {
 #two forms setupTimerBar or setupWMTimerBar
-#    TimeRemainingInSeconds=`grep setupWMTimerBar ${1} | sed 's/.*(//' | sed 's/,.*//'   `
+
     TimeRemainingInSeconds=`grep "TimerBar" ${1} | sed 's/.*(//' | sed 's/,.*//'   `
 #if the value somehow comes out negative then we'll just wait X more seconds and hit it again
     if [ ${TimeRemainingInSeconds} -lt 0 ]
@@ -172,7 +138,7 @@ echo ${Output}
 
 function UploadFileToDjinniusDeals
 {
-#echo "in Upload"
+
 bash UploadFileToDjinniusDeals.sh "nM&^%4Yu" "${1}"
 }
 
@@ -184,8 +150,6 @@ wget www.djinnius.com/Deals/index.html -O "${1}"
 function GetTagLineNumber
 {
 
-#echo "in GetTagLineNumber"
-#echo "${1}" "${2}"
 LineNumber=`eval grep -n "${1}" ${2} | sed 's/:.*//' `
 #without the eval the pattern to search for, which contains a set of quotes to keep it all together, wasn't returning anything
 echo $LineNumber
@@ -193,14 +157,12 @@ echo $LineNumber
 
 function GetBeginningOfFileToLine
 {
-#echo ${1} "${2}"
 Output=` head -n +${1} "${2}" `
 echo "${Output}"
 }
 
 function GetLineToEOF
 {
-#echo ${1} "${2}"
 Output=` tail -n +${1} "${2}" `
 #could also use "sed -n 'N,$p' filename"
 echo "${Output}"
@@ -303,13 +265,11 @@ EndLineNumber=$( GetTagLineNumber "${EndTag}" "${Webpage}" )
 echo $BeginLineNumber $EndLineNumber
 
 Top=$( GetBeginningOfFileToLine ${BeginLineNumber} "${Webpage}" )
-#echo "Top" "${Top}"
-Bottom=$( GetLineToEOF ${EndLineNumber} "${Webpage}" )
-#echo "Bottom" "${Bottom}"
-QueryResults=$( GetQueryResults "${DatabaseName}" ${WebsiteCode} ${NumberOfRecordsToDisplay} )
-#echo "Query Results:" "${QueryResults}"
 
-#this doesn't work
+Bottom=$( GetLineToEOF ${EndLineNumber} "${Webpage}" )
+
+QueryResults=$( GetQueryResults "${DatabaseName}" ${WebsiteCode} ${NumberOfRecordsToDisplay} )
+
 Newline="\n"
 Output="${Top}""${Newline}""${QueryResults}""${Newline}""${Bottom}"
 #could also use printf to insert the newline
@@ -318,7 +278,7 @@ ${QueryResults}
 ${Bottom}"
 
 echo "${Output}" > "${Webpage}"
-#> /tmp/Bob.html #> "${Webpage}"
+
 }
 
 function GetQueryResults
@@ -326,18 +286,11 @@ function GetQueryResults
 DatabaseName="${1}"
 WebsiteCode=${2}
 NumberOfRecordsToDisplay=${3}
-#without the eval we get a syntax error
-#Stuff="\"select product,price,percentOffMSRP,quantity,dealdurationinminutes,timeEnter from Backcountrydeals where websitecode=${WebsiteCode} order by Bkey desc limit ${NumberOfRecordsToDisplay}\""
+
 Stuff="select product,price,percentOffMSRP,quantity,dealdurationinminutes,timeEnter from Backcountrydeals where websitecode=${WebsiteCode} order by Bkey desc limit ${NumberOfRecordsToDisplay}"
-#echo "${Stuff}"  
+
 #for some reason it was having trouble expanding the quotes. To solve that i tried using eval but that seemed to not expand the variables so I had to do a two step approach.
 Output=`sqlite3 -html "${DatabaseName}" "${Stuff}" `
-#`eval sqlite3 -html "${DatabaseName}" "${Stuf}" ` # gets hung up 
-#"select product,price,percentOffMSRP,quantity,dealdurationinminutes,timeEnter from Backcountrydeals where websitecode="${WebsiteCode}" order by Bkey desc limit "${NumberOfRecordsToDisplay}"" ` 
-#"select * from Backcountrydeals" ` 
-#".table" ` 
- #"select product,price,percentOffMSRP,quantity,dealdurationinminutes,timeEnter from Backcountrydeals where websitecode=${WebsiteCode} order by Bkey desc limit ${NumberOfRecordsToDisplay}" ` 
-#`eval sqlite3 -html "${DatabaseName}" "select product,price,percentOffMSRP,quantity,dealdurationinminutes,timeEnter from Backcountrydeals where websitecode=${WebsiteCode} order by Bkey desc limit ${NumberOfRecordsToDisplay}"`
 echo "${Output}"
 }
 
@@ -347,22 +300,15 @@ Webpage="${1}"
 ProductDescription="${2}"
 BeginTag="${3}" 
 EndTag="${4}"
-#echo $Webpage
 BeginLineNumber=$( GetTagLineNumber  "${BeginTag}" "${Webpage}" )
-#echo "BeginLineNumber" $BeginLineNumber
 EndLineNumber=$( GetTagLineNumber  "${EndTag}" "${Webpage}" )
-#echo "EndLineNumber" $EndLineNumber
 Top=$( GetBeginningOfFileToLine ${BeginLineNumber} "${Webpage}" )
-#echo "Top" $Top
 Bottom=$( GetLineToEOF ${EndLineNumber} "${Webpage}" )
-#echo "Bottom" $Bottom
-#Newline="\n"
-#Output="${Top}""${Newline}""${ProductDescription}""${Newline}""${Bottom}"
 Output="${Top}
 ${ProductDescription}
 ${Bottom}"
 echo "${Output}" > "${Webpage}"
-#> /tmp/Bob1.html # 
+
 }
 
 #--------------------------
@@ -380,30 +326,20 @@ BonktownImageLocation="/tmp/Bonktown.jpg"
 ChainloveImageLocation="/tmp/Chainlove.jpg"
 WebpageIndex="/home/nicolae/Desktop/index.html"
 #clean up our temp files if we receive a kill signal
-    #trap on_exit SIGKILL
-    #trap on_exit SIGTERM
-    trap on_exit SIGINT #2
-    #on_exit
+    trap on_exit SIGINT 
+
 while [ 1 ] ; do 
-#    SteepAndCheapPage=$(GetPageReturnFile http://www.steepandcheap.com)
+
     SteepAndCheapPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.steepandcheap.com 0 )
     SnCDurationOfDealInMinutes=$(GivePageReturnDurationOfDealInMinutes ${SteepAndCheapPage} )
-#echo "Duration of Deal" ${SnCDurationOfDealInMinutes}
     SnCTimeRemainingOfTotal=$(GivePageReturnTimeRemainingOfTotalTime ${SteepAndCheapPage} )
-#echo "Time remaining of total"  ${SnCTimeRemainingOfTotal}
     SteepAndCheapTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${SteepAndCheapPage} )
     SnCTimeLeftSeconds=${SteepAndCheapTimeLeftSeconds}
-
- #   echo ${SteepAndCheapTimeLeftSeconds}
     SnCTimeLeftMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SteepAndCheapTimeLeftSeconds})
-  #  echo ${SnCTimeLeftMinutesSeconds}
     SnCQuantityRemaining=$(GivePageReturnQuantityRemainingOfTotalQuantity ${SteepAndCheapPage} )
     SnCQuantityRemaining=$(GivePageReturnQuantityRemaining ${SteepAndCheapPage} )
-   # echo ${SnCQuantityRemaining}
     SnCTotalQuantity=$(GivePageReturnTotalQuantity ${SteepAndCheapPage} )
-   # echo -n ${SnCTotalQuantity} ${SnCQuantityRemaining} 
     SnCQuantityRemainingOfTotalQuantity=$(GivePageReturnQuantityRemainingOfTotalQuantity ${SteepAndCheapPage} )
-
     SteepAndCheap=$(GivePageReturnText ${SteepAndCheapPage} )
 
 #if there are changes to the item description then we update and print the new info
@@ -415,25 +351,15 @@ while [ 1 ] ; do
 	echo ${SteepAndCheap} 
 
 	UpdateWebpage 0 "${SteepAndCheap}" "${SteepAndCheapImage}"  "${WebpageIndex}"
-
-	#rm ${SteepAndCheapImageLocation} I can't use this bc I delete the file before I'm done uploading it
-#send out the info using notify-send for a popup
-#	notify-send "$SteepAndCheap" -i ${SteepAndCheapImage} -t 3
-#copy content to our temp holder so we can see if things changed.
 	SteepAndCheapTemp=`echo ${SteepAndCheap}`
     fi
 
-#    WhiskeyMilitiaPage=$(GetPageReturnFile http://www.whiskeymilitia.com)
     WhiskeyMilitiaPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.whiskeymilitia.com 1 )
     WMQuantityRemaining=$(GivePageReturnQuantityRemaining ${WhiskeyMilitiaPage} )
 
     WMTotalQuantity=$(GivePageReturnTotalQuantity ${WhiskeyMilitiaPage} )
-
     WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${WhiskeyMilitiaPage})
-
-
     WhiskeyMilitia=$(GivePageReturnText ${WhiskeyMilitiaPage} )
-
 
     if [ "${WhiskeyMilitia}" != "${WhiskeyMilitiaTemp}" ]
     then
@@ -446,14 +372,11 @@ while [ 1 ] ; do
 	WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
     fi
 
-#    BonktownPage=$(GetPageReturnFile http://www.bonktown.com)
     BonktownPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.bonktown.com 2 )
     BTQuantityRemaining=$(GivePageReturnQuantityRemaining ${BonktownPage} )
     BTTotalQuantity=$(GivePageReturnTotalQuantity ${BonktownPage} )
     BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
-
     Bonktown=$(GivePageReturnText ${BonktownPage} )
-
 
     if [ "${Bonktown}" != "${BonktownTemp}" ]
     then
@@ -461,41 +384,24 @@ while [ 1 ] ; do
 	BonktownImage=$(GivePageAndWebsiteReturnImage ${BonktownPage} http://www.bonktown.com )
 	echo ${Bonktown}
 	UpdateWebpage 2 "${Bonktown}" "${BonktownImage}"  "${WebpageIndex}"
-
 	notify-send  "$Bonktown" -i ${BonktownImage} -t 3
 	BonktownTemp=`echo ${Bonktown}`
     fi
-    
-#    ChainlovePage=$(GetPageReturnFile http://www.chainlove.com)
     ChainlovePage=$(GiveWebsiteCodeGetWebpageTempFile http://www.chainlove.com 3 )
     CLQuantityRemaining=$(GivePageReturnQuantityRemaining ${ChainlovePage} )
     CLTotalQuantity=$(GivePageReturnTotalQuantity ${ChainlovePage} )
     CLTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${ChainlovePage})
-
     Chainlove=$(GivePageReturnText ${ChainlovePage} )
 
     if [ "${Chainlove}" != "${ChainloveTemp}" ]
     then
-
 	ChainloveImage=$(GivePageAndWebsiteReturnImage ${ChainlovePage} http://www.chainlove.com )
 	echo ${Chainlove}
 	UpdateWebpage 3 "${Chainlove}" "${ChainloveImage}" "${WebpageIndex}"
-
 	notify-send  "$Chainlove" -i ${ChainloveImage} -t 3
 	ChainloveTemp=`echo ${Chainlove}`
     fi
 
-
-
-
-
-
-    #I had been making a logic error here for quite some time.
-#I didn't understand why sometimes the "math" would be off and a smaller value wouldn't be assigned to the SleepTime
-#It was due to me using a if.then.elif.then.elif.then cascade. I was
-#mistakenly thinking that this was the correct method to get the smallest value
-#into SleepTime. This was wrong because if WMTimeLeftSeconds was smaller than 
-#the one for SnC then it would be assigned to SLeepTime and it would kick out of the loop. As long as ONE of the conditions held it'd kick out and not go futher and evaluate any more of the logic tests. DUH. yet this took me a while to figure out.
     SleepTime=${SnCTimeLeftSeconds}
     NextDeal="SteepAndCheap"
     if [ ${WMTimeLeftSeconds} -lt ${SleepTime} ]
@@ -519,15 +425,9 @@ while [ 1 ] ; do
     SleepTimeMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SleepTime})
     DealEndTime=$( GiveTimeInSecondsReturnDealEndTime ${SleepTime} )
     echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes from" `date +%T ` "which occurs at ${DealEndTime}"
-    
-#echo ${DealEndTime}
+
     echo "SnC:${SnCTimeLeftSeconds} (${SnCQuantityRemaining}/${SnCTotalQuantity})  WM:${WMTimeLeftSeconds} (${WMQuantityRemaining}/${WMTotalQuantity}) BT:${BTTimeLeftSeconds} (${BTQuantityRemaining}/${BTTotalQuantity}) CL:${CLTimeLeftSeconds} (${CLQuantityRemaining}/${CLTotalQuantity})"
-    
+   
     sleep ${SleepTime}s
-
-
 done
 
-
-#Add items up for sale to a database. it should include item, price, percent off,quantity,time duration of sale and date of deal- put in sqlite database
-#have it ignore womens/mens items 

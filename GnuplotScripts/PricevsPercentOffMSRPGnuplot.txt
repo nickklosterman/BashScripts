@@ -10,6 +10,6 @@ set title "Price vs. Percent off MSRP"
 #plot "< sqlite3 test.db 'select * from Backcountrydeals'" using 2 title "Website Code", "" using 4 title "Price"
 plot '< sqlite3 test.db "select price,percentOffMSRP from Backcountrydeals"' using 1:2 title "Price vs. Percent off MSRP"
 #if we don't set the title in the line above then the query becomes the title :(
-set terminal png
+set terminal png size 500,375
 set output "PricevsPercentOffMSRPGnuplot.png"
 replot

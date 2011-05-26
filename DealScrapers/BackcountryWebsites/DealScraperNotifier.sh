@@ -5,11 +5,6 @@
 #that site has a new deal before updating.
 #It appears that time isn't linear across all websites as 
 
-#BASH programming caveats
-#since there is no compiling I was having the program stop because I was trying to reference a variable that didn't exist bc I had spelled the name wrong.
-#This just caused the program to stop dead in its tracks and not progress farther
-#At the end you see that SleepTime gets printed as well as SleepTimeMinutesSeconds when I call to print SleepTimeMinutesSeconds. Maybe this has to do with variable name length being too long and too similar?
-
 function checknet()
 {
 #this doesn't seem super robust but I suppose it works
@@ -60,19 +55,47 @@ function checkhomediskspace()
 function on_exit()
 {
 #remove temporary files                                                         
-    echo "Ok, caught Ctrl-c, exiting after clean up"
-    if [ -e /tmp/WebsitePage  ]
-    then
-	rm /tmp/WebsitePage
-    fi
-
-    if [ -e /tmp/ProductImage ]
-    then
-	rm /tmp/ProductImage
-    fi
+    WebpageArray=( "/tmp/SteepAndCheapPage" "/tmp/WhiskeyMilitiaPage" "/tmp/BonktownPage" "/tmp/ChainlovePage" )
+    for item in "${WebpageArray[@]}"
+    do
+        if [ -e  "${item}" ]
+        then 
+            rm "${item}"
+        fi
+    done
+    WebImage=( "/tmp/SteepAndCheap.jpg" "/tmp/WhiskeyMilitia.jpg" "/tmp/Chainlove.jpg" "/tmp/Bonktown.jpg" "/tmp/ProductImage")
+    for item in "${WebImage[@]}"
+    do
+        if [ -e  "${item}" ]
+        then 
+            rm "${item}"
+        fi
+    done
 
     exit 1
 
+}
+
+function GiveWebsiteCodeGetWebpageTempFile()
+{
+    case ${2} in
+        0)
+            Webpage='/tmp/SteepAndCheapPage';;
+        1)
+            Webpage='/tmp/WhiskeyMilitiaPage';;
+        2)
+            Webpage='/tmp/BonktownPage';;
+        3)
+            Webpage='/tmp/ChainlovePage';;
+    esac
+    wget ${1} -O ${Webpage} 2>&1 | grep -q "200 OK"
+    WgetExitStatus=$?
+    if [ $WgetExitStatus -eq 0 ]
+    then
+        echo ${Webpage}
+    else
+        echo "Error"
+    fi
 }
 
 function GetPageReturnFile()
@@ -253,19 +276,23 @@ function GiveWebPageKeywordDatabaseTablethenNotify()
     TableName=${2}
     sqlite3 ${Database} "select * from ${TableName}" | while read databaserecords; do
 	echo $databaserecords
+Array=($(echo "${databaserecords}" | sed 's/|/ /g'))
+keyword=${Array[0]} #` cut -d "|" -f 1 `
+EmailTextAddress=${Array[1]} #cut -d "|" -f 1 `
+
+if grep -q "${keyword}" <<<${1}
+then
+echo "We have a match"
+fi
     done
     
 }
 
 function GiveWebPageKeywordTextEmailListFilethenNotify()
 {
-#echo "${1}" "${2}"
     while read keyword phonenumber email
     do 
-#Match=$( echo `expr match "${keyword}" "${1}" ` ) #for some reason I couldn't get these substring matching routines to work
-#Match=$( echo `expr index "${1}" "${keyword}" ` )
-#echo ${Match}  ${keyword}
-#if [ $Match -gt 0 ]
+
 	if  grep -q "${keyword}" <<<${1}   # we use the -q since we just want the exit code
 	then 
 	    echo "We have a match at ${Match}"
@@ -294,91 +321,106 @@ TmpDiskSpaceStatus=$( checktmpdiskspace )
 HomeDiskSpaceStatus=$( checkhomediskspace )
 NetStatus=$( checknet )
 while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -eq 1 ]] ; do 
-    SteepAndCheapPage=$(GetPageReturnFile http://www.steepandcheap.com)
-    SteepAndCheap=$(GivePageReturnText ${SteepAndCheapPage} )
+    SteepAndCheapPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.steepandcheap.com 0 )
+    if [ "$SteepAndCheapPage" != "Error" ]
+    then
 
+	SteepAndCheap=$(GivePageReturnText ${SteepAndCheapPage} )
 #if there are changes to the item description then we update and print the new info
-    if [ "${SteepAndCheap}" != "${SteepAndCheapTemp}" ]
-    then
-	echo ${SteepAndCheap} 
-
+	if [ "${SteepAndCheap}" != "${SteepAndCheapTemp}" ]
+	then
+	    echo ${SteepAndCheap} 
 #	GiveWebPageKeywordTextEmailListFilethenNotify ${SteepAndCheapPage} "${Datafile}"
-	GiveWebPageKeywordTextEmailListFilethenNotify "${SteepAndCheap}" "${Datafile}"
-	SteepAndCheapTemp=`echo ${SteepAndCheap}`
+	    GiveWebPageKeywordTextEmailListFilethenNotify "${SteepAndCheap}" "${Datafile}"
+	    SteepAndCheapTemp=`echo ${SteepAndCheap}`
+	fi
+    else
+        echo "Wget didn't return a 200 OK response when getting the Steep and Cheap webpage"
+        SCTimeLeftSeconds=120
     fi
-
-    WhiskeyMilitiaPage=$(GetPageReturnFile http://www.whiskeymilitia.com)
-    WhiskeyMilitia=$(GivePageReturnText ${WhiskeyMilitiaPage} )
-
-
-    if [ "${WhiskeyMilitia}" != "${WhiskeyMilitiaTemp}" ]
+    WhiskeyMilitiaPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.whiskeymilitia.com 1 )
+    if [ "$WhiskeyMilitiaPage" != "Error" ]
     then
-	echo ${WhiskeyMilitia}
+	WhiskeyMilitia=$(GivePageReturnText ${WhiskeyMilitiaPage} )
+
+
+	if [ "${WhiskeyMilitia}" != "${WhiskeyMilitiaTemp}" ]
+	then
+	    echo ${WhiskeyMilitia}
 #	GiveWebPageKeywordTextEmailListFilethenNotify   ${WhiskeyMilitiaPage} "${Datafile}"
-	GiveWebPageKeywordTextEmailListFilethenNotify  "${WhiskeyMilitia}" "${Datafile}"
+	    GiveWebPageKeywordTextEmailListFilethenNotify  "${WhiskeyMilitia}" "${Datafile}"
 
 
 
-	WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
+	    WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
+	fi
+    else
+        echo "Wget didn't return a 200 OK response when getting the Whiskey Mil\
+itia webpage"
+	WMTimeLeftSeconds=120
     fi
-
-    BonktownPage=$(GetPageReturnFile http://www.bonktown.com)
-    Bonktown=$(GivePageReturnText ${BonktownPage} )
-
-
-    if [ "${Bonktown}" != "${BonktownTemp}" ]
+    BonktownPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.bonktown.com 2 )
+    if [ "$BonktownPage" != "Error" ]
     then
-	echo ${Bonktown}
+	Bonktown=$(GivePageReturnText ${BonktownPage} )
+
+
+	if [ "${Bonktown}" != "${BonktownTemp}" ]
+	then
+	    echo ${Bonktown}
 #	GiveWebPageKeywordTextEmailListFilethenNotify ${BonktownPage} "${Datafile}"
-	GiveWebPageKeywordTextEmailListFilethenNotify "${Bonktown}" "${Datafile}"
+	    GiveWebPageKeywordTextEmailListFilethenNotify "${Bonktown}" "${Datafile}"
 
 
-	BonktownTemp=`echo ${Bonktown}`
+	    BonktownTemp=`echo ${Bonktown}`
+	fi
+    else
+        echo "Wget didn't return a 200 OK response when getting the Bonktown we\
+bpage"
+        BTTimeLeftSeconds=120
     fi
-    
-    ChainlovePage=$(GetPageReturnFile http://www.chainlove.com)
-    Chainlove=$(GivePageReturnText ${ChainlovePage} )
-
-    if [ "${Chainlove}" != "${ChainloveTemp}" ]
+    ChainlovePage=$(GiveWebsiteCodeGetWebpageTempFile http://www.chainlove.com 3 )
+    if [ "$ChainlovePage" != "Error" ]
     then
-	echo ${Chainlove}
+	Chainlove=$(GivePageReturnText ${ChainlovePage} )
+
+	if [ "${Chainlove}" != "${ChainloveTemp}" ]
+	then
+	    echo ${Chainlove}
 #	GiveWebPageKeywordTextEmailListFilethenNotify ${ChainlovePage} "${Datafile}"
-	GiveWebPageKeywordTextEmailListFilethenNotify "${Chainlove}" "${Datafile}"
+	    GiveWebPageKeywordTextEmailListFilethenNotify "${Chainlove}" "${Datafile}"
 
 
-	ChainloveTemp=`echo ${Chainlove}`
-    fi
-    SCTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${SteepAndCheapPage})
-    WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${WhiskeyMilitiaPage})
-    BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
-    CLTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${ChainlovePage})
+	    ChainloveTemp=`echo ${Chainlove}`
+	fi
 
-    SleepTime=${SCTimeLeftSeconds}
-    NextDeal="SteepAndCheap"
-    if [ ${WMTimeLeftSeconds} -lt ${SleepTime} ]
-    then
-	SleepTime=${WMTimeLeftSeconds}
-	NextDeal="WhiskeyMilitia"
-    fi
-    if [ ${BTTimeLeftSeconds} -lt ${SleepTime} ] 
-    then
-	SleepTime=${BTTimeLeftSeconds}
-	NextDeal="Bonktown"
-    fi
-    if [ ${CLTimeLeftSeconds} -lt ${SleepTime} ]
-    then
-	SleepTime=${CLTimeLeftSeconds} 
-	NextDeal="Chainlove"
-    fi
+
+	SleepTime=${SCTimeLeftSeconds}
+	NextDeal="SteepAndCheap"
+	if [ ${WMTimeLeftSeconds} -lt ${SleepTime} ]
+	then
+	    SleepTime=${WMTimeLeftSeconds}
+	    NextDeal="WhiskeyMilitia"
+	fi
+	if [ ${BTTimeLeftSeconds} -lt ${SleepTime} ] 
+	then
+	    SleepTime=${BTTimeLeftSeconds}
+	    NextDeal="Bonktown"
+	fi
+	if [ ${CLTimeLeftSeconds} -lt ${SleepTime} ]
+	then
+	    SleepTime=${CLTimeLeftSeconds} 
+	    NextDeal="Chainlove"
+	fi
 
 #it'd be nice if we could print the time ticking down and then refresh with the new deals. use "print" maybe?
 
-    SleepTimeMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SleepTime})
-    echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes from" `date +%T `
-    sleep ${SleepTime}s
-    TmpDiskSpaceStatus=$(checktmpdiskspace )
-    HomeDiskSpaceStatus=$(checkhomediskspace )
-    NetStatus=$(checknet )
+	SleepTimeMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SleepTime})
+	echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes from" `date +%T `
+	sleep ${SleepTime}s
+	TmpDiskSpaceStatus=$(checktmpdiskspace )
+	HomeDiskSpaceStatus=$(checkhomediskspace )
+	NetStatus=$(checknet )
 done
 
 if [ "$TmpDiskSpaceStatus" -ne 1 ]

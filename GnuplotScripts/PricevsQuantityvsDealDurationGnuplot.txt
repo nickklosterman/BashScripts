@@ -1,17 +1,13 @@
 set style data points #pm3d # lines
-#dots
+
 set datafile separator "|"
-#set xrange [-1:4]
-#set yrange [0:60]
+
 set ylabel "Quantity"
 set zlabel "Deal Duration in Minutes"
 set xlabel  "Price"
-#set title "Price vs. Discount off MSRP"
-#I could color code by websitecode?...I'm sure I could
-set key title  "0 = Steep and Cheap\n1=Whiskey Militia\n2=Bonktown\n3=Chainlove"
-#plot "< sqlite3 test.db 'select * from Backcountrydeals'" using 2 title "Website Code", "" using 4 title "Price"
+set title "Price vs. Deal Duration in Minutes vs. Price"
 splot '< sqlite3 test.db "select price,quantity,dealdurationinminutes from Backcountrydeals"' using 1:2:3 title "Price vs. Quantity vs. Deal Duration in Minutes"
 #if we don't set the title in the line above then the query becomes the title :(
-set terminal png
+set terminal png size 500,375
 set output "PricevsQuantityvsDealDurationGnuplot.png"
 replot
