@@ -11,5 +11,10 @@ gnuplot ~/Git/BashScripts/GnuplotScripts/WebsitecodevsDealDurationGnuplot.txt
 gnuplot ~/Git/BashScripts/GnuplotScripts/WebsitecodevsPercentOffMSRPGnuplot.txt
 gnuplot ~/Git/BashScripts/GnuplotScripts/WebsitecodevsQuantityGnuplot.txt
 gnuplot ~/Git/BashScripts/GnuplotScripts/WebsitecodevsPriceGnuplot.txt
+gnuplot ~/Git/BashScripts/GnuplotScripts/TimevsDealDurationGnuplot.txt
+gnuplot ~/Git/BashScripts/GnuplotScripts/TimevsPercentOffMSRPGnuplot.txt
+gnuplot ~/Git/BashScripts/GnuplotScripts/TimevsPriceGnuplot.txt
+gnuplot ~/Git/BashScripts/GnuplotScripts/TimevsQuantityGnuplot.txt
+
 bash ~/Git/BashScripts/DealScrapers/BackcountryWebsites/UploadMultipleFilesMPUTToDjinniusDeals.sh "nM&^%4Yu" "~/Desktop/sqlite_examples/*nuplot.png"
-#without the quotes 
+#without the quotes the wildcard gets expanded before entering the script and you only cp one file to the server
