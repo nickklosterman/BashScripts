@@ -142,12 +142,7 @@ function GivePageReturnPrice()
 function GivePageReturnPercentOffMSRP()
 {
     OutputText=`grep "<title>" ${1} |  sed 's/.* - //' | sed 's/%.*//' `
-# or could use the tag stripping command of sed 's/<[^>]*>//g'                                                                                         
-# sed 's/.*: //' -> remove website prefix                                                                                                              
-# grep "<title>" /home/nicolae/index.html.1 | sed 's/.*: //' -> obtain main info w/o website prefix. but has trailling </title> tag                    
-# grep "<title>" /home/nicolae/index.html.1 | sed 's/.*: //' | sed 's/.* - //' | sed 's/%.*//' -> obtain percent off                                   
-# grep "<title>" /home/nicolae/index.html.1 | sed 's/.*: //' | sed 's/.* - \$//' | sed 's/- .*//' ->obtain price w/o dollar sign --this worked in the terminal but in the script I had to put the $ in [\$]                      
-# grep "<title>" /home/nicolae/index.html.1 | sed 's/.*: //' | sed 's/ - \$.*//' -> obtain  product description                                        
+# or could use the tag stripping command of sed 's/<[^>]*>//g'    
     echo ${OutputText}
 }
 
@@ -162,7 +157,6 @@ function GiveWebsiteAndDatabaseReturnWebsiteCodeFromDatabase()
 {
     Website=${1}
     Database=${2}
-
 }
 
 function GivePageAndWebsiteReturnImage()
@@ -187,10 +181,7 @@ function GivePageReturnTotalQuantity()
 
 function GivePageReturnQuantityRemaining()
 {
-#echo "22"
     RemainingQuantity=`grep total_qty_bar.set_data\( ${1} | sed 's/.*(//' | sed 's/,.*//' `
-#echo "33"
-#printf " GivePageReturnQuantityRemaining()"
     echo ${RemainingQuantity}
 }
 
@@ -222,24 +213,16 @@ function GivePageReturnDurationOfDealInMinutes()
 function GiveSecondsReturnMinutesAndSeconds()
 {
     input=${1}
-    echo ${1}
 #YOU WEREN"T QUOTING YOUR VARIABLE! THAT IS WHY THIS WAS FAILING
 #    if [ ${input} == "\r" ] # \n check if null with -z ${input}
-    if [ "${1}" == "" ] # \n check if null with -z ${input}
+    if [ "${input}" == "" ] # \n check if null with -z ${input}
     then 
 	echo "Null time"
 	input=99999
     fi
     let "minutes = ${1} / 60"
     let "seconds = ${1} % 60 "
-#    echo ${minutes} ${seconds}
-    if [ ${seconds} -lt 10 ];
-    then 
-	echo ${minutes}:0${seconds}
-    else
-	echo ${minutes}:${seconds} 
-#FML the seconds need to be padded with zeros--well I suppose this is one way to do it
-    fi
+    printf "%d:%02d" ${minutes} ${seconds}
 }
 
 #Input: webpage file
@@ -270,29 +253,30 @@ function GiveTimeReturnDealEndTime()
     echo "Emptyfornow"
 }
 
-function GiveWebPageKeywordDatabaseTablethenNotify()
+function GiveProductKeywordDatabaseTablethenNotify()
 {
-    Database=${1}
-    TableName=${2}
+    Product=${1}
+    Database=${2}
+    TableName=${3}
     sqlite3 ${Database} "select * from ${TableName}" | while read databaserecords; do
 	echo $databaserecords
-Array=($(echo "${databaserecords}" | sed 's/|/ /g'))
-keyword=${Array[0]} #` cut -d "|" -f 1 `
-EmailTextAddress=${Array[1]} #cut -d "|" -f 1 `
+	Array=($(echo "${databaserecords}" | sed 's/|/ /g'))
+	keyword=${Array[0]} #` cut -d "|" -f 1 `
+	EmailTextAddress=${Array[1]} #cut -d "|" -f 1 `
 
-if grep -q "${keyword}" <<<${1}
-then
-echo "We have a match"
-fi
+	if grep -q "${keyword}" <<<"${Product}"
+	then
+	    echo "We have a match"
+bash SendNotice ${EmailTextAddress} ${Product} 
+#perl  sendEmail -f inkydinky@djinnius.com -t 5079909052@tmomail.net -u 'Subject line' -m 'Message Body' -s mail.djinnius.com:587 -xu user -xp password
+	fi
     done
-    
 }
 
-function GiveWebPageKeywordTextEmailListFilethenNotify()
+function GiveProductKeywordTextEmailListFilethenNotify()
 {
     while read keyword phonenumber email
     do 
-
 	if  grep -q "${keyword}" <<<${1}   # we use the -q since we just want the exit code
 	then 
 	    echo "We have a match at ${Match}"
@@ -330,7 +314,6 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	if [ "${SteepAndCheap}" != "${SteepAndCheapTemp}" ]
 	then
 	    echo ${SteepAndCheap} 
-#	GiveWebPageKeywordTextEmailListFilethenNotify ${SteepAndCheapPage} "${Datafile}"
 	    GiveWebPageKeywordTextEmailListFilethenNotify "${SteepAndCheap}" "${Datafile}"
 	    SteepAndCheapTemp=`echo ${SteepAndCheap}`
 	fi
