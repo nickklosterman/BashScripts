@@ -1,10 +1,16 @@
 #!/bin/bash
 ls *_by_* > DeviantArtistHandleList.txt
-#cat DeviantArtistHandleList.txt
-#echo  "0099"
-sed 's/^.*_by_//' DeviantArtistHandleList.txt | sed 's/-.*//' | sed 's/\..*//' > Handles.txt
+
+sed 's/^.*_by_//;s/-.*//;s/\..*//' DeviantArtistHandleList.txt > Handles.txt
+
 sort -d Handles.txt | uniq -c | sort > DeviantArtHandlesCount.txt
 
-#uniq OutputHandle.txt
-#echo "00999"c
+FilesArray=( DeviantArtistHandleList.txt Handles.txt )
+for item in "${FilesArray[@]}"
+do
+    if [ -e "$item"]
+    then
+	rm $item
+    fi
+done
 cat DeviantArtHandlesCount.txt

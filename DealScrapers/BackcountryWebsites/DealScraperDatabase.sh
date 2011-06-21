@@ -33,8 +33,10 @@ function checkdiskspace()
     Output=0    
 
     case $BytesLetter in
+	"")
+	    Output=0;; #no letter is displayed when there is 0 space left
 	"K")
-	    Output=0;;
+	    Output=0;; #assumes need more than a couple kilobytes :)
 	"M")
 	    Output=1
             if [ $digits -lt  $diskspacelimit ]
