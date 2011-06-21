@@ -256,24 +256,41 @@ function GiveTimeReturnDealEndTime()
 function GiveProductKeywordDatabaseTablethenNotify()
 {
     Product=${1}
-    Database=${2}
-    TableName=${3}
-    sqlite3 ${Database} "select * from ${TableName}" | while read databaserecords; do
-	echo $databaserecords
-	Array=($(echo "${databaserecords}" | sed 's/|/ /g'))
-	keyword=${Array[0]} #` cut -d "|" -f 1 `
-	EmailTextAddress=${Array[1]} #cut -d "|" -f 1 `
+    MySQLDatabase=${2}
+    MySQLTableName=${3}
 
+    MySQLHost="mysql.server272.com"
+    MySQLPort="3306"
+    MySQLDatabase="djinnius_BackCountryAlerts"
+    MySQLTableName="SearchTermsAndContactAddress"
+    MySQLUser="BCA"
+    MySQLPassword="backcountryalerts"
+    mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --execute="select * from ${MySQLTableName}" --silent --skip-column-names | while read databaserecords; do
+#    sqlite3 ${Database} "select * from ${TableName}" | while read databaserecords; do
+#	echo $databaserecords
+	Array=($(echo "${databaserecords}" )) # the -s option for mysql suppresse the boxed output # this needed for sqlite3| sed 's/|/ /g'))
+	Primary_Key=${Array[0]}
+	keyword=${Array[1]} #` cut -d "|" -f 1 `
+	EmailTextAddress=${Array[2]} #cut -d "|" -f 1 `
+#I need a way to keep track if a certain product has been sent all ready to a specific address and check so I don't send duplicates out each time.
 	if grep -q "${keyword}" <<<"${Product}"
 	then
 	    echo "We have a match"
-bash SendNotice ${EmailTextAddress} ${Product} 
+	    echo "Addr:${EmailTextAddress}"
+	    SendNotice ${EmailTextAddress} "${Product}" 
 #perl  sendEmail -f inkydinky@djinnius.com -t 5079909052@tmomail.net -u 'Subject line' -m 'Message Body' -s mail.djinnius.com:587 -xu user -xp password
 	fi
     done
 }
+function SendNotice()
+{
+Address=${1}
+Message=${2}
+echo "Addr:${Address} -Msg:${Message}"
+perl /home/nicolae/Downloads/sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address}  -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry
+}
 
-function GiveProductKeywordTextEmailListFilethenNotify()
+function GiveProductKeywordTextEmailListFilethenNotifyDEPRECATED()
 {
     while read keyword phonenumber email
     do 
@@ -311,10 +328,12 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 
 	SteepAndCheap=$(GivePageReturnText ${SteepAndCheapPage} )
 #if there are changes to the item description then we update and print the new info
+	SCTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${SteepAndCheapPage})
 	if [ "${SteepAndCheap}" != "${SteepAndCheapTemp}" ]
 	then
 	    echo ${SteepAndCheap} 
-	    GiveWebPageKeywordTextEmailListFilethenNotify "${SteepAndCheap}" "${Datafile}"
+#	    GiveWebPageKeywordTextEmailListFilethenNotify "${SteepAndCheap}" "${Datafile}"
+	    GiveProductKeywordDatabaseTablethenNotify ${SteepAndCheap}
 	    SteepAndCheapTemp=`echo ${SteepAndCheap}`
 	fi
     else
@@ -326,15 +345,12 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
     then
 	WhiskeyMilitia=$(GivePageReturnText ${WhiskeyMilitiaPage} )
 
-
+	WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${WhiskeyMilitiaPage})
 	if [ "${WhiskeyMilitia}" != "${WhiskeyMilitiaTemp}" ]
 	then
 	    echo ${WhiskeyMilitia}
 #	GiveWebPageKeywordTextEmailListFilethenNotify   ${WhiskeyMilitiaPage} "${Datafile}"
-	    GiveWebPageKeywordTextEmailListFilethenNotify  "${WhiskeyMilitia}" "${Datafile}"
-
-
-
+	    GiveProductKeywordDatabaseTablethenNotify  "${WhiskeyMilitia}" 
 	    WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
 	fi
     else
@@ -347,14 +363,12 @@ itia webpage"
     then
 	Bonktown=$(GivePageReturnText ${BonktownPage} )
 
-
+	BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
 	if [ "${Bonktown}" != "${BonktownTemp}" ]
 	then
 	    echo ${Bonktown}
 #	GiveWebPageKeywordTextEmailListFilethenNotify ${BonktownPage} "${Datafile}"
-	    GiveWebPageKeywordTextEmailListFilethenNotify "${Bonktown}" "${Datafile}"
-
-
+	    GiveProductKeywordDatabaseTablethenNotify "${Bonktown}" 
 	    BonktownTemp=`echo ${Bonktown}`
 	fi
     else
@@ -366,44 +380,45 @@ bpage"
     if [ "$ChainlovePage" != "Error" ]
     then
 	Chainlove=$(GivePageReturnText ${ChainlovePage} )
-
+	CLTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${ChainlovePage})
 	if [ "${Chainlove}" != "${ChainloveTemp}" ]
 	then
 	    echo ${Chainlove}
 #	GiveWebPageKeywordTextEmailListFilethenNotify ${ChainlovePage} "${Datafile}"
-	    GiveWebPageKeywordTextEmailListFilethenNotify "${Chainlove}" "${Datafile}"
-
-
+	    GiveProductKeywordDatabaseTablethenNotify "${Chainlove}"
 	    ChainloveTemp=`echo ${Chainlove}`
 	fi
+    else
+        echo "Wget didn't return a 200 OK response when getting the Chainlove webpage"
+        CLTimeLeftSeconds=120
+    fi
 
-
-	SleepTime=${SCTimeLeftSeconds}
-	NextDeal="SteepAndCheap"
-	if [ ${WMTimeLeftSeconds} -lt ${SleepTime} ]
-	then
-	    SleepTime=${WMTimeLeftSeconds}
-	    NextDeal="WhiskeyMilitia"
-	fi
-	if [ ${BTTimeLeftSeconds} -lt ${SleepTime} ] 
-	then
-	    SleepTime=${BTTimeLeftSeconds}
-	    NextDeal="Bonktown"
-	fi
-	if [ ${CLTimeLeftSeconds} -lt ${SleepTime} ]
-	then
-	    SleepTime=${CLTimeLeftSeconds} 
-	    NextDeal="Chainlove"
-	fi
+    SleepTime=${SCTimeLeftSeconds}
+    NextDeal="SteepAndCheap"
+    if [ ${WMTimeLeftSeconds} -lt ${SleepTime} ]
+    then
+	SleepTime=${WMTimeLeftSeconds}
+	NextDeal="WhiskeyMilitia"
+    fi
+    if [ ${BTTimeLeftSeconds} -lt ${SleepTime} ] 
+    then
+	SleepTime=${BTTimeLeftSeconds}
+	NextDeal="Bonktown"
+    fi
+    if [ ${CLTimeLeftSeconds} -lt ${SleepTime} ]
+    then
+	SleepTime=${CLTimeLeftSeconds} 
+	NextDeal="Chainlove"
+    fi
 
 #it'd be nice if we could print the time ticking down and then refresh with the new deals. use "print" maybe?
 
-	SleepTimeMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SleepTime})
-	echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes from" `date +%T `
-	sleep ${SleepTime}s
-	TmpDiskSpaceStatus=$(checktmpdiskspace )
-	HomeDiskSpaceStatus=$(checkhomediskspace )
-	NetStatus=$(checknet )
+    SleepTimeMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SleepTime})
+    echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes from" `date +%T `
+    sleep ${SleepTime}s
+    TmpDiskSpaceStatus=$(checktmpdiskspace )
+    HomeDiskSpaceStatus=$(checkhomediskspace )
+    NetStatus=$(checknet )
 done
 
 if [ "$TmpDiskSpaceStatus" -ne 1 ]
