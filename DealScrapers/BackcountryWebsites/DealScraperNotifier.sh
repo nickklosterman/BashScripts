@@ -54,8 +54,7 @@ function checkhomediskspace()
 
 function on_exit()
 {
-#remove temporary files                                                         
-    WebpageArray=( "/tmp/SteepAndCheapPage" "/tmp/WhiskeyMilitiaPage" "/tmp/BonktownPage" "/tmp/ChainlovePage" )
+#remove temporary files                                                             WebpageArray=( "/tmp/SteepAndCheapPage" "/tmp/WhiskeyMilitiaPage" "/tmp/BonktownPage" "/tmp/ChainlovePage" )
     for item in "${WebpageArray[@]}"
     do
         if [ -e  "${item}" ]
@@ -98,66 +97,12 @@ function GiveWebsiteCodeGetWebpageTempFile()
     fi
 }
 
-function GetPageReturnFile()
-{
-#this function gets a webpage and echoes the name of the file that holds the desired text
-    Webpage='/tmp/WebsitePage' #`mktemp`
-    wget ${1} -O ${Webpage} -q
-    echo ${Webpage}
-}
-
 function GivePageReturnText()
 {
     OutputText=`grep "<title>" ${1} | sed 's/<title>//' | sed 's/<\/title>//' `
     echo ${OutputText}
 }
 
-function GivePageReturnProductDescription()
-{
-#for the possessive form I need to replace the single quote with double single quotes
-
-#    OutputText=`grep "<title>" ${1} |  sed 's/\<title\>(Steep and Cheap:|WhiskeyMilitia.com:|BonkTown.com:|Chainlove.com:) //' | sed 's/ - \$.*//' | sed 's/\x27/\x27\x27/g' ` #not sure why this didn't work
-
-    OutputText=`grep "<title>" ${1} |  sed -n 's/[^:]*://p' | sed 's/ - \$.*//' | sed 's/\x27/\x27\x27/g' ` #this was causing problems with descriptions that had multiple instances of the colon i.e. there was a colon in the description that caused the front part  of the description to be cut off.
-#Explanation: replace everything up to the colon that isn't a colon with nothing, print the rest
-
-#    OutputText=`grep "<title>" ${1} |  sed 's/.*: //' | sed 's/ - \$.*//' | sed 's/\x27/\x27\x27/g' ` #this was causing problems with descriptions that had multiple instances of the colon i.e. there was a colon in the description that caused the front part  of the description to be cut off.
-
-# tr -d "'" ` this worked but I wanted to still have the apostrophe in the output
-#sed 's/"'"/\\"'"/' ` this didn't work as it kept giving an error ->unexpected EOF while looking for matching `''
- #the database was chocking on apostrophes in the variable as the single quote signals the end of a command so needs to be preceded by another single quote to escape it
-# then the problem arose as bash being ended by the single quote we put in there. other bash/sed solutions to this
-# for it to work you had to create a quote variable "'" and then sub that in to a double quoted sed expression sed "s/$quote/stuff/g" inputfile. The above method seemed more straightforward using the hex character codes
-#also check out the singleapostrophetodoubleapostrophetest.sh file I wrote
-
-    echo ${OutputText}
-}
-
-function GivePageReturnPrice()
-{
-    OutputText=`grep "<title>" ${1} | sed 's/.*[\$]//' | sed 's/- .*//' `
-    echo ${OutputText}
-}
-
-function GivePageReturnPercentOffMSRP()
-{
-    OutputText=`grep "<title>" ${1} |  sed 's/.* - //' | sed 's/%.*//' `
-# or could use the tag stripping command of sed 's/<[^>]*>//g'    
-    echo ${OutputText}
-}
-
-function GiveDatabaseTablenameDataEnterIntoDatabase()
-{
-    sqlite3 ${1} "insert into ${2} (websiteCode, product, price, percentOffMSRP, quantity, dealdurationinminutes) values ( '${3}', '${4}', '${5}', '${6}', '${7}', '${8}' );"
-}
-
-
-
-function GiveWebsiteAndDatabaseReturnWebsiteCodeFromDatabase()
-{
-    Website=${1}
-    Database=${2}
-}
 
 function GivePageAndWebsiteReturnImage()
 {
@@ -177,37 +122,6 @@ function GivePageReturnTotalQuantity()
 {
     TotalQuantity=`grep total_qty_bar.set_data\( ${1} | sed 's/.*,//;s/[)].*//' `
     echo ${TotalQuantity}
-}
-
-function GivePageReturnQuantityRemaining()
-{
-    RemainingQuantity=`grep total_qty_bar.set_data\( ${1} | sed 's/.*(//' | sed 's/,.*//' `
-    echo ${RemainingQuantity}
-}
-
-function GivePageReturnQuantityRemainingOfTotalQuantity()
-{
-    QuantityRemainingOfTotalQuantity=`grep total_qty_bar.set_data\( ${1} | sed 's/.*(//' | sed 's/).*/ left/' | sed 's/,/ of /'  `
-    echo ${QuantityRemainingOfTotalQuantity}
-}
-
-function GivePageReturnTimeRemainingOfTotalTime()
-{
-    TimeRemainingOfTotalTime=`grep setupWMTimerBar ${1} | sed 's/.*(//' | sed 's/).*/ total/' | sed 's/,/ seconds left of /'  `
-    echo ${TimeRemainingOfTotalTime}
-}
-
-function GivePageReturnDurationOfDealInMinutes()
-{
-    DurationOfDeal=` grep "Time Remaining:" ${1} -A 4 | grep bar_full | sed 's/<[^>]*>//g' `
-    if [ "${DurationOfDeal}" == "" ]
-    then
-#then its teh alternate time form
-	DurationOfDeal=`grep "total_time" ${1} | sed 's/<[^>]*//g; s/[^0-9]//g' `
-#first we grep for total_time then remove html tags then remove everything but the numbers
-#to just capture all numbers add a * after the pattern
-    fi
-    echo ${DurationOfDeal}
 }
 
 function GiveSecondsReturnMinutesAndSeconds()
@@ -248,17 +162,13 @@ function GivePageReturnTimeRemainingInSeconds()
     echo ${TimeRemainingInSeconds}
 }
 
-function GiveTimeReturnDealEndTime()
-{
-    echo "Emptyfornow"
-}
 
 function GiveProductKeywordDatabaseTablethenNotify()
 {
     Product=${1}
     MySQLDatabase=${2}
     MySQLTableName=${3}
-
+    ImageFile=${4}
     MySQLHost="mysql.server272.com"
     MySQLPort="3306"
     MySQLDatabase="djinnius_BackCountryAlerts"
@@ -268,26 +178,35 @@ function GiveProductKeywordDatabaseTablethenNotify()
     mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --execute="select * from ${MySQLTableName}" --silent --skip-column-names | while read databaserecords; do
 #    sqlite3 ${Database} "select * from ${TableName}" | while read databaserecords; do
 #	echo $databaserecords
-	Array=($(echo "${databaserecords}" )) # the -s option for mysql suppresse the boxed output # this needed for sqlite3| sed 's/|/ /g'))
+	Array=($(echo "${databaserecords}" )) # the -s option for mysql suppresse the boxed output # this needed for sqlite3 --> | sed 's/|/ /g'))
 	Primary_Key=${Array[0]}
 	keyword=${Array[1]} #` cut -d "|" -f 1 `
 	EmailTextAddress=${Array[2]} #cut -d "|" -f 1 `
+	ImageAttachment=${Array[3]}
 #I need a way to keep track if a certain product has been sent all ready to a specific address and check so I don't send duplicates out each time.
 	if grep -q "${keyword}" <<<"${Product}"
 	then
 	    echo "We have a match"
 	    echo "Addr:${EmailTextAddress}"
-	    SendNotice ${EmailTextAddress} "${Product}" 
+	    SendNotice ${EmailTextAddress} "${Product}" $ImageAttachment "${ImageFile}"
 #perl  sendEmail -f inkydinky@djinnius.com -t 5079909052@tmomail.net -u 'Subject line' -m 'Message Body' -s mail.djinnius.com:587 -xu user -xp password
 	fi
     done
 }
+
 function SendNotice()
 {
 Address=${1}
 Message=${2}
-echo "Addr:${Address} -Msg:${Message}"
-perl /home/nicolae/Downloads/sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address}  -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry
+ImageAttachment=${3}
+WebPage="${4}"
+#echo "Addr:${Address} -Msg:${Message}"
+if [ ${ImageAttachment} -eq 0 ]
+then
+    perl /home/nicolae/Downloads/sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address}  -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry
+else 
+    perl /home/nicolae/Downloads/sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address}  -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry -a 
+fi
 }
 
 function GiveProductKeywordTextEmailListFilethenNotifyDEPRECATED()
@@ -316,7 +235,7 @@ BonktownTemp=""
 ChainloveTemp=""
 trap on_exit SIGINT
 
-Datafile='Data.txt'
+#Datafile='Data.txt'
 
 TmpDiskSpaceStatus=$( checktmpdiskspace )
 HomeDiskSpaceStatus=$( checkhomediskspace )
@@ -332,8 +251,8 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	if [ "${SteepAndCheap}" != "${SteepAndCheapTemp}" ]
 	then
 	    echo ${SteepAndCheap} 
-#	    GiveWebPageKeywordTextEmailListFilethenNotify "${SteepAndCheap}" "${Datafile}"
-	    GiveProductKeywordDatabaseTablethenNotify ${SteepAndCheap}
+	    SteepAndCheapImage=$(GivePageAndWebsiteReturnImage ${SteepAndCheapPage} http://www.steepandcheap.com )
+	    GiveProductKeywordDatabaseTablethenNotify ${SteepAndCheap} ${SteepAndCheapImage} 
 	    SteepAndCheapTemp=`echo ${SteepAndCheap}`
 	fi
     else
@@ -349,8 +268,8 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	if [ "${WhiskeyMilitia}" != "${WhiskeyMilitiaTemp}" ]
 	then
 	    echo ${WhiskeyMilitia}
-#	GiveWebPageKeywordTextEmailListFilethenNotify   ${WhiskeyMilitiaPage} "${Datafile}"
-	    GiveProductKeywordDatabaseTablethenNotify  "${WhiskeyMilitia}" 
+	    WhiskeyMilitiaImage=$(GivePageAndWebsiteReturnImage ${WhiskeyMilitiaPage} http://www.whiskeymilitia.com )
+	    GiveProductKeywordDatabaseTablethenNotify  "${WhiskeyMilitia}"  ${WhiskeyMilitiaImage} 
 	    WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
 	fi
     else
@@ -367,8 +286,8 @@ itia webpage"
 	if [ "${Bonktown}" != "${BonktownTemp}" ]
 	then
 	    echo ${Bonktown}
-#	GiveWebPageKeywordTextEmailListFilethenNotify ${BonktownPage} "${Datafile}"
-	    GiveProductKeywordDatabaseTablethenNotify "${Bonktown}" 
+BonktownImage=$(GivePageAndWebsiteReturnImage ${BonktownPage} http://www.bonktown.com )
+	    GiveProductKeywordDatabaseTablethenNotify "${Bonktown}" ${BonktownImage} 
 	    BonktownTemp=`echo ${Bonktown}`
 	fi
     else
@@ -384,8 +303,8 @@ bpage"
 	if [ "${Chainlove}" != "${ChainloveTemp}" ]
 	then
 	    echo ${Chainlove}
-#	GiveWebPageKeywordTextEmailListFilethenNotify ${ChainlovePage} "${Datafile}"
-	    GiveProductKeywordDatabaseTablethenNotify "${Chainlove}"
+	    ChainloveImage=$(GivePageAndWebsiteReturnImage ${ChainlovePage} http://www.chainlove.com )
+	    GiveProductKeywordDatabaseTablethenNotify "${Chainlove}" ${ChainloveImage} 
 	    ChainloveTemp=`echo ${Chainlove}`
 	fi
     else

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#I think this version is simplified from the previous version. Before I had a separate function for the mature stuff but here I use the thumbnail address which I was keying off for the mature content for all the images. 
+#I think this version is simplified from the previous version. Before I had a separate function for the mature stuff but here I use the thumbnail address (which I was keying off for the mature content) for all the images. 
 GetFullSizeImages=0
 GetLargeImages=0
 
@@ -63,7 +63,9 @@ function downloadnoclobber ()
     done
 }
 
-
+#####################
+# BEGIN MAIN SCRIPT #
+#####################X
 Number_Of_Expected_Args=1
 if [ $# -lt $Number_Of_Expected_Args ]
 then 
@@ -84,8 +86,9 @@ else
 #without the trailing / it saves the file as gallery instead of index.html
 	wget -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt  http://${1}.deviantart.com/gallery/ #-O $OutputFile
 #check if the gallery index has additional pages.
-	NextPageCheck=$(grep "gallery/?offset=" index.html | grep "Next Page</a>" )
-	
+	NextPageCheck=$(grep "gallery/?offset=" index.html | grep "Next" )
+#2011.06.21 appears they no longer put "next page" they just do next. grep "Next Page</a>" )
+#echo "$NextPageCheck"	
 #grab all pages of the gallery
 	while [ "$NextPageCheck" != "" ]
 	do 
@@ -94,7 +97,7 @@ else
 	    let "offset=${offsetcounter} * 24"
 	    echo "Getting gallery index with offset of ${offset}"
 	    wget -U Mozilla http://${1}.deviantart.com/gallery/?offset=${offset} 
-	    NextPageCheck=$(grep "gallery/?offset=" index.html?offset=${offset}  | grep "Next Page</a>" )
+	    NextPageCheck=$(grep "gallery/?offset=" index.html?offset=${offset}  | grep "Next") # Page</a>" )
 	    cat index.html?offset=${offset} >> index.html
 	done
 	echo "Done getting all gallery pages."
@@ -103,37 +106,38 @@ else
 	Super_FullImg=$( grep super_fullimg index.html | sed 's/.*super_fullimg="//' | sed 's/" .*//' )
 	Super_Img=$( grep super_img index.html | sed 's/.*super_img="//' | sed 's/" .*//' )
 
-if [ $GetFullSizeImages -eq 1 ]
-then 
+	if [ $GetFullSizeImages -eq 1 ]
+	then 
 
-	HrefAddress=$( grep "deviantart.com/art/"  index.html | sed 's/.*<a href="//' | sed 's/" class=.*//' )
-	HrefPageName=$( grep "deviantart.com/art/"  index.html | sed 's/.*<a href="//' | sed 's/" class=.*//' | sed 's/.*art\"///' )
-	DeletePageList=${HrefPageName}
+	    HrefAddress=$( grep "deviantart.com/art/"  index.html | sed 's/.*<a href="//' | sed 's/" class=.*//' )
+	    HrefPageName=$( grep "deviantart.com/art/"  index.html | sed 's/.*<a href="//' | sed 's/" class=.*//' | sed 's/.*art\"///' )
+	    DeletePageList=${HrefPageName}
 #first download the pages of each image, then attempt to download the full image.  There is no other way that I know of to guarantee getting the fullsize image without visiting the individual webpage and checking if there is a "Download Image" button present. Otherwise simply going off the gallery webpage might only get you the "super_fullimg" when there is a larger version available.	
 
-	downloadIndividualPages "$HrefAddress" #need the quotes otherwise only the first element is sent
-	downloadFullImageFromFile "$HrefPageName"	
-	echo "Begin deleting files:"
-	echo $DeletePageList
-	removeIndividualPages "$DeletePageList"
-	echo "End deleting Files"
-	echo "Done compiling fullimg and img lists."
-fi
-#Since the full images are first priority, we now try to get the fullimg then img listed in the gallery index file (as they are of lower res)	
-if [ $GetLargeImages -eq 1 ]
-then 
-	if [ "$Super_FullImg" != "" ]
-	then
-#	    downloadallowingclobber "$Super_FullImg" 
-	    downloadnoclobber "$Super_FullImg" 
+	    downloadIndividualPages "$HrefAddress" #need the quotes otherwise only the first element is sent
+	    downloadFullImageFromFile "$HrefPageName"	
+	    echo "Begin deleting files:"
+	    echo $DeletePageList
+	    removeIndividualPages "$DeletePageList"
+	    echo "End deleting Files"
+	    echo "Done compiling fullimg and img lists."
 	fi
-fi	
+#Since the full images are first priority, we now try to get the fullimg then img listed in the gallery index file (as they are of lower res)	
+	if [ $GetLargeImages -eq 1 ]
+	then 
+	    if [ "$Super_FullImg" != "" ]
+	    then
+#	    downloadallowingclobber "$Super_FullImg" 
+		downloadnoclobber "$Super_FullImg" 
+	    fi
+	fi	
 
 	if [ "$Super_Img" != "" ]
 	then 
-		downloadnoclobber "$Super_Img" 
+	    downloadnoclobber "$Super_Img" 
 	fi
-	rm `ls | grep -v '\.'` #use this to rm files since my above comd wasn't working
+# ??not sure this works or what it is supposed to do	rm `ls | grep -v '\.'` #use this to rm files since my above comd wasn't working
+	rm index.html*
 	cd ..
 	shift 
 #this shifts the input parameters over one position.  pg 38 of bash guide. http://tldp.org/LDP/LG/issue25/dearman.html
