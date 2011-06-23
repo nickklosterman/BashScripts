@@ -1,6 +1,8 @@
 #!/bin/bash
 
 #I think this version is simplified from the previous version. Before I had a separate function for the mature stuff but here I use the thumbnail address (which I was keying off for the mature content) for all the images. 
+#NOTE::you can't be logged in and view the source and go off that bc diff pages are served to you when you are logged in vs this script which isn't logged in
+#2011.06.23 It appears that DA wised up and now you can't just chop the 150 from the url to get the mature version. Only the thumbnail is accessible without brutefocring the URL. Which we'll be doing.
 GetFullSizeImages=0
 GetLargeImages=0
 
@@ -105,6 +107,7 @@ else
 #compile arrays of the links to the fullimg, img, address of webpage, webpage file	
 	Super_FullImg=$( grep super_fullimg index.html | sed 's/.*super_fullimg="//' | sed 's/" .*//' )
 	Super_Img=$( grep super_img index.html | sed 's/.*super_img="//' | sed 's/" .*//' )
+	DataSrc=$( grep data-src index.html | sed 's/.*data-src="//;s/".*//' )
 
 	if [ $GetFullSizeImages -eq 1 ]
 	then 
@@ -136,8 +139,14 @@ else
 	then 
 	    downloadnoclobber "$Super_Img" 
 	fi
+
+	if [ "$DataSrc" != "" ]
+	then
+	    downloadnoclobber "$DataSrc" #this catches all the ones that don't have superimages
+#echo "$DataSrc"
+	fi
 # ??not sure this works or what it is supposed to do	rm `ls | grep -v '\.'` #use this to rm files since my above comd wasn't working
-	rm index.html*
+	rm index.html?offset*
 	cd ..
 	shift 
 #this shifts the input parameters over one position.  pg 38 of bash guide. http://tldp.org/LDP/LG/issue25/dearman.html
