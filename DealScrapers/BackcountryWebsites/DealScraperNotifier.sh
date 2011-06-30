@@ -113,7 +113,7 @@ function GivePageAndWebsiteReturnImage()
 	"http://www.whiskeymilitia.com"|"http://www.chainlove.com"|"http://www.bonktown.com")
 	    OutputText=`grep "mainimage" ${Webpage} | sed 's/<img name=\"mainimage\" src=\"//' | sed 's/".*//' `;;
     esac
-    Image='/tmp/ProductImage' #`mktemp`
+    Image='/tmp/ProductImage.jpg' #`mktemp`
     wget ${OutputText} -O ${Image} -q
     echo ${Image}
 }
@@ -166,9 +166,10 @@ function GivePageReturnTimeRemainingInSeconds()
 function GiveProductKeywordDatabaseTablethenNotify()
 {
     Product=${1}
-    MySQLDatabase=${2}
-    MySQLTableName=${3}
-    ImageFile=${4}
+#    MySQLDatabase=${2}
+ #   MySQLTableName=${3}
+    ImageFile=${2}
+    #echo "${ImageFile}"
     MySQLHost="mysql.server272.com"
     MySQLPort="3306"
     MySQLDatabase="djinnius_BackCountryAlerts"
@@ -186,7 +187,7 @@ function GiveProductKeywordDatabaseTablethenNotify()
 #I need a way to keep track if a certain product has been sent all ready to a specific address and check so I don't send duplicates out each time.
 	if grep -q "${keyword}" <<<"${Product}"
 	then
-	    echo "We have a match"
+	    echo "We have a match for ${keyword}"
 	    echo "Addr:${EmailTextAddress}"
 	    SendNotice ${EmailTextAddress} "${Product}" $ImageAttachment "${ImageFile}"
 #perl  sendEmail -f inkydinky@djinnius.com -t 5079909052@tmomail.net -u 'Subject line' -m 'Message Body' -s mail.djinnius.com:587 -xu user -xp password
@@ -198,14 +199,19 @@ function SendNotice()
 {
 Address=${1}
 Message=${2}
-ImageAttachment=${3}
-WebPage="${4}"
+ImageAttachmentBoolean=${3}
+ImageFile="${4}"
+
+if [ ${ImageAttachmentBoolean} == "NULL" ]
+then 
+ImageAttachmentBoolean=0
+fi
 #echo "Addr:${Address} -Msg:${Message}"
-if [ ${ImageAttachment} -eq 0 ]
+if [ ${ImageAttachmentBoolean} -eq 0 ]
 then
     perl /home/nicolae/Downloads/sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address}  -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry
 else 
-    perl /home/nicolae/Downloads/sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address}  -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry -a 
+    perl /home/nicolae/Downloads/sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address} -u 'A Matching Deal from BackCountry' -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry -a "${ImageFile}"
 fi
 }
 

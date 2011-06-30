@@ -7,9 +7,9 @@ die('Could not connect:'.mysql_error());
 
 mysql_select_db("djinnius_BackCountryAlerts",$con);
 
-$sql="INSERT INTO SearchTermsAndContactAddress (searchterms, contactaddress)
+$sql="INSERT INTO SearchTermsAndContactAddress (searchterms, contactaddress, ImageAttachment)
 VALUES
-('$_POST[SearchTerms]','$_POST[ContactAddress]')";
+('$_POST[SearchTerms]','$_POST[ContactAddress]', '$_POST[ImageAttachment]')";
 
 if (!mysql_query($sql,$con))
 {
