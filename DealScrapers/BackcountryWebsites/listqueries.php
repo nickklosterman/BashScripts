@@ -7,7 +7,7 @@ die('Could not connect:'.mysql_error());
 
 mysql_select_db("djinnius_BackCountryAlerts",$con);
 
-$sql="SELECT * FROM SearchTermsAndContactAddress WHERE contactaddress = ('$_POST[SearchAddress]')";
+$sql="SELECT * FROM SearchTermsAndContactAddress order by prim_key desc";
 
 if (!mysql_query($sql,$con))
 {

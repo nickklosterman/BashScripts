@@ -42,8 +42,14 @@ function GiveWebsiteCodeGetWebpageTempFile()
         3)
             Webpage='/tmp/ChainlovePage';;
     esac
-    wget ${1} -O ${Webpage} -q
-    echo ${Webpage}
+    wget ${1} -O ${Webpage} 2>&1 | grep -q "200 OK"
+    WgetExitStatus=$?
+    if [ $WgetExitStatus -eq 0 ]
+    then
+        echo ${Webpage}
+    else
+        echo "Error"
+    fi
 }
 
 function GivePageReturnText()
@@ -61,7 +67,7 @@ function GivePageAndWebsiteReturnImage()
 	"http://www.whiskeymilitia.com"|"http://www.chainlove.com"|"http://www.bonktown.com")
 	    OutputText=`grep "mainimage" ${Webpage} | sed 's/<img name=\"mainimage\" src=\"//' | sed 's/".*//' `;;
     esac
-    Image='/tmp/ProductImage' #`mktemp`
+    Image='/tmp/ProductImage' 
     wget ${OutputText} -O ${Image} -q
     echo ${Image}
 }
@@ -131,77 +137,77 @@ function GivePageReturnTimeRemainingInSeconds()
 function GiveTimeInSecondsReturnDealEndTime()
 {
 #this was found here:http://www.askdavetaylor.com/date_math_in_linux_shell_script.html about 2/3 of the way down you'll see a post by marcus that is where it came from
-NumDaysAdjust=0
-Output=`date --date @$(($(date +%s)-(3600*24*${NumDaysAdjust})+${1} )) +%T`
-echo ${Output}
+    NumDaysAdjust=0
+    Output=`date --date @$(($(date +%s)-(3600*24*${NumDaysAdjust})+${1} )) +%T`
+    echo ${Output}
 }
 
 function UploadFileToDjinniusDeals
 {
 
-bash UploadFileToDjinniusDeals.sh "nM&^%4Yu" "${1}"
+    bash UploadFileToDjinniusDeals.sh "nM&^%4Yu" "${1}"
 }
 
 function DownloadDjinniusDealsIndex
 {
-wget www.djinnius.com/Deals/index.html -O "${1}"
+    wget www.djinnius.com/Deals/index.html -O "${1}"
 }
 
 function GetTagLineNumber
 {
 
-LineNumber=`eval grep -n "${1}" ${2} | sed 's/:.*//' `
+    LineNumber=`eval grep -n "${1}" ${2} | sed 's/:.*//' `
 #without the eval the pattern to search for, which contains a set of quotes to keep it all together, wasn't returning anything
-echo $LineNumber
+    echo $LineNumber
 }
 
 function GetBeginningOfFileToLine
 {
-Output=` head -n +${1} "${2}" `
-echo "${Output}"
+    Output=` head -n +${1} "${2}" `
+    echo "${Output}"
 }
 
 function GetLineToEOF
 {
-Output=` tail -n +${1} "${2}" `
+    Output=` tail -n +${1} "${2}" `
 #could also use "sed -n 'N,$p' filename"
-echo "${Output}"
+    echo "${Output}"
 }
 
 function GetBonktownProductDescriptionBeginLineNumber
 {
-Output=$( GetTagLineNumber "\"BT Product Description Begin\"" "${1}" )
+    Output=$( GetTagLineNumber "\"BT Product Description Begin\"" "${1}" )
 }
 
 function GetBonktownProductDescriptionEndLineNumber
 {
-Output=$( GetTagLineNumber "BT Product Description End" "${1}" )
-echo "${Output}"
+    Output=$( GetTagLineNumber "BT Product Description End" "${1}" )
+    echo "${Output}"
 }
 
 function GetBonktownTableBeginLineNumber
 {
-Output=$( GetTagLineNumber "BT Table Begin" "${1}" )
-echo "${Output}"
+    Output=$( GetTagLineNumber "BT Table Begin" "${1}" )
+    echo "${Output}"
 }
 
 function GetBonktownTableEndLineNumber
 {
-Output=$( GetTagLineNumber "BT Table End" "${1}" )
-echo "${Output}"
+    Output=$( GetTagLineNumber "BT Table End" "${1}" )
+    echo "${Output}"
 }
 
 function UpdateWebpage
 {
-WebsiteCode=${1}
-ProductDescription="${2}"
-Webpage="${4}"
-TempImage="${3}"
+    WebsiteCode=${1}
+    ProductDescription="${2}"
+    Webpage="${4}"
+    TempImage="${3}"
 
-echo ${Webpage}
-Database="/home/nicolae/Desktop/sqlite_examples/test.db"
+    echo ${Webpage}
+    Database="/home/nicolae/Desktop/sqlite_examples/test.db"
 
-NumberOfRecordsToDisplay=25
+    NumberOfRecordsToDisplay=25
 #Get webpage from site --keep a local version?
     case ${WebsiteCode} in  #key off website code
 	0) 
@@ -247,67 +253,67 @@ NumberOfRecordsToDisplay=25
 
 function UploadDjinniusDealsIndex
 {
-IndexFile="/home/nicolae/Desktop/index.html"
-UploadFileToDjinniusDeals ${IndexFile}
+    IndexFile="/home/nicolae/Desktop/index.html"
+    UploadFileToDjinniusDeals ${IndexFile}
 }
 
 function UpdateTable
 {
-Webpage="${1}"
-echo "Webpage" "${1}"
-NumberOfRecordsToDisplay="${2}"
-BeginTag="${3}" 
-EndTag="${4}"
-DatabaseName="${5}"
+    Webpage="${1}"
+    echo "Webpage" "${1}"
+    NumberOfRecordsToDisplay="${2}"
+    BeginTag="${3}" 
+    EndTag="${4}"
+    DatabaseName="${5}"
 
-BeginLineNumber=$( GetTagLineNumber "${BeginTag}" "${Webpage}" )
-EndLineNumber=$( GetTagLineNumber "${EndTag}" "${Webpage}" )
-echo $BeginLineNumber $EndLineNumber
+    BeginLineNumber=$( GetTagLineNumber "${BeginTag}" "${Webpage}" )
+    EndLineNumber=$( GetTagLineNumber "${EndTag}" "${Webpage}" )
+    echo $BeginLineNumber $EndLineNumber
 
-Top=$( GetBeginningOfFileToLine ${BeginLineNumber} "${Webpage}" )
+    Top=$( GetBeginningOfFileToLine ${BeginLineNumber} "${Webpage}" )
 
-Bottom=$( GetLineToEOF ${EndLineNumber} "${Webpage}" )
+    Bottom=$( GetLineToEOF ${EndLineNumber} "${Webpage}" )
 
-QueryResults=$( GetQueryResults "${DatabaseName}" ${WebsiteCode} ${NumberOfRecordsToDisplay} )
+    QueryResults=$( GetQueryResults "${DatabaseName}" ${WebsiteCode} ${NumberOfRecordsToDisplay} )
 
-Newline="\n"
-Output="${Top}""${Newline}""${QueryResults}""${Newline}""${Bottom}"
+    Newline="\n"
+    Output="${Top}""${Newline}""${QueryResults}""${Newline}""${Bottom}"
 #could also use printf to insert the newline
-Output="${Top}
+    Output="${Top}
 ${QueryResults}
 ${Bottom}"
 
-echo "${Output}" > "${Webpage}"
+    echo "${Output}" > "${Webpage}"
 
 }
 
 function GetQueryResults
 {
-DatabaseName="${1}"
-WebsiteCode=${2}
-NumberOfRecordsToDisplay=${3}
+    DatabaseName="${1}"
+    WebsiteCode=${2}
+    NumberOfRecordsToDisplay=${3}
 
-Stuff="select product,price,percentOffMSRP,quantity,dealdurationinminutes,timeEnter from Backcountrydeals where websitecode=${WebsiteCode} order by Bkey desc limit ${NumberOfRecordsToDisplay}"
+    Stuff="select product,price,percentOffMSRP,quantity,dealdurationinminutes,timeEnter from Backcountrydeals where websitecode=${WebsiteCode} order by Bkey desc limit ${NumberOfRecordsToDisplay}"
 
 #for some reason it was having trouble expanding the quotes. To solve that i tried using eval but that seemed to not expand the variables so I had to do a two step approach.
-Output=`sqlite3 -html "${DatabaseName}" "${Stuff}" `
-echo "${Output}"
+    Output=`sqlite3 -html "${DatabaseName}" "${Stuff}" `
+    echo "${Output}"
 }
 
 function UpdateProductDescription
 {
-Webpage="${1}"
-ProductDescription="${2}"
-BeginTag="${3}" 
-EndTag="${4}"
-BeginLineNumber=$( GetTagLineNumber  "${BeginTag}" "${Webpage}" )
-EndLineNumber=$( GetTagLineNumber  "${EndTag}" "${Webpage}" )
-Top=$( GetBeginningOfFileToLine ${BeginLineNumber} "${Webpage}" )
-Bottom=$( GetLineToEOF ${EndLineNumber} "${Webpage}" )
-Output="${Top}
+    Webpage="${1}"
+    ProductDescription="${2}"
+    BeginTag="${3}" 
+    EndTag="${4}"
+    BeginLineNumber=$( GetTagLineNumber  "${BeginTag}" "${Webpage}" )
+    EndLineNumber=$( GetTagLineNumber  "${EndTag}" "${Webpage}" )
+    Top=$( GetBeginningOfFileToLine ${BeginLineNumber} "${Webpage}" )
+    Bottom=$( GetLineToEOF ${EndLineNumber} "${Webpage}" )
+    Output="${Top}
 ${ProductDescription}
 ${Bottom}"
-echo "${Output}" > "${Webpage}"
+    echo "${Output}" > "${Webpage}"
 
 }
 
@@ -326,7 +332,7 @@ BonktownImageLocation="/tmp/Bonktown.jpg"
 ChainloveImageLocation="/tmp/Chainlove.jpg"
 WebpageIndex="/home/nicolae/Desktop/index.html"
 #clean up our temp files if we receive a kill signal
-    trap on_exit SIGINT 
+trap on_exit SIGINT 
 
 while [ 1 ] ; do 
 
@@ -366,7 +372,7 @@ while [ 1 ] ; do
 
 	WhiskeyMilitiaImage=$(GivePageAndWebsiteReturnImage ${WhiskeyMilitiaPage} http://www.whiskeymilitia.com )
 	echo ${WhiskeyMilitia}
-	 
+	
 	UpdateWebpage 1 "${WhiskeyMilitia}" "${WhiskeyMilitiaImage}"   "${WebpageIndex}"
 	notify-send  "$WhiskeyMilitia" -i ${WhiskeyMilitiaImage} -t 3
 	WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
@@ -427,7 +433,7 @@ while [ 1 ] ; do
     echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes from" `date +%T ` "which occurs at ${DealEndTime}"
 
     echo "SnC:${SnCTimeLeftSeconds} (${SnCQuantityRemaining}/${SnCTotalQuantity})  WM:${WMTimeLeftSeconds} (${WMQuantityRemaining}/${WMTotalQuantity}) BT:${BTTimeLeftSeconds} (${BTQuantityRemaining}/${BTTotalQuantity}) CL:${CLTimeLeftSeconds} (${CLQuantityRemaining}/${CLTotalQuantity})"
-   
+    
     sleep ${SleepTime}s
 done
 
