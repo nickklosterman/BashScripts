@@ -1,0 +1,3 @@
+#!/bin/bash
+filename=${1}
+grep function "${filename}" | sort | uniq

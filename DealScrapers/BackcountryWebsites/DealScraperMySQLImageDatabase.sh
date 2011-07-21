@@ -188,7 +188,7 @@ function GiveProductProductImageEnterIntoDatabase()
 #also using the databasearecords isn't very useful because each field is hard to get (esp text) as spaces are treated as a field separator
 
 #we SHOULD only get one record back otherwise this isn't working the way I want it to
-	echo "dbaserec:$databaserecords"
+	echo "Matching records primary_key:$databaserecords"
         Array=($(echo "${databaserecords}" )) 
         Primary_Key=${Array[0]}
 	file="${Array[1]}"
@@ -196,10 +196,10 @@ function GiveProductProductImageEnterIntoDatabase()
 	query="UPDATE ${MySQLTableName} SET number_of_times_seen=number_of_times_seen+1 where image_id=${Primary_Key}" 
 	mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --execute="${query}" --silent
 	flag=1
-	echo "flag inside:${flag}"
+#	echo "flag inside:${flag}"
 fi
 #    done
-    echo "flag outside:${flag}"
+ #   echo "flag outside:${flag}"
     if [ ${flag} -eq 0 ] #then we haven't inserted that data into the database yet
     then 
 	echo "Match not found in database, entering in ${Product} as a new item"
