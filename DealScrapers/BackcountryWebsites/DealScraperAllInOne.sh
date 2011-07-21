@@ -714,11 +714,13 @@ function UpdateTable
 
     QueryResults=$( GetQueryResults "${DatabaseName}" ${WebsiteCode} ${NumberOfRecordsToDisplay} )
 
-#    Newline="\n"
 
-#    Output="${Top}""${Newline}""${QueryResults}""${Newline}""${Bottom}"
-#could also use printf to insert the newline                                                                                                                
-    Output="${Top}                                                                                                                                           ${QueryResults}                                                                                                                                              ${Bottom}"
+#You need the extra empty lines otherwise the query results get put on our delimiter lines and that first result piles up and doesn't go away. it took me a while to figure out that this was happening.
+    Output="${Top} 
+                                                                                                                                    
+      ${QueryResults}      
+
+     ${Bottom}"
 
     echo "${Output}" > "${Webpage}"
 
