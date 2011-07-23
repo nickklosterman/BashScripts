@@ -184,24 +184,39 @@ function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase()
     fi
     DurationInMinutes=$(GivePageReturnDurationOfDealInMinutes ${Webpage} )
     PreviousProduct=$( GiveDatabaseTableNameWebsiteCodeGetLastProductEntryFromDatabase  ${Database} ${Table} ${WebsiteCode} )
-
     PreviousTimeEnter=$( GiveDatabaseTableNameWebsiteCodeGetLastTimeEnterEntryFromDatabase  ${Database} ${Table} ${WebsiteCode} )
     PreviousDealDurationInMinutes=$( GiveDatabaseTableNameWebsiteCodeGetLastDealDurationInMinutesEntryFromDatabase  ${Database} ${Table} ${WebsiteCode} )
     PreviousProductDescription=${PreviousProduct/\'/\'\'} #this doubles the single quotes for entry into the sqlite database
-    echo "prev_time_enter:$PreviousTimeEnter: prev_deal_duration:$PreviousDealDurationInMinutes:" 
+#    echo "prev_time_enter:$PreviousTimeEnter: prev_deal_duration:$PreviousDealDurationInMinutes:" 
+    echo "prev_prod:${PreviousProduct}:${#PreviousProduct}:  prev_prod_desc:${PreviousProductDescription}:${#PreviousProductDescription}: prod_desc:${ProductDescription}:${#ProductDescription}:" 
 #We need to compare to the variable with the double single quotes since that is how we need to enter the string into the database                           
+    #if [ "${PreviousProductDescription}" != "${ProductDescription}" ]
+
+
+#so for some reason the string != comparison no longer works, but the = does.
+if [ "${PreviousProductDescription}" = "${ProductDescription}" ]
+then 
+echo "EQUAL"
+fi
+if [ "${PreviousProductDescription}" != "${ProductDescription}" ]
+then 
+echo "NOT EQUAL"
+else
+echo "NOT EQUAL Fail"
+fi
+
     if [ "${PreviousProductDescription}" != "${ProductDescription}" ]
     then
-        echo "Entering new product info into database."
+        echo "Entering new product info into database. reason:products not the same"
         GiveDatabaseTablenameDataEnterIntoDatabase  ${Database} ${Table} ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
     else
 #prevent duplicate entries sequentially but allow duplicates if a certain period has passed therefore giving a check saying that we are pretty sure that this is just a repeat that day/week/whatever
 # if you keep getting an error it is because PreviousDealDurationInMinutes is empty bc the entry into the database was corrupted. Run the cleanup script
 	TimeComparison=$( CompareDateToNow "${PreviousTimeEnter}" ${PreviousDealDurationInMinutes} )
         	
-        if [ "$TimeComparison" -eq 1 ] # "${ProductDescription}" != "" ${Price} != ""  ${PercentOffMSRP} != ""  ${TotalQuantity}!= ""  ${DurationInMinutes} != ""
+        if [ $TimeComparison -eq 1 ] # "${ProductDescription}" != "" ${Price} != ""  ${PercentOffMSRP} != ""  ${TotalQuantity}!= ""  ${DurationInMinutes} != ""
         then
-            echo "Entering new product info into database."
+            echo "Entering new product info into database.reason:products the same but meets time diff criteria"
 	    echo "TODO : WE NEED TO TYPECHECK THAT WE ARE ENTERING VALID DATA HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             GiveDatabaseTablenameDataEnterIntoDatabase  ${Database} ${Table} ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
         else

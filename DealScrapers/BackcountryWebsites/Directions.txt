@@ -1,0 +1,53 @@
+
+http://www.djinnius.com/Deals/
+This is the main page.
+The current deals from Steep and Cheap, Whiskey Militia, Bonktown and Chainlove are displayed.
+The page automaticaly updates when a new deal appears on any of the websites. 
+This is based off the duration of the deals. If a deal (is so popular that it) sells out before the time is up we will miss the beginning of this new deal.
+
+Clicking on the image of the current deal will send you to the appropriate webpage so that you can purchase the product.
+
+Below the images of the current four deals there are links to manage creation of alerts for products.
+
+Create New Alert
+----------------
+You can create an alert for a deal.
+Enter a search term in the text box.
+TIP: Searching is a little rudimentary right now so a 'shotgun' approach is best. By this I mean that if you are looking for a certain Castelli jersey or short that it is probably best to enter 'Castelli' as your search term.
+TIP:If any of the past products are exactly what you're looking for then just copy the product description into the 'Search Term' field and you'll be notified when that product shows back up.
+Enter an email address or your phone's email adddress.
+Most cell phone providers have an email address that is associated with it's texting service. Sending an email to the address will send a text message to the associated phone. 
+Check for you cell provider here: http://www.emailtextmessages.com/
+Here is a short list of the most popular providers.
+    * AT&T – cellnumber@txt.att.net
+    * Verizon – cellnumber@vtext.com
+    * T-Mobile – cellnumber@tmomail.net
+    * Sprint PCS - cellnumber@messaging.sprintpcs.com
+    * Virgin Mobile – cellnumber@vmobl.com
+    * US Cellular – cellnumber@email.uscc.net
+    * Nextel - cellnumber@messaging.nextel.com
+    * Boost - cellnumber@myboostmobile.com
+    * Alltel – cellnumber@message.alltel.com
+
+If you want the image included in the alert then select "yes" to attach the image of the product to the email.
+For text messages you will receive a MMS/picture message.
+
+You will receive an email from deals@djinnius.com with the product information and the image if you selected to have that sent as well.
+Check that this address is not labeled as spam.
+
+Standard text messaging rates apply blabbity blah.
+
+Stop Alerts
+-----------
+After you've scored a sweet deal you'll want to stop getting the alerts.
+Enter the email address that you entered when you set up the alert.
+A list of all the alerts will appear in alphabetical order for the entered email address. 
+Select the alerts that you wish to stop by selecting the appropriate checkboxes and then click the 'Delete' button at the bottom of the page.
+
+
+Past 25 Products
+----------------
+Below the alert management utilities is a list of the past 25 products featured on each website.
+The product, price, percent off MSRP, quantity, deal duration in minutes, and time the deal was published are displayed.
+The quantity shows the total number of products up for sale. The quantity is for all products across all sizes.  The quantity is not necessarily eevnly distributed across all sizes (shoe/clothing/bike frame/helmet). Typically their are more products for the less common sizes (S, XL, XXL). There may not even be any product for a given size.
+
