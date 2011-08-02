@@ -15,14 +15,14 @@ die('Error:'.mysql_error());
 }
 else
 {
-$result=mysql_query($query);
+$result=mysql_query($sql);
 }
 //creating the table /w headers
 echo "<html><body>";
 echo "<table><tr><td>ID</td><td>Search Term</td><td>Contact Address</td></tr>";
 
 //row for each record
-while ($row = mysql_fetch_array($rs)) {
+while ($row = mysql_fetch_array($result)) {
 echo"<tr><td>" . $row['prim_key'] . "</td><td>" . $row['searchterms'] . "</td><td>" . $row['contactaddress'] . "</td></tr>";
 }
 

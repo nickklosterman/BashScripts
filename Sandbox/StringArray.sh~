@@ -1,0 +1,36 @@
+#!/bin/bash
+function CheckArray()
+{
+SearchArray=$1
+SearchTerm=$2
+if [ ${SearchArray[@]} =~ ${SearchTerm} ]
+then
+echo "Found"
+else
+echo "Not Found"
+fi
+}
+function CheckArray2()
+{
+SearchArray=$1
+SearchTerm=$2
+ArrayElements=${#SearchArray[@]}
+index=0
+while [ $index -lt $ArrayElements ]
+do
+if [ ${SearchArray[$index]} =~ ${SearchTerm} ]
+then
+echo "Found"
+else
+echo "Not Found"
+fi
+let "index += index"
+echo $index
+done 
+}
+
+#begin script
+Array=( one two three four five six seven )
+PackedArray=`echo ${Array[@]}`
+CheckArray2 ${PackedArray} "one"
+CheckArray2 ${PackedArray} "One"
