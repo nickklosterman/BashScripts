@@ -5,9 +5,27 @@
 #that site has a new deal before updating.
 #It appears that time isn't linear across all websites as 
 
+
 #BASH programming caveats
 #since there is no compiling I was having the program stop because I was trying to reference a variable that didn't exist bc I had spelled the name wrong.
 #This just caused the program to stop dead in its tracks and not progress farther
+
+
+function GetMimeType()
+{
+    file --mime-type "${1}" | sed 's/[^:]*: //'
+}
+function GetFileSize()
+{
+    du -k | awk '{print $1}'
+}
+
+function UploadFileToDjinniusDeals
+{
+
+    bash UploadFileToDjinniusDeals.sh "nM&^%4Yu" "${1}"
+}
+
 
 function checknet()
 {
@@ -24,19 +42,10 @@ function checknet()
             else
                 sleep 10s
             fi
-            done
+        done
         echo ${flag}
     fi
-#I was mistakenly echoing more than just one value and this was causing the subsequent checks on the returned values to barf.  
-}
-function checknetOLD()
-{
-#this doesn't seem super robust but I suppose it works
-    if eval "ping -c 1 www.djinnius.com > /dev/null"; then
-	echo "1"
-    else
-	echo "0"
-    fi
+#I was mistakenly echoing more than just one value and this was causing the subsequent checks on the returned values to barf.
 }
 
 function checkdiskspace()
@@ -81,7 +90,7 @@ function checkhomediskspace()
 function on_exit()
 {
 #remove temporary files  
-WebpageArray=( "/tmp/SteepAndCheapPage" "/tmp/WhiskeyMilitiaPage" "/tmp/BonktownPage" "/tmp/ChainlovePage" )
+    WebpageArray=( "/tmp/SteepAndCheapPage" "/tmp/WhiskeyMilitiaPage" "/tmp/BonktownPage" "/tmp/ChainlovePage" )
     echo "Ok, caught Ctrl-c, exiting after clean up"
     for item in "${WebpageArray[@]}"
     do
@@ -122,10 +131,11 @@ function GivePageReturnText()
     echo ${OutputText}
 }
 
-function GivePageReturnProductDescription()
+function GivePageReturnProductDescriptionV2()
 {
-#for the possessive form I need to replace the single quote with double single quotes
-    OutputText=`grep "<title>" ${1} |  sed -n 's/[^:]*://p' | sed 's/ - \$.*//;s/\x27/\x27\x27/g' ` #this was causing problems with descriptions that had multiple instances of the colon i.e. there was a colon in the description that caused the front part  of the description to be cut off.
+#Version 2 removes the <title> html tags
+#it appears that mysql doesn't care about the single quotes problem that sqlite has
+    OutputText=`grep "<title>" ${1} |  sed -n 's/[^:]*://p' |sed 's/ - \$.*//;s/<title>//;s/<\/title>//' `
 #Explanation: replace everything up to the colon that isn't a colon with nothing, print the rest
     echo ${OutputText}
 }
@@ -143,23 +153,70 @@ function GivePageReturnPercentOffMSRP()
     echo ${OutputText}
 }
 
-GiveDatabaseTablenameDataEnterIntoDatabase()
+
+function GiveProductProductImageEnterIntoDatabase()
 {
-    sqlite3 ${1} "insert into ${2} (websiteCode, product, price, percentOffMSRP, quantity, dealdurationinminutes) values ( '${3}', '${4}', '${5}', '${6}', '${7}', '${8}' );"
+#ok I can see the pros and cons of not storing the image in the db. 
+#if I just store the images on teh server, the product name will serve as the image filename as well. Yet I can easily delete the image while still having a record in the db. but if I run the file delete command in conjunction with the db delete then we shouldn't have a problem.
+    SentEmailTextAddressList=""
+    SentEmailTextAddressList_arraycounter=0
+    Product="${1}"
+#    MySQLDatabase=${2}
+ #   MySQLTableName=${3}
+    ImageFile=${2}
+    #echo "${ImageFile}"
+    MySQLHost="mysql.server272.com"
+    MySQLPort="3306"
+    MySQLDatabase="djinnius_BackCountryAlerts"
+    MySQLTableName="ProductImages"
+    MySQLUser="BCA"
+    MySQLPassword="backcountryalerts"
+    flag=0
+
+#check and see if the product all ready entered in database
+    query="select image_id,filename,number_of_times_seen from ${MySQLTableName} where filename=\"${Product}\"" 
+    query="select image_id,filename from ${MySQLTableName} where filename=\"${Product}\""  
+#    query="select image_id,filename,number_of_times_seen from ProductImages where filename=\"Cutter Tall Boy Sock - 3-Pack\"" 
+    #mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --execute="${query}" --silent --skip-column-names | while read databaserecords; do
+    databaserecords=$(mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --execute="${query}" --silent --skip-column-names  )
+    databaserecordsSize=${#databaserecords}
+    if [ $databaserecordsSize -ne 0 ]
+    then
+
+# the database query was being piped straight into the while statement. this was causing ascope problem as piping utilizes a subshell so the 'flag' variable was out of scope when I needed it.
+#also using the databasearecords isn't very useful because each field is hard to get (esp text) as spaces are treated as a field separator
+
+#we SHOULD only get one record back otherwise this isn't working the way I want it to
+	echo "dbaserec:$databaserecords"
+        Array=($(echo "${databaserecords}" )) 
+        Primary_Key=${Array[0]}
+	file="${Array[1]}"
+#	echo "db:${file}-prod:${Product}"
+	query="UPDATE ${MySQLTableName} SET number_of_times_seen=number_of_times_seen+1 where image_id=${Primary_Key}" 
+	mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --execute="${query}" --silent
+	flag=1
+	echo "flag inside:${flag}"
+fi
+#    done
+    echo "flag outside:${flag}"
+    if [ ${flag} -eq 0 ] #then we haven't inserted that data into the database yet
+    then 
+	echo "Match not found in database, entering in ${Product} as a new item"
+	query="insert into  ${MySQLTableName} (filename) value (\"${Product}\")"
+	#echo "${query}"
+	mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --execute="${query}" --silent
+#	Filename00=`echo "${Product}"| recode html`
+#	Filename=$Filename00.jpg
+	Filename=${Product}.jpg
+	#echo ${Product} ${Filename}
+	cp -T "${ImageFile}" "${Filename}"
+	UploadFileToDjinniusDeals "${Filename}"
+	rm "${Filename}"
+
+    fi
+
 }
 
-function GiveWebsiteAndDatabaseReturnWebsiteCodeFromDatabase()
-{
-    Website=${1}
-    Database=${2}
-
-}
-
-function GivePageReturnTotalQuantity()
-{
-    TotalQuantity=`grep total_qty_bar.set_data\( ${1} | sed 's/.*,//;s/[)].*//' `
-    echo ${TotalQuantity}
-}
 
 function GivePageReturnDurationOfDealInMinutes()
 {
@@ -189,9 +246,11 @@ function GiveSecondsReturnMinutesAndSeconds()
     printf "%d:%02d" ${minutes} ${seconds}
 
 }
-
-#Input: webpage file
-#output: extracts time remaining of the item for sale on the page
+function GivePageReturnTotalQuantity()
+{   
+    TotalQuantity=`grep total_qty_bar.set_data\( ${1} | sed 's/.*,//' | sed 's/).*//' `
+    echo ${TotalQuantity}
+}
 function GivePageReturnTimeRemainingInSeconds()
 {
 #two forms setupTimerBar or setupWMTimerBar
@@ -214,132 +273,29 @@ function GivePageReturnTimeRemainingInSeconds()
     echo ${TimeRemainingInSeconds}
 }
 
+function GivePageAndWebsiteReturnImage()
+{   
+    Webpage=${1}
+    case ${2} in  #key off website name to determine how to parse for image    
+        "http://www.steepandcheap.com")
+            OutputText=`grep "item_image" ${Webpage} | sed 's/<div id=\"item_image\"><img src=\"//' | sed 's/".*//' `;;
+        "http://www.whiskeymilitia.com"|"http://www.chainlove.com"|"http://www.bonktown.com")
+            OutputText=`grep "mainimage" ${Webpage} | sed 's/<img name=\"mainimage\" src=\"//' | sed 's/".*//' `;;
+    esac
+    Image='/tmp/ProductImage' #`mktemp` 
+
+    wget ${OutputText} -O ${Image} -q
+    echo ${Image}
+}
+
 function GiveTimeInSecondsReturnDealEndTime()
 {
-#this was found here:http://www.askdavetaylor.com/date_math_in_linux_shell_script.html about 2/3 of the way down you'll see a post by marcus that is where it came from                                                                                                                                                  
+#this was found here:http://www.askdavetaylor.com/date_math_in_linux_shell_script.html about 2/3 of the way down you'll see a post by marcus that is where it came from                                                                       
     NumDaysAdjust=0
     Output=`date --date @$(($(date +%s)-(3600*24*${NumDaysAdjust})+${1} )) +%T`
     echo ${Output}
 }
 
-function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase()
-{
-    Database=${1}
-    Table=${2}
-    Webpage=${3}
-    WebsiteCode=${4}
-#enter data into database
-    ProductDescription=$(GivePageReturnProductDescription ${Webpage} ) 
-    Price=$(GivePageReturnPrice ${Webpage} )
-    PercentOffMSRP=$(GivePageReturnPercentOffMSRP ${Webpage} )
-    TotalQuantity=$(GivePageReturnTotalQuantity ${Webpage} ) 
-    DurationInMinutes=$(GivePageReturnDurationOfDealInMinutes ${Webpage} ) 
-
-    PreviousProduct=$( GiveDatabaseTableNameWebsiteCodeGetLastProductEntryFromDatabase  ${Database} ${Table} ${WebsiteCode} )
-    PreviousTimeEnter=$( GiveDatabaseTableNameWebsiteCodeGetLastTimeEnterEntryFromDatabase  ${Database} ${Table} ${WebsiteCode} )
-    PreviousDealDurationInMinutes=$( GiveDatabaseTableNameWebsiteCodeGetLastDealDurationInMinutesEntryFromDatabase  ${Database} ${Table} ${WebsiteCode} )
-    PreviousProductDescription=${PreviousProduct/\'/\'\'} 
-
-#We need to compare to the variable with the double single quotes since that is how we need to enter the string into the database
-    if [ "${PreviousProductDescription}" != "${ProductDescription}" ]
-    then
-	echo "Entering new product info into database."
-	GiveDatabaseTablenameDataEnterIntoDatabase  ${Database} ${Table} ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
-    else
-#prevent duplicate entries sequentially but allow duplicates if a certain period has passed therefore giving a check saying that we are pretty sure that this is just a repeat that day/week/whatever
-
-	TimeComparison=$( CompareDateToNow "$PreviousTimeEnter" ${PreviousDealDurationInMinutes} )
-	One=1
-
-	if [ "$TimeComparison" -eq "$One" ] 
-	then 
-	    echo "Entering new product info into database."
-	    GiveDatabaseTablenameDataEnterIntoDatabase  ${Database} ${Table} ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
-	else
-	    echo "Product the same, but time difference too little from previous entry."
-	fi
-
-	
-    fi
-
-}
-
-function CompareDateToNow
-{
-#The problem I was having was that i was comparing utc time from the db to local time, i needed to compare utc to utc times.
-
-    DateToCompare="${1}"
-    MinuteThreshold=${2}
-#we'll use the TC suffix to mean ToCompare
-    YearTC="${DateToCompare:0:4}" #don't leave a space btw the = and " or I won't work
-    MonthTC="${DateToCompare:5:2}" 
-    DayTC="${DateToCompare:8:2}" 
-    HourTC="${DateToCompare:11:2}" 
-    MinutesTC="${DateToCompare:14:2}" 
-    SecondsTC="${DateToCompare:17:2}" 
-    YearTCSeconds=$(( 365*24*60*60*($YearTC-1970) ))
-#`expr 365*24*60*60*($YearTC-1970) ` #this is supposed to work but didn't. maybe I'm donig something wrong
-# we add the 10# infront of the variable to force the base to be decimal instead of octal (since we might get times that are 08 and then eprform math on them.  This will cause and error of "value too great for base (error token is "09")" or "08" this is because in octal 07 is the highest it can go.
-    MonthTCSeconds=$(( 10#$MonthTC*31*24*60*60 ))  #`expr $MonthTC*31*24*60*60`
-    DayTCSeconds=$(( 10#$DayTC*24*60*60 ))
-    HourTCSeconds=$(( 10#$HourTC*60*60 ))
-    MinutesTCSeconds=$(( 10#$MinutesTC*60  ))
-    SecondsTCTotalSince1970=$(( $YearTCSeconds+$MonthTCSeconds+$DayTCSeconds+$HourTCSeconds+$MinutesTCSeconds+10#$SecondsTC ))
-
-    Year=$( date --utc +%Y )
-    Month=$( date --utc +%m )
-    Day=$( date --utc +%d )
-    Hour=$( date --utc +%H )
-    Minute=$( date --utc +%M )
-    Second=$( date --utc +%S )
-    SecondsTotalSince1970=$(( (10#${Year}-1970)*365*24*60*60+10#${Month}*31*24*60*60+10#${Day}*24*60*60+10#${Hour}*60*60+10#${Minute}*60+10#${Second} ))
-#echo $SecondsTCTotalSince1970 $SecondsTotalSince1970
-#echo "SecsTC" $SecondsTCTotalSince1970 "SecsTotal" $SecondsTotalSince1970
-    SecondsBetweenTimes=$(( $SecondsTotalSince1970-$SecondsTCTotalSince1970 ))
-    Threshold=$(( ${MinuteThreshold}*60 ))
- #   echo "SEcsbtwTimes" $SecondsBetweenTimes "Thresh" $Threshold
-    if  [ "$SecondsBetweenTimes" -lt "$Threshold" ] 
-    then 
-#We don't want to add the item into the database bc the product names are the same and the time difference isn't enough
-	echo "0"
-    else
-#the time difference iis enough that we want to enter the item into the database even if the product names are the same.
-	echo "1"
-    fi
-
-}
-
-function GiveDatabaseTableNameWebsiteCodeGetLastDealDurationInMinutesEntryFromDatabase
-{
-    Database=${1}
-    TableName=${2}
-    WebsiteCode=$3
-#echo $Database $TableName $WebsiteCode
-    Query="select dealdurationinminutes from ${TableName} where websitecode=${WebsiteCode} order by Bkey desc limit 1"
-    sqlite3 ${Database} "${Query}"
-}
-
-function GiveDatabaseTableNameWebsiteCodeGetLastProductEntryFromDatabase
-{
-
-    Database=${1}
-    TableName=${2}
-    WebsiteCode=$3
-#echo $Database $TableName $WebsiteCode
-    Query="select product from ${TableName} where websitecode=${WebsiteCode} order by Bkey desc limit 1"
-    sqlite3 ${Database} "${Query}"
-}
-
-function GiveDatabaseTableNameWebsiteCodeGetLastTimeEnterEntryFromDatabase
-{
-
-    Database=${1}
-    TableName=${2}
-    WebsiteCode=$3
-#echo $Database $TableName $WebsiteCode
-    Query="select timeEnter from ${TableName} where websitecode=${WebsiteCode} order by Bkey desc limit 1"
-    sqlite3 ${Database} "${Query}"
-}
 
 #--------------------------
 # BEGIN MAIN PART OF SCRIPT
@@ -351,24 +307,6 @@ WhiskeyMilitiaTemp=""
 BonktownTemp=""
 ChainloveTemp=""
 trap on_exit SIGINT
-#check that the database exists and create if it doesn't
-if [ !  -e  "test.db"  ]
-then
-    echo "database nonexistent, creating"
-    sqlite3 test.db "create table Backcountrydeals (Bkey INTEGER PRIMARY KEY, websiteCode int, product TEXT, price double, percentOffMSRP int, quantity int, dealdurationinminutes int, timeEnter DATE);"
-    sqlite3 test.db "create table WebsiteCodes (WKey INTEGER PRIMARY KEY, website TEXT, websiteCode int);"
-    sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('Steep and Cheap', 0);"
-    sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('WhiskeyMilitia', 1);"
-    sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('Bonktown', 2);"
-    sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('Chainlove', 3);"
-    sqlite3 test.db <<EOF 
-CREATE TRIGGER insert__timeEnter AFTER  INSERT ON Backcountrydeals
-     BEGIN
-      UPDATE Backcountrydeals SET timeEnter = DATETIME('NOW')  WHERE rowid = new.rowid;
-     END;
-EOF
-    
-fi
 TmpDiskSpaceStatus=$( checktmpdiskspace )
 HomeDiskSpaceStatus=$( checkhomediskspace )
 NetStatus=$( checknet )
@@ -376,14 +314,17 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
     SteepAndCheapPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.steepandcheap.com 0 )
     if [ "$SteepAndCheapPage" != "Error" ] 
     then 
-	SteepAndCheap=$(GivePageReturnText ${SteepAndCheapPage} )
+#	SteepAndCheap=$(GivePageReturnText ${SteepAndCheapPage} )
+	SteepAndCheap=$(GivePageReturnProductDescriptionV2 ${SteepAndCheapPage} )
 #if there are changes to the item description then we update and print the new info
 	if [ "${SteepAndCheap}" != "${SteepAndCheapTemp}" ]
 	then
 	    SCTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${SteepAndCheapPage})
 	    echo ${SteepAndCheap} 
+	    SteepAndCheapImage=$(GivePageAndWebsiteReturnImage ${SteepAndCheapPage} http://www.steepandcheap.com )
 
-	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase "test.db" "Backcountrydeals" ${SteepAndCheapPage} 0
+	    GiveProductProductImageEnterIntoDatabase "${SteepAndCheap}" "${SteepAndCheapImage}"
+
 
 #copy content to our temp holder so we can see if things changed.
 	    SteepAndCheapTemp=`echo ${SteepAndCheap}`
@@ -395,13 +336,17 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
     WhiskeyMilitiaPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.whiskeymilitia.com 1 )
     if [ "$WhiskeyMilitiaPage" != "Error" ]
     then 
-	WhiskeyMilitia=$(GivePageReturnText ${WhiskeyMilitiaPage} )
+
+#	WhiskeyMilitia=$(GivePageReturnText ${WhiskeyMilitiaPage} )
+	WhiskeyMilitia=$(GivePageReturnProductDescriptionV2 ${WhiskeyMilitiaPage} )
+
 	WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${WhiskeyMilitiaPage})
 
 	if [ "${WhiskeyMilitia}" != "${WhiskeyMilitiaTemp}" ]
 	then
 	    echo ${WhiskeyMilitia}
-	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase "test.db" "Backcountrydeals"  ${WhiskeyMilitiaPage} 1
+	    WhiskeyMilitiaImage=$(GivePageAndWebsiteReturnImage ${WhiskeyMilitiaPage} http://www.whiskeymilitia.com )
+	    GiveProductProductImageEnterIntoDatabase "${WhiskeyMilitia}" "${WhiskeyMilitiaImage}"
 	    WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
 	fi
     else
@@ -412,13 +357,15 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
     BonktownPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.bonktown.com 2 )
     if [ "$BonktownPage" != "Error" ]
     then 
-	Bonktown=$(GivePageReturnText ${BonktownPage} )
+#	Bonktown=$(GivePageReturnText ${BonktownPage} )
+	Bonktown=$(GivePageReturnProductDescriptionV2  ${BonktownPage} )
 	BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
 
 	if [ "${Bonktown}" != "${BonktownTemp}" ]
 	then
 	    echo ${Bonktown}
-	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db "Backcountrydeals"  ${BonktownPage} 2
+	    BonktownImage=$(GivePageAndWebsiteReturnImage ${BonktownPage} http://www.bonktown.com )
+	    GiveProductProductImageEnterIntoDatabase "${Bonktown}" "${BonktownImage}"
 	    BonktownTemp=`echo ${Bonktown}`
 	fi
     else
@@ -429,12 +376,14 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
     ChainlovePage=$(GiveWebsiteCodeGetWebpageTempFile http://www.chainlove.com 3 )
     if [ "$ChainlovePage" != "Error" ]  
     then 
-	Chainlove=$(GivePageReturnText ${ChainlovePage} )
+#	Chainlove=$(GivePageReturnText ${ChainlovePage} )
+	Chainlove=$(GivePageReturnProductDescriptionV2  ${ChainlovePage} )
 	CLTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${ChainlovePage})
 	if [ "${Chainlove}" != "${ChainloveTemp}" ]
 	then
 	    echo ${Chainlove}
-	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db Backcountrydeals  ${ChainlovePage} 3
+	    ChainloveImage=$(GivePageAndWebsiteReturnImage ${ChainlovePage} http://www.chainlove.com )
+	    GiveProductProductImageEnterIntoDatabase "${Chainlove}" "${ChainloveImage}"
 	    ChainloveTemp=`echo ${Chainlove}`
 	fi
     else

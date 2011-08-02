@@ -7,7 +7,7 @@ die('Could not connect:'.mysql_error());
 
 mysql_select_db("djinnius_BackCountryAlerts",$con);
 
-$sql="SELECT * FROM SearchTermsAndContactAddress WHERE contactaddress = ('$_POST[SearchAddress]')";
+$sql="SELECT * FROM SearchTermsAndContactAddress order by prim_key desc";
 
 if (!mysql_query($sql,$con))
 {
@@ -19,11 +19,11 @@ $result=mysql_query($sql);
 }
 //creating the table /w headers
 echo "<html><body>";
-echo "<table><tr><td>ID</td><td>Search Term</td><td>Contact Address</td></tr>";
+echo "<table><tr><td>ID</td><td>Search Term</td><td>Contact Address</td><td>Attach Image&#63</td></tr>";
 
 //row for each record
 while ($row = mysql_fetch_array($result)) {
-echo"<tr><td>" . $row['prim_key'] . "</td><td>" . $row['searchterms'] . "</td><td>" . $row['contactaddress'] . "</td></tr>";
+echo"<tr><td>" . $row['prim_key'] . "</td><td>" . $row['searchterms'] . "</td><td>" . $row['contactaddress'] . "</td><td>" . $row['ImageAttachment'] . "</td></tr>";
 }
 
 echo "</table>";

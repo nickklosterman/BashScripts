@@ -1,0 +1,19 @@
+sqlite3 test.db "select product,price,percentOffMSRP,quantity,dealdurationinminutes,timeEnter from Backcountrydeals where product like '%Wheelset%' order by Bkey desc ";
+
+sqlite3 test.db "select product,price,percentOffMSRP,quantity,dealdurationinminutes,timeEnter from Backcountrydeals where price < 990 and product like '%Wheelset%' order by Bkey desc ";
+
+sqlite3 test.db "select product,price,percentOffMSRP,quantity,dealdurationinminutes,timeEnter from Backcountrydeals where websitecode=0 order by timeEnter desc limit 4";
+
+
+SQL-----------------------
+create table ProductImages( image_id serial, filename varchar(255) not null, number_of_times_seen int not null default 1, last_seen timestamp default current_timestamp on update current_timestamp,  primary key (image_id), index (filename));
+drop table ProductImages ;
+grant delete on SearchTermsAndContactAddress to BCA@'localhost' identified by 'backcountryalerts';
+delete from SearchTermsAndContactAddress where prim_key = 39;
+describe SearchTermsAndContactAddress;
+alter table SearchTermsAndContactAddress add column ImageAttachment tinyint(1);
+
+
+select * from ProductImages where number_of_times_seen > 3;
+select max(number_of_times_seen)  from ProductImages;
+select * from ProductImages where filename like "Shimano%" order by image_id desc limit 4 offset 4;

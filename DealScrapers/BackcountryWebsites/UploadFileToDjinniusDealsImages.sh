@@ -7,20 +7,16 @@ USER='DailyDeals'
 PASSWORD=${1} 
 #or use .netrc for password etc
 #LocalFilePath=$(readlink -f "${2}" )
-
 LocalFilePath=$(dirname "${2}" )
 Filename=$(basename "${2}" )
-LocalFilePathLength=${#LocalFilePath}
-let "LocalFilePathLength+=1"
-Filename=${2:$LocalFilePathLength}
-echo "${LocalFilePathA}" "${Filename}"
+
 #we don't need to cd to Deals bc this ftp acct is setup to start off in that directory
 
 ftp -in $HOST <<EOF
 user $USER $PASSWORD
 lcd "${LocalFilePath}"
 binary
-mput "${Filename}"
+cd ProductImages
+put "${Filename}"
 quit
 EOF
-

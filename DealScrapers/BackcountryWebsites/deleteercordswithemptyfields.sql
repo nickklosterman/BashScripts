@@ -1,0 +1,1 @@
+delete from Backcountrydeals where price=\"\" or product=\"\" or quantity=\"\" or dealdurationinminutes=\"\" 

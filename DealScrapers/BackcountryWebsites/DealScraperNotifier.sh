@@ -4,6 +4,26 @@
 #It will determines which site has the next upcoming deal and waits until
 #that site has a new deal before updating.
 #It appears that time isn't linear across all websites as 
+function checknet2()
+{
+    flag=0
+    if eval "ping -c 1 www.djinnius.com > /dev/null"; then
+	echo "1"
+    else
+#if we don't have 'net cuz of sporadic wifi, recheck and sleep in between tries
+	for num in 1 2 3 4 5 6
+	do
+	    if eval "ping -c 1 www.djinnius.com > /dev/null"; then
+		flag=1
+		break
+	    else
+		sleep 10s
+	    fi
+	done
+	echo ${flag}
+    fi
+#I was mistakenly echoing more than just one value and this was causing the subsequent checks on the returned values to barf.
+}
 
 function checknet()
 {
@@ -13,6 +33,7 @@ function checknet()
     else
 	echo "0"
     fi
+#could stick in while loop and give it three tries with a sleep in between so that we keep the rest of the code working
 }
 
 function checkdiskspace()
@@ -165,7 +186,9 @@ function GivePageReturnTimeRemainingInSeconds()
 
 function GiveProductKeywordDatabaseTablethenNotify()
 {
-    Product=${1}
+    SentEmailTextAddressList=""
+    SentEmailTextAddressList_arraycounter=0
+    Product="${1}"
 #    MySQLDatabase=${2}
  #   MySQLTableName=${3}
     ImageFile=${2}
@@ -181,38 +204,94 @@ function GiveProductKeywordDatabaseTablethenNotify()
 #	echo $databaserecords
 	Array=($(echo "${databaserecords}" )) # the -s option for mysql suppresse the boxed output # this needed for sqlite3 --> | sed 's/|/ /g'))
 	Primary_Key=${Array[0]}
-	keyword=${Array[1]} #` cut -d "|" -f 1 `
+	keyword="${Array[1]}" #` cut -d "|" -f 1 `
 	EmailTextAddress=${Array[2]} #cut -d "|" -f 1 `
 	ImageAttachment=${Array[3]}
-#I need a way to keep track if a certain product has been sent all ready to a specific address and check so I don't send duplicates out each time.
-	if grep -q "${keyword}" <<<"${Product}"
-	then
-	    echo "We have a match for ${keyword}"
-	    echo "Addr:${EmailTextAddress}"
-	    SendNotice ${EmailTextAddress} "${Product}" $ImageAttachment "${ImageFile}"
+	AddressLength=${#EmailTextAddress}
+#prevent problems associated with addr snuck in that are blank or too short to be real
+	if [ $AddressLength -gt 4 ]
+	then 
+#if we have a match then send message
+	    if grep -q "${keyword}" <<<"${Product}"
+	    then
+		echo "We have a match for ${keyword} w prim_key:$Primary_Key"
+
+#Check if we all ready sent a message based on this keyword to this addr
+#pack array so we can pass it to the function
+		PackedAddressList=`echo ${SentEmailTextAddressList[@]}`
+		MessageAllReadySent=$( CheckMessageSenttoAddressList "${PackedAddressList}" "${EmailTextAddress}" )
+		if [ $MessageAllReadySent -eq 0 ] 
+		then 
+
+		    echo "Addr:${EmailTextAddress} Product:${Product}"
+		    SendNotice ${EmailTextAddress} "${Product}" $ImageAttachment "${ImageFile}"
+		else
+		    echo "Skipping because message all ready sent to $EmailTextAddress"
+		fi
+		SentEmailTextAddressList[$SentEmailTextAddressList_arraycounter]=${EmailTextAddress}
+		let "SentEmailTextAddressList_arraycounter+=1"
+#Add address to our list to prevent mutliple emails being sent
+
 #perl  sendEmail -f inkydinky@djinnius.com -t 5079909052@tmomail.net -u 'Subject line' -m 'Message Body' -s mail.djinnius.com:587 -xu user -xp password
+	    fi
 	fi
     done
+}
+function CheckMessageSenttoAddressList()
+{
+#Check AddressList (a list of addresses the alert has all ready been sent to) for Address
+    AddressList=$1
+    Address=$2
+#get number of array elements
+    ArrayElements=${#AddressList[@]}
+    index=0
+    flag=0
+    while [ $index -lt $ArrayElements ]
+    do
+	if grep -q $Address <<< "${AddressList[$index]}"
+	then 
+	    flag=1
+#if we found a match we can break
+	    break
+	fi
+	let "index = $index + 1"
+    done
+    echo ${flag}
+}
+
+function CheckMessageSenttoAddressListOLD()
+{
+    AddressList=$1
+    CopyofAddressList=$1
+    Address=$2
+    ${AddressList[@]##${Address}}
+    if [ $AddressList != $CopyofAddressList ]
+    then 
+	echo 1
+    else
+	echo 0
+    fi
 }
 
 function SendNotice()
 {
-Address=${1}
-Message=${2}
-ImageAttachmentBoolean=${3}
-ImageFile="${4}"
+    Address=${1}
+    Message=${2}
+    ImageAttachmentBoolean=${3}
+    ImageFile="${4}"
 
-if [ ${ImageAttachmentBoolean} == "NULL" ]
-then 
-ImageAttachmentBoolean=0
-fi
-#echo "Addr:${Address} -Msg:${Message}"
-if [ ${ImageAttachmentBoolean} -eq 0 ]
-then
-    perl /home/nicolae/Downloads/sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address}  -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry
-else 
-    perl /home/nicolae/Downloads/sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address} -u 'A Matching Deal from BackCountry' -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry -a "${ImageFile}"
-fi
+    if [ ${ImageAttachmentBoolean} == "NULL" ]
+    then 
+	ImageAttachmentBoolean=0
+    fi
+    echo "Addr:${Address} -Msg:${Message}"
+#Branch on whether or not to send image as attachment
+    if [ ${ImageAttachmentBoolean} -eq 0 ]
+    then
+	perl /home/nicolae/Downloads/sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address}  -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry
+    else 
+	perl /home/nicolae/Downloads/sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address} -u 'A Matching Deal from BackCountry' -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry -a "${ImageFile}"
+    fi
 }
 
 function GiveProductKeywordTextEmailListFilethenNotifyDEPRECATED()
@@ -245,7 +324,7 @@ trap on_exit SIGINT
 
 TmpDiskSpaceStatus=$( checktmpdiskspace )
 HomeDiskSpaceStatus=$( checkhomediskspace )
-NetStatus=$( checknet )
+NetStatus=$( checknet2 )
 while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -eq 1 ]] ; do 
     SteepAndCheapPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.steepandcheap.com 0 )
     if [ "$SteepAndCheapPage" != "Error" ]
@@ -258,12 +337,12 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	then
 	    echo ${SteepAndCheap} 
 	    SteepAndCheapImage=$(GivePageAndWebsiteReturnImage ${SteepAndCheapPage} http://www.steepandcheap.com )
-	    GiveProductKeywordDatabaseTablethenNotify ${SteepAndCheap} ${SteepAndCheapImage} 
+	    GiveProductKeywordDatabaseTablethenNotify "${SteepAndCheap}" ${SteepAndCheapImage} 
 	    SteepAndCheapTemp=`echo ${SteepAndCheap}`
 	fi
     else
-        echo "Wget didn't return a 200 OK response when getting the Steep and Cheap webpage"
-        SCTimeLeftSeconds=120
+	echo "Wget didn't return a 200 OK response when getting the Steep and Cheap webpage"
+	SCTimeLeftSeconds=120
     fi
     WhiskeyMilitiaPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.whiskeymilitia.com 1 )
     if [ "$WhiskeyMilitiaPage" != "Error" ]
@@ -279,7 +358,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	    WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
 	fi
     else
-        echo "Wget didn't return a 200 OK response when getting the Whiskey Mil\
+	echo "Wget didn't return a 200 OK response when getting the Whiskey Mil\
 itia webpage"
 	WMTimeLeftSeconds=120
     fi
@@ -292,14 +371,14 @@ itia webpage"
 	if [ "${Bonktown}" != "${BonktownTemp}" ]
 	then
 	    echo ${Bonktown}
-BonktownImage=$(GivePageAndWebsiteReturnImage ${BonktownPage} http://www.bonktown.com )
+	    BonktownImage=$(GivePageAndWebsiteReturnImage ${BonktownPage} http://www.bonktown.com )
 	    GiveProductKeywordDatabaseTablethenNotify "${Bonktown}" ${BonktownImage} 
 	    BonktownTemp=`echo ${Bonktown}`
 	fi
     else
-        echo "Wget didn't return a 200 OK response when getting the Bonktown we\
+	echo "Wget didn't return a 200 OK response when getting the Bonktown we\
 bpage"
-        BTTimeLeftSeconds=120
+	BTTimeLeftSeconds=120
     fi
     ChainlovePage=$(GiveWebsiteCodeGetWebpageTempFile http://www.chainlove.com 3 )
     if [ "$ChainlovePage" != "Error" ]
@@ -314,8 +393,8 @@ bpage"
 	    ChainloveTemp=`echo ${Chainlove}`
 	fi
     else
-        echo "Wget didn't return a 200 OK response when getting the Chainlove webpage"
-        CLTimeLeftSeconds=120
+	echo "Wget didn't return a 200 OK response when getting the Chainlove webpage"
+	CLTimeLeftSeconds=120
     fi
 
     SleepTime=${SCTimeLeftSeconds}
@@ -343,7 +422,7 @@ bpage"
     sleep ${SleepTime}s
     TmpDiskSpaceStatus=$(checktmpdiskspace )
     HomeDiskSpaceStatus=$(checkhomediskspace )
-    NetStatus=$(checknet )
+    NetStatus=$(checknet2 )
 done
 
 if [ "$TmpDiskSpaceStatus" -ne 1 ]

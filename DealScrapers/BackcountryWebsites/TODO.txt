@@ -1,0 +1,71 @@
+string similarity 
+longest common subsequence
+
+Prevent injection attacks - mysql_real_escape_string
+Add multiple queries at one time, allowe entries separated by space & tokenize
+
+Query on price
+More advanced query engine , substring matching?
+Query on Men's, WOmen's, restrict to certain websites 
+
+Possible case sensitivity problems for people - ignore case
+Hide DB password on server
+DONE??? check that entry/item hasn't been entered into the db all ready
+Allow selection of item from drop down menu of past products for specific match alert
+Prevent entry of non-numeric data for numeric fields --> try to save the page so we can figure out why the error occurred
+MySQL full migration
+DB of key, price, quantity,mspr%,dicount,etc...make it a table with matching key to the table that holds the product description 
+prevent insertion of blank query
+post past products list & # of occurrences & last occurrence
+Image database -> check if all entries actually have an image!
+
+save queries & MySQL commandds to separate .sql files
+simple CLI tools to add delete.query the database
+
+php generated webpage of all the diferent product images alphabetized
+php generated webpage of product images that match query
+php backslash conversion for proper display
+php display products prices
+php query constructor : product price, quantity, % off MSRP, website, deal duration, date, product keyword, men's womens', pricelt/gt price bracketed, exclude keyword, exclude include certain website, only show results from x days/weeks/months/ago
+querey db of alerts and make suggestions when new items come up that may be of interest.
+method of haivng a link for theses suggested items that can then have that person be enrolled to be alerted for that item
+
+create simpler displayProdDescriPImages so it doesn't kill the comp w all the data etc
+SPlit up into 24/48/72 records or something
+
+In future filter out old results that haven't been seen in quite some time that mya no longer be offered
+
+Display link to rudimentary google search of product review of featured item. possibly parse the reviews and ..ahh that would only work for currently displayed items. would have to steal the reviews from other places
+
+Query of how often new/never before seen products ocme up.
+REDO in Python so can be done solely on Djinius
+
+set up remote access of home computers
+
+link to webpage in email so can easily go to the webpage quickly to purchase the itme.
+Or launch a ODAT app on their phone.
+have link to a custom made page for that product that is statically viewable. ie need some way to produce page just for that product on fly yet that can be sent as a request
+x
+
+Clean up script for dtabases
+
+display time as local and not utc on webpage. translate from UTC to local time zone time
+Create log file output for debug purposes
+send test message page to ensure address entered correctly - enter address to database & delete record after test message sent " this is from the deal tracker at djinnius" --how to accomplish this since we run Perl locally!
+have backups scheduled for the database and website
+
+use last_insert_id() to retrieve an autoincrememtn value after inserting a row
+
+Show what other peopleare searching for.
+WRite a disclaimer
+Link to deals page so can manage their alerts
+Possibly am off somehow on the times of reneewal? they seem to come in clumps instead of being independnt of each other whch the posted times seem to suggest from the script output
+display product likelihood of reappearance-text size based on # of times seen & quantity. trend quantity as a graph to see if pople are buying any. graph price too and see if it trends in any direction. 
+mark as hot if seee the numbers go down quickly. (wish we could see how many are left when the deal expires)
+aJAX style interface for output of products info 1 at a time or by brands.
+make listproducts.php have links to images.
+
+select product from pulldown list and then have a statistics page of that item appear showing all kinds of goodies (all the relevant info) about that product. possibly have icons for each thing. red/yellow/green for hwo expensive it is compared to other sites vs just that site (am talking about the ODAT sites) pie chart showing percent off MSRP. timeline of price & quantity --possibly done with google graphs
+
+NOTE:
+Meta refresh not fullproff
