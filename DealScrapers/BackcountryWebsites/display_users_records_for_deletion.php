@@ -11,34 +11,40 @@ $tbl_name="SearchTermsAndContactAddress"; // Table name
 mysql_connect("$host", "$username", "$password")or die("cannot connect");
 mysql_select_db("$db_name")or die("cannot select DB");
 
-$sql="SELECT * FROM $tbl_name where contactaddress = ('$_POST[SearchAddress]') order by searchterms asc";
-$result=mysql_query($sql);
+$sql = 'SELECT * FROM `'.$tbl_name.'` WHERE contactaddress = \''.mysql_real_escape_string($_POST['SearchAddress']).'\' ORDER BY searchterms ASC';
 
+$result=mysql_query($sql);
 $count=mysql_num_rows($result);
 
-$Address="$_POST[SearchAddress]";
-
 ?>
+<html>
+<body>
+
+<form method="post" action="delete_checkboxed_items.php">
 <table width="400" border="0" cellspacing="1" cellpadding="0">
 <tr>
 <td><form name="form1" method="post" action="">
 <table width="400" border="0" cellpadding="3" cellspacing="1" bgcolor="#CCCCCC">
 <tr>
   <td bgcolor="#FFFFFF">&nbsp;</td>
-  <td colspan="4" bgcolor="#FFFFFF"><strong>Alerts for <? echo $Address; ?></strong> </td>
+<td colspan="4" bgcolor="#FFFFFF"><strong>Delete multiple rows in mysql</strong> </td>
 </tr>
 <tr>
 <td align="center" bgcolor="#FFFFFF">#</td>
 <td align="center" bgcolor="#FFFFFF"><strong>Id</strong></td>
 <td align="center" bgcolor="#FFFFFF"><strong>Search Term</strong></td>
+<td align="center" bgcolor="#FFFFFF"><strong>Address</strong></td>
+<td align="center" bgcolor="#FFFFFF"><strong>Attach Image</strong></td>
 </tr>
 <?php
   while($rows=mysql_fetch_array($result)){
 ?>
 <tr>
-<td align="center" bgcolor="#FFFFFF"><input name="checkbox[]" type="checkbox" id="checkbox[]" value="<? echo $rows['id']; ?>"></td>
+<td align="center" bgcolor="#FFFFFF"><input name="checkbox[]" type="checkbox" id="checkbox[]" value="<? echo $rows['prim_key']; ?>"></td>
 <td bgcolor="#FFFFFF"><? echo $rows['prim_key']; ?></td>
 <td bgcolor="#FFFFFF"><? echo $rows['searchterms']; ?></td>
+<td bgcolor="#FFFFFF"><? echo $rows['contactaddress']; ?></td>
+<td bgcolor="#FFFFFF"><? echo $rows['ImageAttachment']; ?></td>
 </tr>
 <?php
   }
@@ -46,20 +52,10 @@ $Address="$_POST[SearchAddress]";
 <tr>
 <td colspan="5" align="center" bgcolor="#FFFFFF"><input name="delete" type="submit" id="delete" value="Delete"></td>
 </tr>
-<?
-  // Check if delete button active, start this
-  if($delete){
-    for($i=0;$i<$count;$i++){
-      $del_id = $checkbox[$i];
-      $sql = "DELETE FROM $tbl_name WHERE id='$del_id'";
-      $result = mysql_query($sql);
-    }
 
-    // if successful redirect to delete_multiple.php
-    if($result){
-      echo "<meta http-equiv=\"refresh\" content=\"0;URL=index.html\">";
-    }
-  }
+</form>
+
+<?
 mysql_close();
 ?>
 </table>
@@ -67,3 +63,5 @@ mysql_close();
 </td>
 </tr>
 </table>
+</body>
+</html>

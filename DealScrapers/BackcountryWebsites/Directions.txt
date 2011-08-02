@@ -16,8 +16,8 @@ Enter a search term in the text box.
 TIP: Searching is a little rudimentary right now so a 'shotgun' approach is best. By this I mean that if you are looking for a certain Castelli jersey or short that it is probably best to enter 'Castelli' as your search term.
 TIP:If any of the past products are exactly what you're looking for then just copy the product description into the 'Search Term' field and you'll be notified when that product shows back up.
 Enter an email address or your phone's email adddress.
-Most cell phone providers have an email address that is associated with it's texting service. Sending an email to the address will send a text message to the associated phone. 
-Check for you cell provider here: http://www.emailtextmessages.com/
+Most cell phone providers have an email address that is associated with it's texting service. Sending an email to the address will send a text message to the associated phone. I feel that this is the best way to receive alerts if you don't always have your email account open.
+Check for you cell provider's email to text address here: http://www.emailtextmessages.com/
 Here is a short list of the most popular providers.
     * AT&T – cellnumber@txt.att.net
     * Verizon – cellnumber@vtext.com
@@ -35,7 +35,9 @@ For text messages you will receive a MMS/picture message.
 You will receive an email from deals@djinnius.com with the product information and the image if you selected to have that sent as well.
 Check that this address is not labeled as spam.
 
-Standard text messaging rates apply blabbity blah.
+**NOTE**
+Standard text messaging rates apply blabbity blah. If you set up a lot of alerts you can be bombarded with texts which may add up quite quickly.
+
 
 Stop Alerts
 -----------

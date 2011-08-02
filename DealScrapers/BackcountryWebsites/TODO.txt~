@@ -1,0 +1,13 @@
+string similarity 
+longest common subsequence
+
+Prevent injection attacks - mysql_real_escape_string
+Add multiple queries at one time, allowe entries separated by space & tokenize
+Query on price
+More advanced query engine
+Possible case sensitivity problems for people
+Hide DB password on server
+DONE??? check that entry/item hasn't been entered into the db all ready
+Allow selection of item from drop down menu of past products for specific match alert
+Prevent entry of non-numeric data for numeric fields --> try to save the page so we can figure out why the error occurred
+

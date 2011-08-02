@@ -119,6 +119,58 @@ function on_exit()
 
 }
 #----BEGIN - FUNCTIONS SPECIFIC TO PRODUCT DATABASE ------
+function CompareDateToNow2()
+{
+#The problem I was having was that i was comparing utc time from the db to local time, i needed to compare utc to utc times.                                
+echo "inside CompareDateToNow2()";
+    DateToCompare="${1}"
+    MinuteThreshold=${2}
+    echo $DateToCompare $MinuteThreshold
+#we'll use the TC suffix to mean ToCompare                                                                                                                  
+    YearTC="${DateToCompare:0:4}" #don't leave a space btw the = and " or I won't work                                                                      
+    MonthTC="${DateToCompare:5:2}"
+    DayTC="${DateToCompare:8:2}"
+    HourTC="${DateToCompare:11:2}"
+    MinutesTC="${DateToCompare:14:2}"
+    SecondsTC="${DateToCompare:17:2}"
+    YearTCSeconds=$(( 365*24*60*60*($YearTC-1970) ))
+#`expr 365*24*60*60*($YearTC-1970) ` #this is supposed to work but didn't. maybe I'm donig something wrong                                                  
+# we add the 10# infront of the variable to force the base to be decimal instead of octal (since we might get times that are 08 and then eprform math on the\m.  This will cause and error of "value too great for base (error token is "09")" or "08" this is because in octal 07 is the highest it can go.    
+    MonthTCSeconds=$(( 10#$MonthTC*31*24*60*60 ))  #`expr $MonthTC*31*24*60*60`                                                                             
+    DayTCSeconds=$(( 10#$DayTC*24*60*60 ))
+    HourTCSeconds=$(( 10#$HourTC*60*60 ))
+    MinutesTCSeconds=$(( 10#$MinutesTC*60  ))
+    SecondsTCTotalSince1970=$(( $YearTCSeconds+$MonthTCSeconds+$DayTCSeconds+$HourTCSeconds+$MinutesTCSeconds+10#$SecondsTC ))
+
+    Year=$( date --utc +%Y )
+    Month=$( date --utc +%m )
+    Day=$( date --utc +%d )
+    Hour=$( date --utc +%H )
+    Minute=$( date --utc +%M )
+    Second=$( date --utc +%S )
+    SecondsTotalSince1970=$(( (10#${Year}-1970)*365*24*60*60+10#${Month}*31*24*60*60+10#${Day}*24*60*60+10#${Hour}*60*60+10#${Minute}*60+10#${Second} ))
+    echo $SecondsTCTotalSince1970 $SecondsTotalSince1970     
+    echo "SecsTC" $SecondsTCTotalSince1970 "SecsTotal" $SecondsTotalSince1970    
+echo $Year $YearTC
+echo $Month $MonthTC
+echo $Day $DayTC
+echo $Hour $HourTC
+echo $Minute $MinutesTC
+echo $Second $SecondsTC
+    SecondsBetweenTimes=$(( $SecondsTotalSince1970-$SecondsTCTotalSince1970 ))
+ # if you keep getting an error it is because MinuteThreshold is empty bc the entry into the database was corrupted. Run the cleanup script
+    Threshold=$(( ${MinuteThreshold}*60 ))
+    echo "SEcsbtwTimes" $SecondsBetweenTimes "Thresh" $Threshold                                                                                           
+    if  [ "$SecondsBetweenTimes" -lt "$Threshold" ]
+    then
+#We don't want to add the item into the database bc the product names are the same and the time difference isn't enough                                    
+        echo "0"
+    else
+#the time difference iis enough that we want to enter the item into the database even if the product names are the same.                                    
+        echo "1"
+    fi
+}
+
 function CompareDateToNow
 {
 #The problem I was having was that i was comparing utc time from the db to local time, i needed to compare utc to utc times.                                
@@ -212,6 +264,8 @@ fi
     else
 #prevent duplicate entries sequentially but allow duplicates if a certain period has passed therefore giving a check saying that we are pretty sure that this is just a repeat that day/week/whatever
 # if you keep getting an error it is because PreviousDealDurationInMinutes is empty bc the entry into the database was corrupted. Run the cleanup script
+	echo "prev_time_enter:${PreviousTimeEnter}: prev_deal_dur:${PreviousDealDurationInMinutes}:";
+	CompareDateToNow2 "${PreviousTimeEnter}" ${PreviousDealDurationInMinutes} 
 	TimeComparison=$( CompareDateToNow "${PreviousTimeEnter}" ${PreviousDealDurationInMinutes} )
         	
         if [ $TimeComparison -eq 1 ] # "${ProductDescription}" != "" ${Price} != ""  ${PercentOffMSRP} != ""  ${TotalQuantity}!= ""  ${DurationInMinutes} != ""
@@ -688,6 +742,9 @@ function UpdateWebpageMetaRefresh()
     RefreshTime=${1}
     Webpage="${2}"
     output="<META HTTP-EQUIV=\"REFRESH\" CONTENT=\"${RefreshTime}\">"
+#add in the date so we can have something to go off of when we want to debug what is happening with the refresh time
+    date1=`date`
+    date2=`date -u`
     BeginLineNumber=$( GetTagLineNumber "\"Refresh Begin"\" "${Webpage}" )
     EndLineNumber=$( GetTagLineNumber "\"Refresh End"\" "${Webpage}" )
 #echo $output $BeginLineNumber $EndLineNumber
@@ -697,6 +754,8 @@ function UpdateWebpageMetaRefresh()
 
     Output="${Top}
  ${output}
+${date1}
+${date2}
 ${Bottom}"
 
     echo "${Output}" > "${Webpage}"
