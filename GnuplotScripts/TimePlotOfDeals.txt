@@ -1,0 +1,26 @@
+set style data points 
+#dots
+set datafile separator "|"
+set xdata time
+set timefmt "%Y-%m-%d %H:%M:%S"
+set format x "%H:%M:%S"
+#set xrange [0:24] #using this breaks the script
+#set yrange [10:10]
+#set ylabel "Price"
+
+binwidth=5
+bin(x,width)=width*floor(x/width)
+#plot 'datafile' using (bin($1,binwidth)):(1.0) smooth freq with boxes
+plot '< sqlite3 test.db "select timeEnter,quantity from Backcountrydeals where product like ''%Fairmont%'' "'  using (bin($1,binwidth)):(1.0) smooth freq with boxes title "Time of Deal"
+ 
+
+#plot '< sqlite3 test.db "select timeEnter,quantity from Backcountrydeals where product like ''%Fairmont%'' "' using 1:2  title "Time of Deal" #i work
+
+# where product like ''%Fairmont%''"' using 1:2 title "Time of Deal"
+
+#plot VolcomFairmont.txt using 1 title "Time of Deal"
+
+#if we don't set the title in the line above then the query becomes the title :(
+set terminal png size 500,375
+set output "TimePlotOfDealsGnuplot.png"
+replot

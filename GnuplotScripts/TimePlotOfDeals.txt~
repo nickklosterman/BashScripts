@@ -1,0 +1,17 @@
+set style data points 
+#dots
+set datafile separator "|"
+set xdata time
+set timefmt "%Y-%m-%d %H:%M:%S"
+set format x "%H:%M:%S"
+#"%H:%M:%S"
+#set xrange [-1:4]
+#set yrange [0:100]
+set ylabel "Price"
+#set key title  "0 = Steep and Cheap\n1=Whiskey Militia\n2=Bonktown\n3=Chainlove"
+plot '< sqlite3 test.db "select timeEnter,price from Backcountrydeals order by Bkey desc limit 25"' using 1:2 title "Time  vs. Price"
+
+#if we don't set the title in the line above then the query becomes the title :(
+set terminal png size 500,375
+set output "TimevsPriceGnuplot.png"
+replot
