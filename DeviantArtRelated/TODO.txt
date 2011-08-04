@@ -1,0 +1,7 @@
+perform sort & uniq on the index.html to avoid all that extra work being done by wget
+snag mature content images
+add in geometry restrictions --geometry for feh
+upload images to website & have chumby display them
+overwrite if size bigger (either bitwise or actual image dimensions)
+progr to go and spider through directories and find which images we only have thumbnails for (look at image dimensions)
+prog to analyze the index.html and see if larger images can be downloaded.
