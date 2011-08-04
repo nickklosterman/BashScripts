@@ -24,7 +24,11 @@ echo "<table><tr><td>ID</td><td>Search Term</td><td>Contact Address</td><td>Atta
 
 //row for each record
 while ($row = mysql_fetch_array($result)) {
+<<<<<<< HEAD
+echo"<tr><td>" . $row['prim_key'] . "</td><td>" . $row['searchterms'] . "</td><td>" . $row['contactaddress'] . "</td></tr>";
+=======
 echo"<tr><td>" . $row['prim_key'] . "</td><td>" . $row['searchterms'] . "</td><td>" . $row['contactaddress'] . "</td><td>" . $row['ImageAttachment'] . "</td></tr>";
+>>>>>>> 5e6104998366afc86f5f404e4e5403a018518686
 }
 
 echo "</table>";
