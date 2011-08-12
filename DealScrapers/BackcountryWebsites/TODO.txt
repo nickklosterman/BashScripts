@@ -66,6 +66,14 @@ aJAX style interface for output of products info 1 at a time or by brands.
 make listproducts.php have links to images.
 
 select product from pulldown list and then have a statistics page of that item appear showing all kinds of goodies (all the relevant info) about that product. possibly have icons for each thing. red/yellow/green for hwo expensive it is compared to other sites vs just that site (am talking about the ODAT sites) pie chart showing percent off MSRP. timeline of price & quantity --possibly done with google graphs
+show all the gnuplot graphs on this page
+
+Time graph of when a product is offered
+
+list of most often offered items. calculation of average time between offerings
+
+Add git path to classpath so that can execute from anywher
+
 
 NOTE:
 Meta refresh not fullproff
