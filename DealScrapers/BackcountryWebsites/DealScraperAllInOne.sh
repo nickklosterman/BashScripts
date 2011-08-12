@@ -122,7 +122,7 @@ function on_exit()
 function CompareDateToNow2()
 {
 #The problem I was having was that i was comparing utc time from the db to local time, i needed to compare utc to utc times.                                
-echo "inside CompareDateToNow2()";
+    echo "inside CompareDateToNow2()";
     DateToCompare="${1}"
     MinuteThreshold=${2}
     echo $DateToCompare $MinuteThreshold
@@ -151,12 +151,12 @@ echo "inside CompareDateToNow2()";
     SecondsTotalSince1970=$(( (10#${Year}-1970)*365*24*60*60+10#${Month}*31*24*60*60+10#${Day}*24*60*60+10#${Hour}*60*60+10#${Minute}*60+10#${Second} ))
     echo $SecondsTCTotalSince1970 $SecondsTotalSince1970     
     echo "SecsTC" $SecondsTCTotalSince1970 "SecsTotal" $SecondsTotalSince1970    
-echo $Year $YearTC
-echo $Month $MonthTC
-echo $Day $DayTC
-echo $Hour $HourTC
-echo $Minute $MinutesTC
-echo $Second $SecondsTC
+    echo $Year $YearTC
+    echo $Month $MonthTC
+    echo $Day $DayTC
+    echo $Hour $HourTC
+    echo $Minute $MinutesTC
+    echo $Second $SecondsTC
     SecondsBetweenTimes=$(( $SecondsTotalSince1970-$SecondsTCTotalSince1970 ))
  # if you keep getting an error it is because MinuteThreshold is empty bc the entry into the database was corrupted. Run the cleanup script
     Threshold=$(( ${MinuteThreshold}*60 ))
@@ -214,10 +214,156 @@ function CompareDateToNow
         echo "1"
     fi
 }
-
-GiveDatabaseTablenameDataEnterIntoDatabase()
+function EnterProductDataIntoDatabase()
 {
+    MySQLHost="mysql.server272.com"
+    MySQLPort="3306"
+    MySQLDatabase="djinnius_BackCountryAlerts"
+    MySQLTableName="Backcountrydeals"
+    MySQLUser="BCA"
+    MySQLPassword="backcountryalerts"
+    query="insert into  ${MySQLTableName} (websiteCode, product, price, percentOffMSRP, quantity, dealdurationinminutes) values ( '${1}', '${2}','${3}', '${4}', '${5}', '${6}' );"
+    queryresult=$(    mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --execute="${query}"   )
+    echo "${queryresult}"
+
+}
+function GiveDatabaseTablenameDataEnterIntoDatabase()
+{
+
     sqlite3 ${1} "insert into ${2} (websiteCode, product, price, percentOffMSRP, quantity, dealdurationinminutes) values ( '${3}', '${4}', '${5}', '${6}', '${7}', '${8}' );"
+}
+function GenericMySQLDatabaseQuery()
+{
+    MySQLHost=${1}
+    MySQLPort=${2}
+    MySQLDatabase=${3}
+    MySQLUser=${4}
+    MySQLPassword=${5}
+    MySQLQuery="${6}"
+    
+    mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --execute="${MySQLQuery}" --skip-column-names
+}
+
+function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2()
+{
+    Webpage=${1}
+    WebsiteCode=${2}
+
+    MySQLHost="mysql.server272.com"
+    MySQLPort="3306"
+    MySQLDatabase="djinnius_BackCountryAlerts"
+    MySQLUser="BCA"
+    MySQLPassword="backcountryalerts"
+#MySQLTableName="ProductImages"
+
+    TAB=$(echo -e "\t")
+
+    ProductDescription=$(GivePageReturnProductDescriptionV2 ${Webpage} ) #for teh mysql database we don't need teh double apostrophe escape sequence
+    Price=$(GivePageReturnPrice ${Webpage} )
+    PercentOffMSRP=$(GivePageReturnPercentOffMSRP ${Webpage} )
+    TotalQuantity=$(GivePageReturnTotalQuantity ${Webpage} )
+    if [ "${TotalQuantity}" == "" ]
+    then
+	echo "Total Quantity is empty!!! ${WebsiteCode}"
+    fi
+    DurationInMinutes=$(GivePageReturnDurationOfDealInMinutes ${Webpage} )
+
+    NumberOfRecordsToDisplay=1
+    MySQLQuery="SELECT product FROM BackcountryProducts WHERE websitecode=${WebsiteCode} ORDER BY ProductEntrykey DESC LIMIT ${NumberOfRecordsToDisplay}"
+    echo "${MySQLQuery}"
+    PreviousProduct=$(GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}")
+
+
+#    echo "prev_time_enter:$PreviousTimeEnter: prev_deal_duration:$PreviousDealDurationInMinutes:" 
+    echo "prev_prod:${PreviousProduct}:${#PreviousProduct}:  prod_desc:${ProductDescription}:${#ProductDescription}:" 
+
+#so for some reason the string != comparison no longer works, but the = does.
+    if [ "${PreviousProduct}" = "${ProductDescription}" ]
+    then 
+	echo "EQUAL"
+    fi
+    if [ "${PreviousProduct}" != "${ProductDescription}" ]
+    then 
+	echo "NOT EQUAL"
+    else
+	echo "NOT EQUAL Fail"
+    fi
+
+    if [ "${PreviousProduct}" != "${ProductDescription}" ]
+    then
+        echo "Entering new product info into database. reason:products not the same--${ProductDescription}"
+#obtain ProductEntrykey if 
+	MySQLQuery="SELECT ProductEntrykey FROM BackcountryProducts WHERE product=\"${ProductDescription}\";"
+	databaserecords=$(GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}")
+	if [ ${#databaserecords} -eq 0 ]
+	then 
+#Enter product
+#enter product details
+	    echo "product not entered, entering it in:${databaserecords}:"
+	    MySQLQuery="INSERT INTO BackcountryProducts ( websiteCode, product ) values (${WebsiteCode}, \"${ProductDescription}\" );" 
+	    echo "${MySQLQuery}"
+	    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}"
+#aaah...we need to grab the ProductEntrykey of the ercords we just entered
+	    MySQLQuery="SELECT ProductEntrykey FROM BackcountryProducts WHERE product=\"${ProductDescription}\";"
+	    echo "${MySQLQuery}"
+	    databaserecords=$(GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}")
+	    MySQLQuery="INSERT INTO BackcountryProductDetails ( ProductEntryKey, price, percentOffMSRP, quantity, dealdurationinminutes ) VALUES (${databaserecords}, ${Price}, ${PercentOffMSRP}, ${TotalQuantity}, ${DurationInMinutes} );"
+	    echo "${MySQLQuery}"
+	    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}"
+#this is a bit risky because if we don't successfully execute both of these queries we'll have some dangling data that is a bit useless
+#we need to catch the error and retry
+	else
+#just enter the product deteails
+	    echo "product found;just entering in data to ProductDetails w key:${databaserecords}"
+	    MySQLQuery="INSERT INTO BackcountryProductDetails ( ProductEntryKey, price, percentOffMSRP, quantity, dealdurationinminutes ) VALUES (${databaserecords}, ${Price}, ${PercentOffMSRP}, ${TotalQuantity}, ${DurationInMinutes} );"
+	    echo "${MySQLQuery}"
+
+	    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}"
+	    
+	fi
+	
+    else
+#prevent duplicate entries sequentially but allow duplicates if a certain period has passed therefore giving a check saying that we are pretty sure that this is just a repeat that day/week/whatever
+# if you keep getting an error it is because PreviousDealDurationInMinutes is empty bc the entry into the database was corrupted. Run the cleanup script
+	    MySQLQuery="SELECT ProductEntrykey FROM BackcountryProducts WHERE product=\"${ProductDescription}\";"
+	    echo "${MySQLQuery}"
+	    ProductEntrykey=$(GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}")
+echo "will this get me the results I was looking for?"
+	MySQLQuery="SELECT dealdurationinminutes,timeEnter FROM BackcountryProductDetails WHERE ProductEntrykey=${ProductEntrykey} ORDER BY DetailEntrykey DESC LIMIT ${NumberOfRecordsToDisplay}"
+	echo "${MySQLQuery}"
+	databaserecords=$(GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}")
+	echo "results:${databaserecords}"
+	
+	OIFS=$IFS
+	IFS=$TAB
+	Array=($(echo "${databaserecords}"))
+	
+	IFS=$OIFS
+
+	PreviousDealDurationInMinutes=${Array[0]}
+	PreviousTimeEnter="${Array[1]}"
+	
+
+	echo "prev_time_enter:${PreviousTimeEnter}: prev_deal_dur:${PreviousDealDurationInMinutes}:";
+	CompareDateToNow2 "${PreviousTimeEnter}" ${PreviousDealDurationInMinutes} 
+	TimeComparison=$( CompareDateToNow "${PreviousTimeEnter}" ${PreviousDealDurationInMinutes} )
+        
+        if [ $TimeComparison -eq 1 ] # "${ProductDescription}" != "" ${Price} != ""  ${PercentOffMSRP} != ""  ${TotalQuantity}!= ""  ${DurationInMinutes} != ""
+        then
+            echo "Entering new product info into database.reason:products the same but meets time diff criteria"
+	    echo "TODO : WE NEED TO TYPECHECK THAT WE ARE ENTERING VALID DATA HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+
+	    MySQLQuery="SELECT ProductEntrykey FROM BackcountryProducts WHERE product=\"${ProductDescription}\";"
+	    echo "${MySQLQuery}"
+	    databaserecords=$(GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}")
+	    MySQLQuery="INSERT INTO BackcountryProductDetails ( ProductEntryKey, price, percentOffMSRP, quantity, dealdurationinminutes ) VALUES (${databaserecords}, ${Price}, ${PercentOffMSRP}, ${TotalQuantity}, ${DurationInMinutes} );"
+	    echo "${MySQLQuery}"
+	    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}"
+
+        else
+            echo "Product the same, but time difference too little from previous entry."
+        fi
+    fi
 }
 function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase()
 {
@@ -246,20 +392,21 @@ function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase()
 
 
 #so for some reason the string != comparison no longer works, but the = does.
-if [ "${PreviousProductDescription}" = "${ProductDescription}" ]
-then 
-echo "EQUAL"
-fi
-if [ "${PreviousProductDescription}" != "${ProductDescription}" ]
-then 
-echo "NOT EQUAL"
-else
-echo "NOT EQUAL Fail"
-fi
+    if [ "${PreviousProductDescription}" = "${ProductDescription}" ]
+    then 
+	echo "EQUAL"
+    fi
+    if [ "${PreviousProductDescription}" != "${ProductDescription}" ]
+    then 
+	echo "NOT EQUAL"
+    else
+	echo "NOT EQUAL Fail"
+    fi
 
     if [ "${PreviousProductDescription}" != "${ProductDescription}" ]
     then
         echo "Entering new product info into database. reason:products not the same"
+	EnterProductDataIntoDatabase ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
         GiveDatabaseTablenameDataEnterIntoDatabase  ${Database} ${Table} ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
     else
 #prevent duplicate entries sequentially but allow duplicates if a certain period has passed therefore giving a check saying that we are pretty sure that this is just a repeat that day/week/whatever
@@ -267,17 +414,19 @@ fi
 	echo "prev_time_enter:${PreviousTimeEnter}: prev_deal_dur:${PreviousDealDurationInMinutes}:";
 	CompareDateToNow2 "${PreviousTimeEnter}" ${PreviousDealDurationInMinutes} 
 	TimeComparison=$( CompareDateToNow "${PreviousTimeEnter}" ${PreviousDealDurationInMinutes} )
-        	
+        
         if [ $TimeComparison -eq 1 ] # "${ProductDescription}" != "" ${Price} != ""  ${PercentOffMSRP} != ""  ${TotalQuantity}!= ""  ${DurationInMinutes} != ""
         then
             echo "Entering new product info into database.reason:products the same but meets time diff criteria"
 	    echo "TODO : WE NEED TO TYPECHECK THAT WE ARE ENTERING VALID DATA HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+	    EnterProductDataIntoDatabase ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
             GiveDatabaseTablenameDataEnterIntoDatabase  ${Database} ${Table} ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
         else
             echo "Product the same, but time difference too little from previous entry."
         fi
     fi
 }
+
 function GiveDatabaseTableNameWebsiteCodeGetLastDealDurationInMinutesEntryFromDatabase
 {
     Database=${1}
@@ -468,11 +617,9 @@ function GivePageReturnPercentOffMSRP()
 function ConvertForwardSlashToBackSlash()
 {
 #the apostrophe for possessives screws things up so we need to convert it and then convert it back
-Output=` echo "${1}" | tr '/' '\' `
-#tried it without inclucing in backticks adn we got the entire webpages leaking in somehow instead of just the description text
-# echo "${1}" | sed 's/\x27/\^/g; s/\//\\/g; s/\^/\x27/g' 
-#stuff="mi/ke's"; echo ${stuff} | sed 's/\x27/\^/;s/\//\\/;s/\^/\x27/' # this works so what is up with the line above? ....uggggh cuz we weren't copying it over to the directory where we were executing the script!!!...but it still didn't work
-echo "${Output}"
+    Output=` echo "${1}" | tr '/' '\' `
+
+    echo "${Output}"
 }
 
 function GiveProductProductImageEnterIntoDatabase()
@@ -494,18 +641,14 @@ function GiveProductProductImageEnterIntoDatabase()
     MySQLPassword="backcountryalerts"
     flag=0
 
-#check and see if the product all ready entered in database
-    query="select image_id,filename,number_of_times_seen from ${MySQLTableName} where filename=\"${Product}\"" 
+#check and see if the product all ready entered in database, expand variables here in a query string and then expand the $query in the dbase call   
+
     query="select image_id,filename from ${MySQLTableName} where filename=\"${Product}\""  
-#    query="select image_id,filename,number_of_times_seen from ProductImages where filename=\"Cutter Tall Boy Sock - 3-Pack\"" 
-    #mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --execute="${query}" --silent --skip-column-names | while read databaserecords; do
+
     databaserecords=$(mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --execute="${query}" --silent --skip-column-names  )
     databaserecordsSize=${#databaserecords}
     if [ $databaserecordsSize -ne 0 ]
     then
-
-# the database query was being piped straight into the while statement. this was causing ascope problem as piping utilizes a subshell so the 'flag' variable was out of scope when I needed it.
-#also using the databasearecords isn't very useful because each field is hard to get (esp text) as spaces are treated as a field separator
 
 #we SHOULD only get one record back otherwise this isn't working the way I want it to
 #TODO: make sure only 1 record is beign returned by creating a query that will erturn more than one results
@@ -513,39 +656,27 @@ function GiveProductProductImageEnterIntoDatabase()
 	echo "Matching records primary_key:$databaserecords"
         Array=($(echo "${databaserecords}" )) 
         Primary_Key=${Array[0]}
-#	file="${Array[1]}"
-#	echo "db:${file}-prod:${Product}"
 	query="UPDATE ${MySQLTableName} SET number_of_times_seen=number_of_times_seen+1 where image_id=${Primary_Key}" 
 	mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --execute="${query}" --silent
 	flag=1
-#	echo "flag inside:${flag}"
+#insert 
+# query="insert into ${MySQLTableName} 
     fi
-#    done
- #   echo "flag outside:${flag}"
+
     if [ ${flag} -eq 0 ] #then we haven't inserted that data into the database yet
     then 
 	echo "Match not found in database, entering in ${Product} as a new item"
 	query="insert into  ${MySQLTableName} (filename) value (\"${Product}\")"
-	#echo "${query}"
+
 	mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --execute="${query}" --silent
 
-#	Filename00=`echo "${Product}"| recode html`
-#	Filename=$Filename00.jpg
 
-#	echo "beforeslash $Product"
 	Filename=$( ConvertForwardSlashToBackSlash "${Product}").jpg #this takes care of the only forbidden character for filenames the '/' since that is interpreted as a directory separator
-#	Filename=${Product}.jpg
-
-#	echo "slash converted filename:${Filename2}: unconverted:${Filename}:"	
-	#echo "afterslash $Filename"
-	#echo "prod:${Product}: filename:${Filename}:"
-#	echo "do we need to check and see if ImageFile exists first?"
 	if [ -f "${ImageFile}"  ]
 	then
 	    cp -T "${ImageFile}" "${Filename}"
 	    if [ -f "${Filename}" ]
 	    then 
-#		echo "filename exists, otherwise rm would bitch "
 		UploadImageFileToDjinniusDeals "${Filename}"
 		rm "${Filename}"
 	    else 
@@ -734,7 +865,7 @@ function UpdateWebpage
 #update past deals table                                                                                                                             
     UpdateTable "${Webpage}" ${NumberOfRecordsToDisplay} "${TableBegin}" "${TableEnd}" "${Database}"
 #upload updated webpage                                                                                                                 
-  UploadDjinniusDealsIndex
+    UploadDjinniusDealsIndex
 }
 
 function UpdateWebpageMetaRefresh()
@@ -753,15 +884,17 @@ function UpdateWebpageMetaRefresh()
 
 
     Output="${Top}
- ${output}
+${output}
+<!--
 ${date1}
 ${date2}
+-->
 ${Bottom}"
 
     echo "${Output}" > "${Webpage}"
 
 #upload updated webpage                                                                                                                 
-  UploadDjinniusDealsIndex
+    UploadDjinniusDealsIndex
 }
 
 function UploadDjinniusDealsIndex
@@ -860,6 +993,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	    SteepAndCheapImage=$(GivePageAndWebsiteReturnImage ${SteepAndCheapPage} http://www.steepandcheap.com )
 	    GiveProductKeywordDatabaseTablethenNotify "${SteepAndCheapText}" ${SteepAndCheapImage}
 	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase "test.db" "Backcountrydeals" ${SteepAndCheapPage} 0
+	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2  ${SteepAndCheapPage} 0
 	    GiveProductProductImageEnterIntoDatabase "${SteepAndCheap}" "${SteepAndCheapImage}"
 	    UpdateWebpage 0 "${SteepAndCheapText}" "${SteepAndCheapImage}"  "${WebpageIndex}"
             notify-send  "$SteepAndCheapText" -i ${SteepAndCheapImage} -t 3
@@ -887,6 +1021,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	    WhiskeyMilitiaImage=$(GivePageAndWebsiteReturnImage ${WhiskeyMilitiaPage} http://www.whiskeymilitia.com )
 	    GiveProductKeywordDatabaseTablethenNotify  "${WhiskeyMilitiaText}"  ${WhiskeyMilitiaImage}
 	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase "test.db" "Backcountrydeals"  ${WhiskeyMilitiaPage} 1
+	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${WhiskeyMilitiaPage} 1
 	    GiveProductProductImageEnterIntoDatabase "${WhiskeyMilitia}" "${WhiskeyMilitiaImage}"
 	    UpdateWebpage 1 "${WhiskeyMilitiaText}" "${WhiskeyMilitiaImage}"   "${WebpageIndex}"
             notify-send  "$WhiskeyMilitiaText" -i ${WhiskeyMilitiaImage} -t 3
@@ -911,6 +1046,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	    BonktownImage=$(GivePageAndWebsiteReturnImage ${BonktownPage} http://www.bonktown.com )
 	    GiveProductKeywordDatabaseTablethenNotify "${BonktownText}" ${BonktownImage}
 	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db "Backcountrydeals"  ${BonktownPage} 2
+	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${BonktownPage} 2
 	    GiveProductProductImageEnterIntoDatabase "${Bonktown}" "${BonktownImage}"
 	    UpdateWebpage 2 "${BonktownText}" "${BonktownImage}"  "${WebpageIndex}"
             notify-send  "$BonktownText" -i ${BonktownImage} -t 3
@@ -934,6 +1070,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	    ChainloveImage=$(GivePageAndWebsiteReturnImage ${ChainlovePage} http://www.chainlove.com )
 	    GiveProductKeywordDatabaseTablethenNotify "${ChainloveText}" ${ChainloveImage}
 	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db Backcountrydeals  ${ChainlovePage} 3
+	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2  ${ChainlovePage} 3
 	    GiveProductProductImageEnterIntoDatabase "${Chainlove}" "${ChainloveImage}"
 	    UpdateWebpage 3 "${ChainloveText}" "${ChainloveImage}" "${WebpageIndex}"
             notify-send  "$ChainloveText" -i ${ChainloveImage} -t 3
@@ -964,7 +1101,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 
     MetaRefresh=15 # add a litle bit of buffer time
     let "MetaRefresh += SleepTime"
-echo "Metarefreshtime: ${MetaRefresh}" 
+    echo "Metarefreshtime: ${MetaRefresh}" 
     UpdateWebpageMetaRefresh ${MetaRefresh} "${WebpageIndex}"
 #it'd be nice if we could print the time ticking down and then refresh with the new deals. use "print" maybe?
 

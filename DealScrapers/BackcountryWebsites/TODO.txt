@@ -32,6 +32,35 @@ method of haivng a link for theses suggested items that can then have that perso
 
 create simpler displayProdDescriPImages so it doesn't kill the comp w all the data etc
 SPlit up into 24/48/72 records or something
+ 
+create a script to go through the database and pluck out the duplicates due to stopping and restarting the script.
+Simply go thorugh record by record and see if the following record is the same product and within the dealduration time. if so then delete if not then go on to the next one.
+Create a script to convert from the old style db to the new one we want to use. could possibly do it via pho...nah just do it in bash. cycle through the records and call an insert statement.
+
+Modify(rstrict??) alerts by preventing past matches from being sent to you.
+->enter in email address. query database of all matches for that email address. Run those matches against the product database returning anything that would've been mathced and an email sent to the user. allow user to checkbox select which of those items they wouldn't want to see sent to them again. 
+
+show how often new items pop up
+--ie have a graph with red dots of repeat items and blue dots showing new items
+
+
+sipmle precanned queries
+-display product that appears the most- select (
+-sqlite3 test.db "select product,count(product) from Backcountrydeals group by product"
+-select avg(number_of_times_seen) from ProductImages;
+- select * from ProductImages where number_of_times_seen >10;
+-select max(number_of_times_seen) from ProductImages;
+-select * from ProductImages where filename like "Shimano%" order by image_id desc limit 4 offset 4;
+-select * from ProductImages where number_of_times_seen=X limit 4 ;
+select * from ProductImages where number_of_times_seen > X order by number_of_times_seen desc limit Y ;
+-
+How inefficient is it to create a  long query statement and fill in as much as possible with input froma  user and then fill in the rest as wildcards to make a catchall style query ? teh dbase is small enough right now that I doubt anyone would be able to tell the diffference yet with more data and more  users I can see it takeing a hit.
+sqlite3 test.db "select avg(price) from Backcountrydeals"
+sqlite3 test.db "select avg(percentoffMSRP) from Backcountrydeals"
+select avg(image_id) from ProductImages where number_of_times_seen>(select avg(number_of_times_seen) from ProductImages);
+sqlite3 test.db "select min(percentoffMSRP),max(percentoffMSRP) from Backcountrydeals"
+sqlite3 test.db "select distinct(percentoffMSRP) from Backcountrydeals order by  percentoffMSRP desc"
+--> have a query perform all this and return these statistics. This is better than doing each small one piecemeal
 
 In future filter out old results that haven't been seen in quite some time that mya no longer be offered
 
@@ -73,6 +102,8 @@ Time graph of when a product is offered
 list of most often offered items. calculation of average time between offerings
 
 Add git path to classpath so that can execute from anywher
+
+Seems that the crappy net connection is causing the problem involving the poor updating of the items for sale.
 
 
 NOTE:

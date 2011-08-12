@@ -1,0 +1,10 @@
+sqlite3  test.db "select max(websiteCode),min(websiteCode) from Backcountrydeals" 
+3|0
+nicolae@nicolae-desktop:~/Desktop/sqlite_examples$ sqlite3  test.db "select max(price),min(price) from Backcountrydeals" 
+2999.99|0.99
+nicolae@nicolae-desktop:~/Desktop/sqlite_examples$ sqlite3  test.db "select max(percentOffMSRP),min(percentOffMSRP) from Backcountrydeals" 
+<title>Untitled|19
+nicolae@nicolae-desktop:~/Desktop/sqlite_examples$ sqlite3  test.db "select max(quantity),min(quantity) from Backcountrydeals" 
+|1cument</title>
+nicolae@nicolae-desktop:~/Desktop/sqlite_examples$ sqlite3  test.db "select max(dealdurationinminutes),min(dealdurationinminutes) from Backcountrydeals" 
+
