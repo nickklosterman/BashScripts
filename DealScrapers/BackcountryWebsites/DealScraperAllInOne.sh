@@ -239,9 +239,24 @@ function GenericMySQLDatabaseQuery()
     MySQLDatabase=${3}
     MySQLUser=${4}
     MySQLPassword=${5}
+#    MySQLOptions="${6}"
     MySQLQuery="${6}"
-    
-    mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --execute="${MySQLQuery}" --skip-column-names
+#you can't echo anything here since a few times the echoed data is stored as a variable
+    mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --skip-column-names --execute="${MySQLQuery}" 
+
+}
+function GenericMySQLDatabaseQueryHTML()
+{
+    MySQLHost=${1}
+    MySQLPort=${2}
+    MySQLDatabase=${3}
+    MySQLUser=${4}
+    MySQLPassword=${5}
+#    MySQLOptions="${6}"
+    MySQLQuery="${6}"
+#you can't echo anything here since a few times the echoed data is stored as a variable
+    mysql --host=${MySQLHost} --port=${MySQLPort} --database=${MySQLDatabase} --user=${MySQLUser} --password=${MySQLPassword} --skip-column-names --execute="${MySQLQuery}" --html
+
 }
 
 function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2()
@@ -271,8 +286,9 @@ function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2()
     NumberOfRecordsToDisplay=1
     MySQLQuery="SELECT product FROM BackcountryProducts WHERE websitecode=${WebsiteCode} ORDER BY ProductEntrykey DESC LIMIT ${NumberOfRecordsToDisplay}"
     echo "${MySQLQuery}"
+#    MySQLOptions="--no-beep"
     PreviousProduct=$(GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}")
-
+# "${MySQLOptions}" 
 
 #    echo "prev_time_enter:$PreviousTimeEnter: prev_deal_duration:$PreviousDealDurationInMinutes:" 
     echo "prev_prod:${PreviousProduct}:${#PreviousProduct}:  prod_desc:${ProductDescription}:${#ProductDescription}:" 
@@ -294,13 +310,15 @@ function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2()
         echo "Entering new product info into database. reason:products not the same--${ProductDescription}"
 #obtain ProductEntrykey if 
 	MySQLQuery="SELECT ProductEntrykey FROM BackcountryProducts WHERE product=\"${ProductDescription}\";"
-	databaserecords=$(GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}")
+	MySQLOptions="--no-beep"
+	databaserecords=$(GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}") #	databaserecords=$(GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLOptions}" "${MySQLQuery}")
 	if [ ${#databaserecords} -eq 0 ]
 	then 
 #Enter product
 #enter product details
 	    echo "product not entered, entering it in:${databaserecords}:"
 	    MySQLQuery="INSERT INTO BackcountryProducts ( websiteCode, product ) values (${WebsiteCode}, \"${ProductDescription}\" );" 
+	    MySQLOptions="--no-beep"
 	    echo "${MySQLQuery}"
 	    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}"
 #aaah...we need to grab the ProductEntrykey of the ercords we just entered
@@ -308,8 +326,10 @@ function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2()
 	    echo "${MySQLQuery}"
 	    databaserecords=$(GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}")
 	    MySQLQuery="INSERT INTO BackcountryProductDetails ( ProductEntryKey, price, percentOffMSRP, quantity, dealdurationinminutes ) VALUES (${databaserecords}, ${Price}, ${PercentOffMSRP}, ${TotalQuantity}, ${DurationInMinutes} );"
+	    MySQLOptions="--no-beep"
 	    echo "${MySQLQuery}"
 	    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}"
+#	    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLOptions}" "${MySQLQuery}" 
 #this is a bit risky because if we don't successfully execute both of these queries we'll have some dangling data that is a bit useless
 #we need to catch the error and retry
 	else
@@ -317,21 +337,25 @@ function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2()
 	    echo "product found;just entering in data to ProductDetails w key:${databaserecords}"
 	    MySQLQuery="INSERT INTO BackcountryProductDetails ( ProductEntryKey, price, percentOffMSRP, quantity, dealdurationinminutes ) VALUES (${databaserecords}, ${Price}, ${PercentOffMSRP}, ${TotalQuantity}, ${DurationInMinutes} );"
 	    echo "${MySQLQuery}"
-
-	    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}"
+	    MySQLOptions="--no-beep"
+	    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}"#	    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLOptions}" "${MySQLQuery}" 
 	    
 	fi
 	
     else
 #prevent duplicate entries sequentially but allow duplicates if a certain period has passed therefore giving a check saying that we are pretty sure that this is just a repeat that day/week/whatever
 # if you keep getting an error it is because PreviousDealDurationInMinutes is empty bc the entry into the database was corrupted. Run the cleanup script
-	    MySQLQuery="SELECT ProductEntrykey FROM BackcountryProducts WHERE product=\"${ProductDescription}\";"
-	    echo "${MySQLQuery}"
-	    ProductEntrykey=$(GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}")
-echo "will this get me the results I was looking for?"
+	MySQLQuery="SELECT ProductEntrykey FROM BackcountryProducts WHERE product=\"${ProductDescription}\";"
+	echo "${MySQLQuery}"
+	MySQLOptions="--no-beep"
+	ProductEntrykey=$(	    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}" )
+#GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLOptions}" "${MySQLQuery}")
+	echo "will this get me the results I was looking for?"
 	MySQLQuery="SELECT dealdurationinminutes,timeEnter FROM BackcountryProductDetails WHERE ProductEntrykey=${ProductEntrykey} ORDER BY DetailEntrykey DESC LIMIT ${NumberOfRecordsToDisplay}"
 	echo "${MySQLQuery}"
-	databaserecords=$(GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}")
+	MySQLOptions="--no-beep"
+	databaserecords=$(	    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}" )
+#GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLOptions}" "${MySQLQuery}")
 	echo "results:${databaserecords}"
 	
 	OIFS=$IFS
@@ -355,10 +379,14 @@ echo "will this get me the results I was looking for?"
 
 	    MySQLQuery="SELECT ProductEntrykey FROM BackcountryProducts WHERE product=\"${ProductDescription}\";"
 	    echo "${MySQLQuery}"
-	    databaserecords=$(GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}")
+	    MySQLOptions="--no-beep"
+	    databaserecords=$(	    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}" )
+#GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLOptions}" "${MySQLQuery}")
 	    MySQLQuery="INSERT INTO BackcountryProductDetails ( ProductEntryKey, price, percentOffMSRP, quantity, dealdurationinminutes ) VALUES (${databaserecords}, ${Price}, ${PercentOffMSRP}, ${TotalQuantity}, ${DurationInMinutes} );"
 	    echo "${MySQLQuery}"
+	    MySQLOptions="--no-beep"
 	    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}"
+#    GenericMySQLDatabaseQuery ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLOptions}" "${MySQLQuery}" 
 
         else
             echo "Product the same, but time difference too little from previous entry."
@@ -814,6 +842,61 @@ function GetLineToEOF
     echo "${Output}"
 }
 
+function UpdateWebpageMySQL
+{   
+    WebsiteCode=${1}
+    ProductDescription="${2}"
+    Webpage="${4}"  #this is just the file that we are updating...ie. index.html
+    TempImage="${3}"
+
+    echo ${Webpage}
+
+    Database="/home/nicolae/Desktop/sqlite_examples/test.db"
+
+    NumberOfRecordsToDisplay=25
+#Get webpage from site --keep a local version?                                                                                                               
+    case ${WebsiteCode} in  #key off website code                                                                                                            
+        0)
+            ProductBegin="\"SnC Product Description Begin\""
+            ProductEnd="\"SnC Product Description End\""
+            TableBegin="\"SnC Table Begin\""
+            TableEnd="\"SnC Table End\""
+            ProductImage="/tmp/SteepAndCheap.jpg"
+            ;;
+	1)
+            ProductBegin="\"WM Product Description Begin\""
+            ProductEnd="\"WM Product Description End\""
+            TableBegin="\"WM Table Begin\""
+            TableEnd="\"WM Table End\""
+            ProductImage="/tmp/WhiskeyMilitia.jpg"
+            ;;
+        2)
+            ProductBegin="\"BT Product Description Begin\""
+            ProductEnd="\"BT Product Description End\""
+            TableBegin="\"BT Table Begin\""
+            TableEnd="\"BT Table End\""
+	    ProductImage="/tmp/Bonktown.jpg"
+            ;;
+        3)
+            ProductBegin="\"CL Product Description Begin\""
+            ProductEnd="\"CL Product Description End\""
+            TableBegin="\"CL Table Begin\""
+            TableEnd="\"CL Table End\""
+            ProductImage="/tmp/Chainlove.jpg"
+            ;;
+    esac
+
+#upload new product image  
+    cp "${TempImage}" "${ProductImage}"
+    UploadFileToDjinniusDeals "${ProductImage}"
+#update product description                                                                                                                                 
+    UpdateProductDescription "${Webpage}" "${ProductDescription}" "${ProductBegin}" "${ProductEnd}"
+#update past deals table                                                                                                                             
+    UpdateTableMySQL "${Webpage}" ${NumberOfRecordsToDisplay} "${TableBegin}" "${TableEnd}" "${Database}"
+#upload updated webpage                                                                                                                 
+    UploadDjinniusDealsIndex
+}
+
 function UpdateWebpage
 {   
     WebsiteCode=${1}
@@ -903,6 +986,37 @@ function UploadDjinniusDealsIndex
     UploadFileToDjinniusDeals ${IndexFile}
 }
 
+function UpdateTableMySQL
+{
+    Webpage="${1}"
+    #echo "Webpage" "${1}"
+    NumberOfRecordsToDisplay="${2}"
+    BeginTag="${3}"
+    EndTag="${4}"
+    DatabaseName="${5}"
+    BeginLineNumber=$( GetTagLineNumber "${BeginTag}" "${Webpage}" )
+    EndLineNumber=$( GetTagLineNumber "${EndTag}" "${Webpage}" )
+    #echo $BeginLineNumber $EndLineNumber
+
+    Top=$( GetBeginningOfFileToLine ${BeginLineNumber} "${Webpage}" )
+
+    Bottom=$( GetLineToEOF ${EndLineNumber} "${Webpage}" )
+
+    QueryResults=$( GetQueryResultsMySQLForWebpageUpdate  ${WebsiteCode} ${NumberOfRecordsToDisplay} )
+
+
+#You need the extra empty lines otherwise the query results get put on our delimiter lines and that first result piles up and doesn't go away. it took me a while to figure out that this was happening.
+    Output="${Top} 
+                                                                                                                                    
+      ${QueryResults}      
+
+     ${Bottom}"
+
+    echo "${Output}" > "${Webpage}"
+
+}
+
+
 function UpdateTable
 {
     Webpage="${1}"
@@ -938,9 +1052,24 @@ function GetQueryResults
     DatabaseName="${1}"
     WebsiteCode=${2}
     NumberOfRecordsToDisplay=${3}
-    query="select product,price,percentOffMSRP,quantity,dealdurationinminutes,timeEnter from Backcountrydeals where websitecode=${WebsiteCode} order by Bkey desc limit ${NumberOfRecordsToDisplay}"
+    query="SELECT product,price,percentOffMSRP,quantity,dealdurationinminutes,timeEnter FROM Backcountrydeals WHERE websitecode=${WebsiteCode} ORDER BY Bkey DESC LIMIT ${NumberOfRecordsToDisplay} OFFSET 1"
 #for some reason it was having trouble expanding the quotes. To solve that i tried using eval but that seemed to not expand the variables so I had to do a two step approach.                                                                                        
     Output=`sqlite3 -html "${DatabaseName}" "${query}" `
+    echo "${Output}"
+}
+function GetQueryResultsMySQLForWebpageUpdate
+{
+    websiteCode=${1}
+    NumberOfRecordsToDisplay=${2}
+    MySQLHost="mysql.server272.com"
+    MySQLPort="3306"
+    MySQLDatabase="djinnius_BackCountryAlerts"
+    MySQLTableName="Backcountrydeals"
+    MySQLUser="BCA"
+    MySQLPassword="backcountryalerts"
+    MySQLQuery="SELECT p.product,d.price,d.percentOffMSRP,d.quantity,d.dealdurationinminutes,d.timeEnter FROM  BackcountryProducts p, BackcountryProductDetails d WHERE  p.ProductEntrykey=d.ProductEntrykey AND p.websiteCode=${websiteCode} ORDER BY d.DetailEntrykey  DESC LIMIT ${NumberOfRecordsToDisplay} OFFSET 1;"
+#    MySQLOptions="--html"
+    Output=$(GenericMySQLDatabaseQueryHTML ${MySQLHost} ${MySQLPort} ${MySQLDatabase}  ${MySQLUser} ${MySQLPassword} "${MySQLQuery}")
     echo "${Output}"
 }
 
@@ -980,6 +1109,7 @@ TmpDiskSpaceStatus=$( checktmpdiskspace )
 HomeDiskSpaceStatus=$( checkhomediskspace )
 NetStatus=$( checknet )
 while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -eq 1 ]] ; do 
+    echo "------------------------------------SC------------------------------------"
     SteepAndCheapPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.steepandcheap.com 0 )
     if [ "$SteepAndCheapPage" != "Error" ] 
     then 
@@ -1005,6 +1135,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	echo "Wget didn't return a 200 OK response when getting the Steep and Cheap webpage"
 	SNCTimeLeftSeconds=120
     fi
+    echo "------------------------------------WM------------------------------------"
     WhiskeyMilitiaPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.whiskeymilitia.com 1 )
     if [ "$WhiskeyMilitiaPage" != "Error" ]
     then 
@@ -1032,7 +1163,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	echo "Wget didn't return a 200 OK response when getting the Whiskey Militia webpage"
 	WMTimeLeftSeconds=120
     fi
-
+    echo "------------------------------------BT------------------------------------"
     BonktownPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.bonktown.com 2 )
     if [ "$BonktownPage" != "Error" ]
     then 
@@ -1057,7 +1188,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	echo "Wget didn't return a 200 OK response when getting the Bonktown webpage"
 	BTTimeLeftSeconds=120
     fi
-
+    echo "------------------------------------CL------------------------------------"
     ChainlovePage=$(GiveWebsiteCodeGetWebpageTempFile http://www.chainlove.com 3 )
     if [ "$ChainlovePage" != "Error" ]  
     then 

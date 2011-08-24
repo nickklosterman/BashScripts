@@ -19,7 +19,7 @@ else
 
     $sql = 'SELECT * FROM `'.$tbl_name.'`  ORDER BY product ASC';
     $sql = 'SELECT distinct(product),websiteCode,price,percentOffMSRP,quantity,timeEnter,dealdurationinminutes,Bkey FROM `'.$tbl_name.'`  ORDER BY product ASC';
-    $sql = 'SELECT p.product,p.websiteCode,d.price,d.percentOffMSRP,d.quantity,d.timeEnter,d.dealdurationinminutes FROM BackcountryProducts p, BackcountryProductDetails d WHERE p.ProductEntrykey=d.ProductEntrykey ORDER BY p.product ASC' ;
+    $sql = 'SELECT p.product,p.websiteCode,d.price,d.percentOffMSRP,d.quantity,d.timeEnter,d.dealdurationinminutes FROM BackcountryProducts p, BackcountryProductDetails d WHERE p.ProductEntrykey=d.ProductEntrykey AND p.websiteCode=0 ORDER BY p.product ASC' ;
 
     $result=mysql_query($sql);
     $count=mysql_num_rows($result);
@@ -28,15 +28,15 @@ else
     <html>
        <body>
 
-       Website Codes: SC=Steep and Cheap; WM= Whiskey Militia; BT= Bonktown; CL=Chainlove
+
        <table border="0" cellpadding="3" cellspacing="1" bgcolor="#CCCCCC">
        <tr>
-
-				       <td colspan="8" bgcolor="#FFFFFF"><strong>Product Database Contents</strong> </td>
+       <td bgcolor="#FFFFFF">&nbsp;</td>
+				       <td colspan="8" bgcolor="#FFFFFF"><strong>Steep And Cheap Product Database Contents</strong> </td>
 				       </tr>
 				       <tr>
 				       <td align="center" bgcolor="#FFFFFF"><strong>Key</strong></td>
-				       <td align="center" bgcolor="#FFFFFF"><strong>Website</strong></td>
+
 				       <td align="center" bgcolor="#FFFFFF"><strong>Product</strong></td>
 				       <td align="center" bgcolor="#FFFFFF"><strong>Price</strong></td>
 				       <td align="center" bgcolor="#FFFFFF"><strong>Percent off MSRP</strong></td>
@@ -44,27 +44,10 @@ else
 				       <td align="center" bgcolor="#FFFFFF"><strong>Deal Duration (minutes)</strong></td>
 				       <td align="center" bgcolor="#FFFFFF"><strong>Time Deal Appeared</strong></td>
 				       </tr>
-				       <?php
-				       while($rows=mysql_fetch_array($result)){
-					 switch ($rows['websiteCode'])
-					   {
-					   case 0:
-					   $WebsiteCode="SC";
-					   break;
-					   case 1:
-					   $WebsiteCode="WM";
-					   break;
-					   case 2:
-					   $WebsiteCode="BT";
-					   break;
-					   case 3:
-					   $WebsiteCode="CL";
-					   break;
-					   }
-					 ?>
+<?php
+                                       while($rows=mysql_fetch_array($result)){ ?>
 					 <tr>
 					 <td bgcolor="#FFFFFF"><? echo $rows['ProductEntrykey']; ?></td>
-					 <td bgcolor="#FFFFFF"><? echo $WebsiteCode; ?></td>
 					 <?		  $Filename=str_replace('/','\\',$rows['product']);
 					 $ImageLink="<a href=\"ProductImages/" .$Filename . ".jpg \">" . $rows['product'] . "</a> \n";
 					 ?>

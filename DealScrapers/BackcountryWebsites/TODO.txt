@@ -1,8 +1,23 @@
 string similarity 
 longest common subsequence
 
+Color code based on age for the full product lists
+
+restrict query to just one website
+
+have a tickbox page wher ethey can select items and just enter their address in to get an alert for that product
+
+image link on main page display
+
+Have the rollover tooltip appear on teh main page.
+Modify the MySQL query so that you truly display the last 25 deals from each website. You need ot add offset 1 to the code.
+
+Show a fuzzy amount (1 week ago, 1 month ago, 2 days ago, yesterday, today)  of time since last seen item on listProducts.php as well as number of times seen. Maybe do analysis of trend of quantity to come up with likelihood of it reappearing score.
+
 Prevent injection attacks - mysql_real_escape_string
 Add multiple queries at one time, allowe entries separated by space & tokenize
+
+find products taht have been offered on two different websites
 
 Query on price
 More advanced query engine , substring matching?
@@ -13,8 +28,7 @@ Hide DB password on server
 DONE??? check that entry/item hasn't been entered into the db all ready
 Allow selection of item from drop down menu of past products for specific match alert
 Prevent entry of non-numeric data for numeric fields --> try to save the page so we can figure out why the error occurred
-MySQL full migration
-DB of key, price, quantity,mspr%,dicount,etc...make it a table with matching key to the table that holds the product description 
+
 prevent insertion of blank query
 post past products list & # of occurrences & last occurrence
 Image database -> check if all entries actually have an image!
@@ -83,7 +97,7 @@ Create log file output for debug purposes
 send test message page to ensure address entered correctly - enter address to database & delete record after test message sent " this is from the deal tracker at djinnius" --how to accomplish this since we run Perl locally!
 have backups scheduled for the database and website
 
-use last_insert_id() to retrieve an autoincrememtn value after inserting a row
+use last_insert_id() to retrieve an autoincrememtn value after inserting a row (php)
 
 Show what other peopleare searching for.
 WRite a disclaimer
@@ -108,3 +122,9 @@ Seems that the crappy net connection is causing the problem involving the poor u
 
 NOTE:
 Meta refresh not fullproff
+
+
+DONE:
+MySQL full migration
+DB of key, price, quantity,mspr%,dicount,etc...make it a table with matching key to the table that holds the product description 
+listProduct -> links to images (doesn't IE actually show the image if you hover over a link to an image?)

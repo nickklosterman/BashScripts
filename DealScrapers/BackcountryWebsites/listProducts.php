@@ -7,7 +7,7 @@ if (!$con)
 else 
   {
     mysql_select_db("djinnius_BackCountryAlerts",$con);
-
+    //there is no ProductImages only holds this data:image_id, filename, number_of_times_seen , last_seen
     $sql="SELECT filename from ProductImages ORDER BY  filename ASC";
 
     if (!mysql_query($sql,$con))
@@ -24,7 +24,8 @@ else
 
 	//row for each record
 	while ($row = mysql_fetch_array($result)) {
-	  echo"<tr><td>" . $row['filename'] . "</td></tr>";
+	  $Filename=str_replace('/','\\',$row['filename']);
+	  echo"<tr><td>"  . $row['filename'] . "</td><td><a href=\"ProductImages/" . $Filename . "\">image</a></td></tr>";
 	}
 
 	echo "</table>";
