@@ -18,3 +18,5 @@ alter table SearchTermsAndContactAddress add column ImageAttachment tinyint(1);
 select * from ProductImages where number_of_times_seen > 3;
 select max(number_of_times_seen)  from ProductImages;
 select * from ProductImages where filename like "Shimano%" order by image_id desc limit 4 offset 4;
+
+select p.product,p.websiteCode,d.timeEnter,d.dealdurationinminutes from BackcountryProducts p, BackcountryProductDetails d where p.ProductEntrykey=d.ProductEntrykey and websiteCode=0 order by d.DetailEntrykey asc;
