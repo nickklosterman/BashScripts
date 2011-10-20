@@ -32,6 +32,7 @@ symbol=$( echo ${Line} | cut -d "," -f 1  )
 mostrecentclosingprice=$( echo ${Line} | cut -d "," -f 2  )
 #min,max()
 query="select avg(ClosingPrice) from IBD100 where Symbol=${symbol}";
+#--> either need to execute 1 query for each symbol or need another db that holds only 1price for each symbol and then just dump the data from that table. maybe do both and see what time diff is btw methods.
 echo ${symbol} ${mostrecentclosingprice}
 echo ${query}
 done < /tmp/quotes.csv
