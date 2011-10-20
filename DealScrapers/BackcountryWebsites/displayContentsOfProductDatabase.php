@@ -20,6 +20,7 @@ else
     $sql = 'SELECT * FROM `'.$tbl_name.'`  ORDER BY product ASC';
     $sql = 'SELECT distinct(product),websiteCode,price,percentOffMSRP,quantity,timeEnter,dealdurationinminutes,Bkey FROM `'.$tbl_name.'`  ORDER BY product ASC';
     $sql = 'SELECT p.product,p.websiteCode,d.price,d.percentOffMSRP,d.quantity,d.timeEnter,d.dealdurationinminutes FROM BackcountryProducts p, BackcountryProductDetails d WHERE p.ProductEntrykey=d.ProductEntrykey ORDER BY p.product ASC' ;
+    $sql = 'SELECT DISTINCT p.product,p.websiteCode,d.price , d.percentOffMSRP, d.dealdurationinminutes FROM BackcountryProducts p, BackcountryProductDetails d WHERE p.ProductEntrykey=d.ProductEntrykey ORDER BY p.product ASC' ;
 
     $result=mysql_query($sql);
     $count=mysql_num_rows($result);

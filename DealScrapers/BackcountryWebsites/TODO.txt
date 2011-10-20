@@ -1,3 +1,6 @@
+Find out why WhiskeyMilitia.com: Rome Shift Snowboard Binding - $49.99 - 58% off.html was improperly added to the database or not entered at all.
+convert quotes that are used to define inches properly in the database , either insert them properly or interpret them correctly when they come out - e.g. CRKT Prowler 3.250&quot;- Combo Edge Knife --this deisplays properly in the html output but the image link is broken.
+
 string similarity 
 longest common subsequence
 
@@ -7,7 +10,7 @@ restrict query to just one website
 
 have a tickbox page wher ethey can select items and just enter their address in to get an alert for that product
 
-image link on main page display
+image link on main page display (in history lisitng)
 
 Have the rollover tooltip appear on teh main page.
 Modify the MySQL query so that you truly display the last 25 deals from each website. You need ot add offset 1 to the code.
@@ -49,7 +52,9 @@ SPlit up into 24/48/72 records or something
  
 create a script to go through the database and pluck out the duplicates due to stopping and restarting the script.
 Simply go thorugh record by record and see if the following record is the same product and within the dealduration time. if so then delete if not then go on to the next one.
-Create a script to convert from the old style db to the new one we want to use. could possibly do it via pho...nah just do it in bash. cycle through the records and call an insert statement.
+Create a script to convert from the old style db to the new one we want to use. could possibly do it via php...nah just do it in bash. cycle through the records and call an insert statement.
+
+Why does this query return any results at all?    select p.product, i.filename, i.number_of_times_seen from BackcountryProducts p, ProductImages i where p.ProductEntrykey=i.filename ;
 
 Modify(rstrict??) alerts by preventing past matches from being sent to you.
 ->enter in email address. query database of all matches for that email address. Run those matches against the product database returning anything that would've been mathced and an email sent to the user. allow user to checkbox select which of those items they wouldn't want to see sent to them again. 
@@ -57,8 +62,13 @@ Modify(rstrict??) alerts by preventing past matches from being sent to you.
 show how often new items pop up
 --ie have a graph with red dots of repeat items and blue dots showing new items
 
+select p.websiteCode,p.product, d.price,d.percentOffMSRP,d.quantity,d.dealdurationinminutes,d.timeEnter from BackcountryProducts p, BackcountryProductDetails d where p.ProductEntrykey=d.ProductEntrykey and p.websiteCode=0 and p.product="Mountainsmith K-9 Dog Cube" ORDER BY timeEnter DESC;
+-->graph these results for the prduct specific page page
+-->determine length of time since last time it was offered. or length of time between offerings
 
-sipmle precanned queries
+Find items whose price fluctuated and list those.
+
+simple precanned queries
 -display product that appears the most- select (
 -sqlite3 test.db "select product,count(product) from Backcountrydeals group by product"
 -select avg(number_of_times_seen) from ProductImages;
