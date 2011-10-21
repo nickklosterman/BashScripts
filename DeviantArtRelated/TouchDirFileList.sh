@@ -7,28 +7,20 @@ find -type d -name '*' | while read name ; do
     cd "$name"
     #echo "Shouldve changed dirs to:"
     #pwd
-    DirFile=${name}Files.txt2
+    DirFile=Files.txt2 #${name}Files.txt2
     echo $DirFile
-    if [ 1 -eq 1 ] 
-    then
-	for file in *.*
-	do
-	    echo $file >> Files.txt2 
-#$DirFile 
-	    
-	done
-    fi
+
+    while read Line
+    do 
+	if [ ! -e $Line ] #only touch non-existent files
+	then
+	    echo "touching $Line"
+	    touch $Line
+	fi
+    done < $DirFile
+    
+
     cd $OLDPWD
     #echo "should've backed down to Devart"
     #pwd
 done
-
-if [ 0 -eq 1 ]
-then
-for name in *.jpg
-do
-echo $name >> jpgfilelist.txt
-done
-fi
-
-#http://www.linuxquestions.org/questions/programming-9/bash-ls-for-loops-and-whitespaces-in-directories-126388/page2.html

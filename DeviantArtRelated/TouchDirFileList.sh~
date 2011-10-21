@@ -8,7 +8,7 @@ find -type d -name '*' | while read name ; do
     #echo "Shouldve changed dirs to:"
     #pwd
     DirFile=${name}Files.txt2
-    echo $DirFile
+    #echo $DirFile
     if [ 1 -eq 1 ] 
     then
 	for file in *.*
