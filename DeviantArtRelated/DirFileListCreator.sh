@@ -11,6 +11,7 @@ find -type d -name '*' | while read name ; do
     echo $DirFile
     if [ 1 -eq 1 ] 
     then
+shopt -s nullglob #if there are no files with an extension then file will be set to *.*, setting this option prevents that behavior
 	for file in *.*
 	do
 	    echo $file >> Files.txt2 
