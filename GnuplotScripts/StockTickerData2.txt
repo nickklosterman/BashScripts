@@ -1,0 +1,12 @@
+set datafile separator "|"
+set xdata time
+set timefmt "%Y-%m-%d" #for plotting time plots : http://t16web.lanl.gov/Kawano/gnuplot/datetime-e.html
+set xrange [ "2011-06-01":"2011-12-01"]
+set yrange [0:51]
+set x2range [ "2011-06-01":"2011-12-01"]
+set autoscale y2
+set y2tics #otherwise I wasn't getting any scale printed out
+plot "/home/arch-nicky/sample.dat" using 1:2 with lines axes x1y1, "/home/arch-nicky/sample.dat" using 1:3 with lines axes x1y2 
+#dots #boxes
+#plot "/home/arch-nicky/sample.dat" using 1:2  x1y1, "/home/arch-nick/sample.dat" using 1:3 with lines x2y2 #dots #boxes
+pause 3
