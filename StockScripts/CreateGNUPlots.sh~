@@ -1,0 +1,13 @@
+#!/bin/bash
+sqlite3 /home/arch-nicky/IBDdatabase.sqlite "select DISTINCT(StockTicker) from IBD50 ORDER BY  StockTicker ASC" > /tmp/StockTickers.txt #/$HOME/StockTickers.txt #/tmp/StockTickers.txt
+while read line
+do
+#query the sqlite database
+#store query result in /tmp/sample.dat file
+#call gnuplot 
+line0=$( echo $line | tr '\n' ' ')
+echo $line $line0
+    sqlite3 /home/arch-nicky/IBDdatabase.sqlite "select Date,Rank from IBD50 where StockTicker=\"${line}\" ORDER BY Date ASC" > /tmp/sample.dat
+command=$(    sed 's/VARIABLE/"${line}"/' /home/arch-nicky/Git/BashScripts/GnuplotScripts/StockTickerData.txt | gnuplot )
+exec $command
+done < "/$HOME/StockTickers.txt" #"/tmp/StockTickers.txt"
