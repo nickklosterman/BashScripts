@@ -12,7 +12,7 @@ have a tickbox page wher ethey can select items and just enter their address in 
 
 image link on main page display (in history lisitng)
 
-Have the rollover tooltip appear on teh main page.
+Have the rollover tooltip appear on the main page.
 Modify the MySQL query so that you truly display the last 25 deals from each website. You need ot add offset 1 to the code.
 
 Show a fuzzy amount (1 week ago, 1 month ago, 2 days ago, yesterday, today)  of time since last seen item on listProducts.php as well as number of times seen. Maybe do analysis of trend of quantity to come up with likelihood of it reappearing score.
@@ -20,7 +20,11 @@ Show a fuzzy amount (1 week ago, 1 month ago, 2 days ago, yesterday, today)  of 
 Prevent injection attacks - mysql_real_escape_string
 Add multiple queries at one time, allowe entries separated by space & tokenize
 
-find products taht have been offered on two different websites
+find products that have been offered on two different websites
+
+on the Statistics page for each product (AJAXList.php) show min/max price, length of time since last seen. avg price, avg time btw appearances.
+Show if the item has been seen with a lower price and how long ago that was.
+Color code it
 
 Query on price
 More advanced query engine , substring matching?

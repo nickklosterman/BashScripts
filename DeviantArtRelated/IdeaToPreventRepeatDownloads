@@ -1,0 +1,1 @@
+just parse the files that shold've been downloaded vs. those still in the directory and there you go you have two comparison lists as to what should and shouldn't be downloaded. Just need to do this before the new index.htmls are downloaded.
