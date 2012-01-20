@@ -31,8 +31,12 @@ do
 
 #    mogrify -resize 600x800 -equalize -type Grayscale -dither None -format png *.jpg
 
-    mogrify -resize 800x800 -equalize -type Grayscale -dither None -format png *.jpg
-    mkdir "$foldername"
-    mv *.png "$foldername"
+    mogrify -resize 800x800 -equalize -type Grayscale -dither None -format png *.jpg #I wonder if I suffer much aof a loss of quality by going jpg->png 
+
+#    mkdir "$foldername"
+    convert *.png "$foldername.pdf"
+    #mv *.png "$foldername.pdf"
+#so far I haven't been able to get the image viewer to sequence my images corrrectly. Also from what I've read online it appears taht the kindle will handle the comics much better if they are pdfs (even allowing zooming and faste navigation)
+    rm *.png
     rm *.jpg #assume output of unrar/unzip is a set of jpgs
 done
