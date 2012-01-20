@@ -1,7 +1,12 @@
 set datafile separator "|"
 set xdata time
+set terminal png 
+set output "VARIABLE.png"
 set timefmt "%Y-%m-%d" #for plotting time plots : http://t16web.lanl.gov/Kawano/gnuplot/datetime-e.html
+
+set label "VARIABLE"
 set xrange [ "2011-05-01":"2011-12-01"]
 set yrange [0:51]
-plot "/home/arch-nicky/sample.dat" using 1:2 with lines #dots #boxes
-pause 3
+set title "IBD50 Rank for VARIABLE"
+plot "/tmp/sample.dat" using 1:2 with points #lines #dots #boxespause 1#3
+

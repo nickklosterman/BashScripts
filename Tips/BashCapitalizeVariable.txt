@@ -1,0 +1,13 @@
+2 ways
+1) you can use tr
+Code:
+
+echo $word | tr [a-z] [A-Z]
+
+or
+2) use toupper() function of awk
+Code:
+
+# echo $word | awk '{print toupper($0)}'
+WORD
+
