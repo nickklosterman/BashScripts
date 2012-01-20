@@ -18,14 +18,20 @@ do
 	unzip "$i"
     fi
 #    filename=${i%.*}
-    foldername=${i%%(*} #<-- use %% bc want to match longest sequence 
+    foldernamept1=${i%%(*} #<-- use %% bc want to match longest sequence  but this leaves trailing whitespace
+    foldername=${foldernamept1/%[[:space:]]/} #<-- this leaves removes the trailing whitespace
+#https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html
+# ${parameter/pattern/string} -->then I use the % to match at the end of 'parameter' and since string is empty we remove the pattern which specifies spaces.
+
 #phail-->${filename##\(*\)}
-    echo "$foldername"
+    echo "-$foldername-$foldername2-"
 #    newfilename=${filename}.gif
 #    mogrify -resize 600x800 -equalize -type Grayscale -dither Riemersma -format png *.jpg
 #    mogrify -resize 600x800 -equalize -type Grayscale -dither None FloySteinberg -format png *.jpg
 
-    mogrify -resize 600x800 -equalize -type Grayscale -dither None -format png *.jpg
+#    mogrify -resize 600x800 -equalize -type Grayscale -dither None -format png *.jpg
+
+    mogrify -resize 800x800 -equalize -type Grayscale -dither None -format png *.jpg
     mkdir "$foldername"
     mv *.png "$foldername"
     rm *.jpg #assume output of unrar/unzip is a set of jpgs
