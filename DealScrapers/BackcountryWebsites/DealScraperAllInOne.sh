@@ -5,6 +5,7 @@
 #that site has a new deal before updating.
 #It appears that time isn't linear across all websites as 
 
+#REQUIRED PACKAGES: mysql, 
 
 #BASH programming caveats
 #since there is no compiling I was having the program stop because I was trying to reference a variable that didn't exist bc I had spelled the name wrong.
@@ -575,9 +576,9 @@ function SendNotice()
 #Branch on whether or not to send image as attachment                                                                                                       
     if [ ${ImageAttachmentBoolean} -eq 0 ]
     then
-	perl /home/nicolae/Downloads/sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address}  -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry
+	perl sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address}  -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry
     else
-        perl /home/nicolae/Downloads/sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address} -u 'A Matching Deal from BackCountry' -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry -a "${ImageFile}"
+        perl sendEmail-v1.56/sendEmail.pl -f deals@djinnius.com -t ${Address} -u 'A Matching Deal from BackCountry' -m "${Message}" -s mail.djinnius.com:587 -xu deals -xp backcountry -a "${ImageFile}"
     fi
 }
 
@@ -1127,7 +1128,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2  ${SteepAndCheapPage} 0
 	    GiveProductProductImageEnterIntoDatabase "${SteepAndCheap}" "${SteepAndCheapImage}"
 	    UpdateWebpage 0 "${SteepAndCheapText}" "${SteepAndCheapImage}"  "${WebpageIndex}"
-            notify-send  "$SteepAndCheapText" -i ${SteepAndCheapImage} -t 3
+            #notify-send  "$SteepAndCheapText" -i ${SteepAndCheapImage} -t 3
 
 #copy content to our temp holder so we can see if things changed.
 	    SteepAndCheapTemp=`echo ${SteepAndCheap}`
@@ -1156,7 +1157,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${WhiskeyMilitiaPage} 1
 	    GiveProductProductImageEnterIntoDatabase "${WhiskeyMilitia}" "${WhiskeyMilitiaImage}"
 	    UpdateWebpage 1 "${WhiskeyMilitiaText}" "${WhiskeyMilitiaImage}"   "${WebpageIndex}"
-            notify-send  "$WhiskeyMilitiaText" -i ${WhiskeyMilitiaImage} -t 3
+            #notify-send  "$WhiskeyMilitiaText" -i ${WhiskeyMilitiaImage} -t 3
 
 	    WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
 	fi
@@ -1181,7 +1182,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${BonktownPage} 2
 	    GiveProductProductImageEnterIntoDatabase "${Bonktown}" "${BonktownImage}"
 	    UpdateWebpage 2 "${BonktownText}" "${BonktownImage}"  "${WebpageIndex}"
-            notify-send  "$BonktownText" -i ${BonktownImage} -t 3
+#            notify-send  "$BonktownText" -i ${BonktownImage} -t 3
 
 	    BonktownTemp=`echo ${Bonktown}`
 	fi
@@ -1205,7 +1206,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2  ${ChainlovePage} 3
 	    GiveProductProductImageEnterIntoDatabase "${Chainlove}" "${ChainloveImage}"
 	    UpdateWebpage 3 "${ChainloveText}" "${ChainloveImage}" "${WebpageIndex}"
-            notify-send  "$ChainloveText" -i ${ChainloveImage} -t 3
+            #notify-send  "$ChainloveText" -i ${ChainloveImage} -t 3
 	    ChainloveTemp=`echo ${Chainlove}`
 	fi
     else
