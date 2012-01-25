@@ -2,8 +2,8 @@
 function GetPageReturnFile()
 {
 #this function gets a webpage and echoes the name of the file that holds the desired text
-    Webpage='/tmp/REI' #`mktemp`
-    wget ${1} -O ${Webpage} -q
+    Webpage='/tmp/AltRec' #`mktemp`
+    wget ${1} -O ${Webpage} --user-agent="Mozilla" -q #altrec was blockign access wo the useragent string specifying mozilla
     echo ${Webpage}
 }
 function GivePageReturnDescription()
