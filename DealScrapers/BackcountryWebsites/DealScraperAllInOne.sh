@@ -851,7 +851,7 @@ function UpdateWebpageMySQL
 
     echo ${Webpage}
 
-    Database="/home/nicolae/Desktop/sqlite_examples/test.db"
+    Database="test.db" #/home/nicolae/Desktop/sqlite_examples/test.db"
 
     NumberOfRecordsToDisplay=25
 #Get webpage from site --keep a local version?                                                                                                               
@@ -905,7 +905,7 @@ function UpdateWebpage
     TempImage="${3}"
 
     echo ${Webpage}
-    Database="/home/nicolae/Desktop/sqlite_examples/test.db"
+    Database="test.db" #/home/nicolae/Desktop/sqlite_examples/test.db"
 
     NumberOfRecordsToDisplay=25
 #Get webpage from site --keep a local version?                                                                                                               
@@ -982,7 +982,8 @@ ${Bottom}"
 
 function UploadDjinniusDealsIndex
 {
-    IndexFile="/home/nicolae/Desktop/index.html"
+#    IndexFile="/home/nicolae/Desktop/index.html"
+    IndexFile="index.html"
     UploadFileToDjinniusDeals ${IndexFile}
 }
 
@@ -1102,7 +1103,7 @@ SteepAndCheapTemp=""
 WhiskeyMilitiaTemp=""
 BonktownTemp=""
 ChainloveTemp=""
-WebpageIndex="/home/nicolae/Desktop/index.html" #maybe store it on the website in a template directory so its more universal?
+WebpageIndex="index.html" #/home/nicolae/Desktop/index.html" #maybe store it on the website in a template directory so its more universal?
 
 trap on_exit SIGINT
 TmpDiskSpaceStatus=$( checktmpdiskspace )
