@@ -1,6 +1,19 @@
 #!/bin/bash
+function makestuff()
+{
+
+}
+
+
 echo "This is a simple script to automate the Mangle  (Manga-Kindle) app."
 #echo "Drop the resultant folders into the document folder of the kindle."
+Number_Of_Expected_Args=1
+if [ $# -lt $Number_Of_Expected_Args ]
+then 
+    echo "Usage: DeviantArtGalleryScraper deviantID <deviantID> ..."
+else
+    until [ -z "$1" ] #loop through all arguments using shift to move through arguments
+    do
 
 IFS=$( echo -en "\n\b" )  #this changes the file delimiter which is normally a space to a newline so we can deal with files with spaces in them.
 newfilename="blank"
