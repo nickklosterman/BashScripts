@@ -95,7 +95,8 @@ function convertArchivesIntoWebpageDirectory()
 #		    mogrify -resize 1200x1200 "$imagenospaces"
 			width=$( identify -format "%w" "${imagenospaces}" )
 			height=$( identify -format "%h" "${imagenospaces}" )
-			echo -n "."#output dot so shows we are progressing
+#output dot so shows we are progressing
+			echo -n "."
 			if [ $width -gt $height ]
 			then
 #double page
