@@ -1,3 +1,0 @@
-create table SearchTermsAndContactAddress ( prim_key INT NOT NULL Auto_increment Primary key, searchterms varchar(64), contactaddress varchar(64), ImageAttachment tinyint(1) );
-
-create table SearchTermsAndContactAddress2 ( prim_key INT NOT NULL Auto_increment Primary key, searchterms varchar(64), contactaddress varchar(64), ImageAttachment tinyint(1) );
