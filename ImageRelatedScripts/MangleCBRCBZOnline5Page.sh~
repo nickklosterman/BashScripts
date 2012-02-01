@@ -26,7 +26,9 @@ function makestuff()
 	    echo "-$foldername-$foldernamept1-"
 	    mkdir "$foldername"
 	    counter=0
-	    echo "<html><body><title>$foldername</title>" > "$foldername.html"
+	    HTMLpage="$foldername.html"
+	    page=0
+	    echo "<html><body><title>$foldername</title>" > $HTMLpage
 	    for image in *.[jJ][Pp][Gg]
 	    do
 		echo "$image"
@@ -39,15 +41,23 @@ function makestuff()
 		echo "$foldername-$counter.jpg"
 		let 'counter+=1'
 		echo $counter
+		if  [ $counter -lt 0 ]
+		then 
+		    echo "</body></html>" >> "$HTMLpage" #close out last page
+		    let 'page+=1'
+		    HTMLpage="foldername$page.html"
+		    echo "<html><body><title>$foldername pg $page</title>" > $HTMLpage #start new page
+		fi
+    
 	    done
-	    echo "</body></html>" >> "$foldername.html"
-#	    uploadfiles "$foldername" "$foldername.html" 
+	    echo "</body></html>" >> "$HTMLpage"
+	    uploadfiles "$foldername" "$HTMLpage"
 }
 function decompressfile()
 {
     echo "$1"
-
 }
+
 function uploadfiles()
 {
 directory="$1"
@@ -73,6 +83,20 @@ EOF
 ######################
 echo "This is a simple script to automate the Mangle  (Manga-Kindle) app."
 
+while getopt "n" OPTIONS ;
+do
+    case ${OPTIONS} in 
+	n|-numberofimagesperpage) echo ${OPTARG};;
+    esac
+done
+
+shift $(($OPTIND - 1)) 
+# Decrements the argument pointer so it points to next argument.
+# $1 now references the first non-option item supplied on the command-line
+#+ if one exists.
+
+
+
 Number_Of_Expected_Args=1
 if [ $# -lt $Number_Of_Expected_Args ]
 then 
@@ -80,7 +104,8 @@ then
     echo "acting on all cbr/cbz files in this directory"
     for item in *.cb[rz]
     do
-	makestuff "$item"
+	echo "$item"
+#	makestuff "$item"
 #	decompressfile "$item"
     done
 else
