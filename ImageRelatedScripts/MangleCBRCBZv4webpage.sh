@@ -23,7 +23,7 @@ function convertArchivesIntoWebpageDirectory()
 ######
         if [ !  -e "$foldernamenospace" ]
         then
-            echo "creating $foldername directory--only do this for the zip case?? yes bc we create the directory we want with the unrar cmd" 
+            echo "creating $foldername directory" 
             mkdir "$foldernamenospace" #create folder if doesn't exist                      
         fi
 ######## 
@@ -62,26 +62,26 @@ function convertArchivesIntoWebpageDirectory()
 	    rm /tmp/Comic  -rf
 	fi
 #mv extracted images to directory 
-}
-
-function createHtml()
-{
-
+    }
+    
+    function createHtml()
+    {
 	for decompressdir in * #"$foldername"
 	do 
 	    echo "in  decompress dir"
 	    pwd
 	    if [ -d "$decompressdir" ]
 	    then
-
+		
 		echo "Moving into directory $decompressdir"
 		cd "$decompressdir"
-
+		
 		echo "creating webpage"
 		HTMLpage="0000Webpage.html" #use this filename so it will be close to the top
 		echo "<html><body><title>$foldername</title>" > $HTMLpage
 		for image in *.[jJ][Pp][Gg] *.[Gg][Ii][fF] *.[Pp][Nn][Gg]
 		do 
+#		    echo "$image"
 		    if [ -f "$image" ] #prevents output when isn't a file; ie. catches when no images of one of the categories
 		    then
 #could mogrify here as well.
@@ -93,8 +93,9 @@ function createHtml()
 #check width/height etc
 #		    mogrify -resize 800x800 "$imagenospaces"
 #		    mogrify -resize 1200x1200 "$imagenospaces"
-			width=$( identify -format "%w" "${imagenospace}" )
-			height=$( identify -format "%h" "${imagenospace}" )
+			width=$( identify -format "%w" "${imagenospaces}" )
+			height=$( identify -format "%h" "${imagenospaces}" )
+			echo -n "."#output dot so shows we are progressing
 			if [ $width -gt $height ]
 			then
 #double page
@@ -109,7 +110,7 @@ function createHtml()
 		    fi
 		done
 		echo "</body></html>" >> "$HTMLpage" #close out last page                           
-	
+		
 
 		echo "Leaving directory $decompressdir"
 		cd ..
@@ -119,45 +120,45 @@ function createHtml()
 	done
 #	    uploadfiles "$foldername" "$HTMLpage"
 	   # cd ../
-	}
+    }
 
 
 
 ######################
 ##Begin Script
 ######################
-echo "This is a simple script to automate the Mangle  (Manga-Kindle) app."
+    echo "This is a simple script to automate the Mangle  (Manga-Kindle) app."
 
-numberOfImagesPerPage=5
-while getopts ":n:" OPTIONS 
-do
-    case ${OPTIONS} in 
-	n|-numberofimagesperpage) echo "numperpage ${OPTARG}"
-	    numberOfImagesPerPage=${OPTARG};;
-    esac
-done
+    numberOfImagesPerPage=5
+    while getopts ":n:" OPTIONS 
+    do
+	case ${OPTIONS} in 
+	    n|-numberofimagesperpage) echo "numperpage ${OPTARG}"
+		numberOfImagesPerPage=${OPTARG};;
+	esac
+    done
 #echo $numberOfImagesPerPage
-shift $(($OPTIND - 1)) 
+    shift $(($OPTIND - 1)) 
 # Decrements the argument pointer so it points to next argument.
 # $1 now references the first non-option item supplied on the command-line
 #+ if one exists.
 
-Number_Of_Expected_Args=1
-if [ $# -lt $Number_Of_Expected_Args ]
-then 
-    echo "Usage: script archive archive ...."
-    echo "acting on all cbr/cbz files in this directory"
-    for item in *.[Cc][Bb][RrZz]
-    do
-	echo "--$item--"
-	convertArchivesIntoWebpageDirectory $numberOfImagesPerPage "${item}"
-    done
-else
-    until [ -z "$1" ] #loop through all arguments using shift to move through arguments
-    do
-	echo $1
-	convertArchivesIntoWebpageDirectory $numberOfImagesPerPage "${1}"
-	shift
-    done
-fi
-createHtml
+    Number_Of_Expected_Args=1
+    if [ $# -lt $Number_Of_Expected_Args ]
+    then 
+	echo "Usage: script archive archive ...."
+	echo "acting on all cbr/cbz files in this directory"
+	for item in *.[Cc][Bb][RrZz]
+	do
+	    echo "--$item--"
+	    convertArchivesIntoWebpageDirectory $numberOfImagesPerPage "${item}"
+	done
+    else
+	until [ -z "$1" ] #loop through all arguments using shift to move through arguments
+	do
+	    echo $1
+	    convertArchivesIntoWebpageDirectory $numberOfImagesPerPage "${1}"
+	    shift
+	done
+    fi
+    createHtml
