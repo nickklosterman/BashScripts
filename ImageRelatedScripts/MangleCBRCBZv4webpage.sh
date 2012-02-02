@@ -66,6 +66,8 @@ function convertArchivesIntoWebpageDirectory()
     
     function createHtml()
     {
+	pageformat=$1
+	echo "pageformat $pageformat"
 	for decompressdir in * #"$foldername"
 	do 
 	    echo "in  decompress dir"
@@ -78,7 +80,7 @@ function convertArchivesIntoWebpageDirectory()
 		
 		echo "creating webpage"
 		HTMLpage="0000Webpage.html" #use this filename so it will be close to the top
-		echo "<html><body><title>$foldername</title>" > $HTMLpage
+		echo "<html><body><title>$decompressdir</title>" > $HTMLpage
 		for image in *.[jJ][Pp][Gg] *.[Gg][Ii][fF] *.[Pp][Nn][Gg]
 		do 
 #		    echo "$image"
@@ -100,9 +102,20 @@ function convertArchivesIntoWebpageDirectory()
 			if [ $width -gt $height ]
 			then
 #double page
-			    mogrify -resize 1200x1200 "$imagenospaces"
+			    echo "double page"
+			    if [ 1 == $pageformat ] #variable can't be first???
+			    then 
+				mogrify -resize 1600x2560 "$imagenospaces"
+			    else
+				mogrify -resize 1200x1900 "$imagenospaces"
+			    fi
 			else
-			    mogrify -resize 800x800 "$imagenospaces"
+			    if [ 1 == $pageformat ]
+			    then 
+				mogrify -resize 800x1280 "$imagenospaces" #this crops a bit of width so it meets the height
+			    else
+				mogrify -resize 600x950 "$imagenospaces" #crop so full width and height just a smidge over.
+			    fi
 			fi
 
 #need to figure out how to only output stuff about images if there are any. 
@@ -131,11 +144,16 @@ function convertArchivesIntoWebpageDirectory()
     echo "This is a simple script to automate the Mangle  (Manga-Kindle) app."
 
     numberOfImagesPerPage=5
-    while getopts ":n:" OPTIONS 
+    wideformat=0
+    while getopts ":n:wh" OPTIONS 
     do
 	case ${OPTIONS} in 
 	    n|-numberofimagesperpage) echo "numperpage ${OPTARG}"
 		numberOfImagesPerPage=${OPTARG};;
+	    w|-fullwidth) echo "fullwidth" #on the BPDN we'd flip it on side as the min dimension will be 800
+		wideformat=1;;
+	    h|-fullheight) echo "fullheight" #on the BPDN we'd flip it on side as the min dimension will be 600
+		wideformat=0;;
 	esac
     done
 #echo $numberOfImagesPerPage
@@ -162,4 +180,4 @@ function convertArchivesIntoWebpageDirectory()
 	    shift
 	done
     fi
-    createHtml
+    createHtml $wideformat
