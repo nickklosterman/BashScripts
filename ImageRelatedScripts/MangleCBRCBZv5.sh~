@@ -172,7 +172,7 @@ function convertArchivesIntoWebpageDirectory()
 		echo "creating webpage"
 		HTMLpage="0000Webpage.html" #use this filename so it will be close to the top
 		echo "<html><body><title>$decompressdir</title>" > $HTMLpage
-		echo "<h5>$decompressdir</h5>" >> $HTMLpage
+		echo "<h5>$decompressdir</h5>" > $HTMLpage
 		for image in *.[jJ][Pp][Gg] *.[Gg][Ii][fF] *.[Pp][Nn][Gg]
 		do 
 		    if [ -f "$image" ] #prevents output when isn't a file; ie. catches when no images of one of the categories
@@ -191,7 +191,10 @@ function convertArchivesIntoWebpageDirectory()
 			fi
 		    fi
 		done
-		echo "<br><br><br>" >> "$HTMLpage" #add EOF padding as it seems that due to the back-home-option softkeys that the last bit of the page isn't viewable.
+		if [ 0 == $pageformat ]
+		then
+		    echo "<br><br><br>" >> "$HTMLPage" #add EOF padding as it seems that due to the back-home-option softkeys that the last bit of the page isn't viewable. this isn't a problem when using the wide view
+		fi
 		echo "</body></html>" >> "$HTMLpage" #close out last page                           
 		
 
