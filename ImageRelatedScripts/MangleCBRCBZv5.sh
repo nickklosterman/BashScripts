@@ -2,14 +2,59 @@
 #v4: performed all decompression, then all converting of images, then create all webpages
 #Difference from v4: to overcome the problem of recursing directories and creating webpages where no archive was extracted we work on 1 archive at a time (decompress X, convert Xs images, create Xs webpage)
 #TODO:
+
 #catch ctrl-c and exit gracefully
-#perform disk space check to ensure have enough space to extract archive and create images
+#IN PROG perform disk space check to ensure have enough space to extract archive and create images
+#need to do check and see if multiple files in a directory will write to the same directory and overwrite. If so then append# to the directory. That happened with XMen First Class
 #work on collections that are rared or zipped. Then need to make sure unzip and unrar teh cbr/cbz files that were extracted.
 #append W or H identifier to the directory for which style they are
 #recurse directories (CLI switch to activate)
-#error logging -> broken archives, empty directories
+#DONE error logging -> broken archives, empty directories
 #exclude scanner images. Have filenames listed in a file, or listed in a variable/array inside 
 ScannerFileNames="zGGtagT.jpg zGGtag.jpg" #need for way to captures these like did with ibd industry names
+
+function getArchiveSize()
+{
+size=$( du "${1}" | cut -f 1 )
+}
+
+function checkFileSpace()
+{
+archive="${1}"
+archiveSize=$( getArchiveSize "$archive" )
+tempFreeSpaceStatus=$( checkdiskspace /tmp $archiveSize )
+homeFreeSpaceStatus=$( checkdiskspace /home $archiveSizze )
+Status=1
+
+if [[ $tempFreeSpaceStatus -eq 0 ]]
+then
+echo "/tmp doesn't have enough free space to extract the archive."
+Status=0
+fi
+if [[ $tempFreeSpaceStatus -eq 0 ]]
+then
+echo "/home doesn't have enough free space to extract the archive."
+Status=0
+fi
+
+
+echo $Status
+}
+
+function checkdiskspace()
+{   
+#This is a lot easier than the roundabout method I developed in the Backcountry code
+    diskspaceneeded=$2
+    DiskSpace=$(df  "${1}" | grep -v Filesystem | awk '{ print $4  }' )
+    Output=1
+    if [[ $DiskSpace -lt  $diskspaceneeded ]]
+    then
+        Output=0
+    fi
+    echo ${Output}
+}
+
+
 
 function convertFoldername()
 {
@@ -38,9 +83,8 @@ function getFileName()
 function convertArchivesIntoWebpageDirectory()
 {
     imagesPerPage=$1
-    echo "variable 2:${2}"
+    #echo "variable 2:${2}"
     foldernamenospace=$( convertFoldername "${2}" )
-
 #https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html                                               
 # ${parameter/pattern/string} -->then I use the % to match at the end of 'parameter' and since string is empty we remove the pattern which specifies spaces.                            
 
@@ -49,7 +93,6 @@ function convertArchivesIntoWebpageDirectory()
             echo "creating $foldernamenospace directory" 
             mkdir "$foldernamenospace" #create folder if doesn't exist                      
         fi
-	
 	extension=$( getFileExtension "${2}" )
 	echo "$extension"	
 	if [ "$extension" = "cbr" ]
@@ -74,11 +117,76 @@ function convertArchivesIntoWebpageDirectory()
 		fi 
 	    done
 	    cd "$olddir"
-
 	    rm /tmp/Comic  -rf
 	fi
+}
 
-    }
+function RecurseDirs()
+{   
+    echo "1:==$1"
+#    if [ "${1}" -eq "" ]
+    if [ "" != "$1" ]
+    then
+        depth=0
+    fi
+    depth=$1
+    let 'depth+=1'
+    echo "$depth"
+    for dir in *
+    do
+        if [ -d "$dir" ]
+        then
+            cd "$dir"
+            echo -n "entered:"
+            pwd
+            RecurseDirs $depth
+            echo -n "exiting:"
+            pwd
+            cd ..
+        fi
+    done
+#    echo "Do stuff here $depth"
+    let 'depth-=1'
+}
+
+function decompressRARZIPArchivesIntoDirectory()
+{
+    foldernamenospace=$( convertFoldername "${1}" )
+#https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html                                                   
+# ${parameter/pattern/string} -->then I use the % to match at the end of 'parameter' and since string is empty we remove the pattern\
+ which specifies spaces.                                                                                                             
+
+ if [ !  -e "$foldernamenospace" ]
+ then
+     echo "creating $foldernamenospace directory"
+     mkdir "$foldernamenospace" #create folder if doesn't exist                                                               
+ fi
+ extension=$( getFileExtension "${1}" )
+ echo "$extension"
+ if [ "$extension" = "rar" ]
+ then
+     echo "RAR file"
+     unrar e "$1" -d "$foldernamenospace" 2>> /tmp/DecompressErrorLog.txt # if the directory doesn't exist unrar will skip ex\
+     tracting the files                                                                                                                           else #assume that its cbz                                                                                                                olddir=$( pwd )
+     echo "$pwd"
+     echo "ZIP file"
+     unzip "$1" -d /tmp/Comic 2>> /tmp/DecompressErrorLog.txt  #send stderr to log                                            
+     olddir=$( pwd )
+     echo "$olddir"
+     for i in /tmp/Comic/*
+     do
+         if [ -d "$i" ]
+         then
+             echo "$i"
+             cd "$i"
+             ls
+             mv *.* "$olddir/$foldernamenospace"
+         fi
+     done
+     cd "$olddir"
+     rm /tmp/Comic  -rf
+ fi
+}
 
     function createHtmlAndImages()
     {
@@ -278,58 +386,74 @@ numberOfImagesPerPage=$1
 item=$2
 wideformat=$3
 deletearchive=$4
-
-convertArchivesIntoWebpageDirectory $numberOfImagesPerPage "${item}" 
-directory=$( convertFoldername "${item}" )
-convertImages $wideformat $directory
-createHtml $wideformat $directory
-deleteArchive $deletearchive "${item}"
+DiskStatus=$( checkFileSpace "${item}" )
+if [[ $DiskStatus -eq 1 ]]
+then
+    convertArchivesIntoWebpageDirectory $numberOfImagesPerPage "${item}" 
+    directory=$( convertFoldername "${item}" )
+    convertImages $wideformat $directory
+    createHtml $wideformat $directory
+    deleteArchive $deletearchive "${item}"
+else
+    echo "There is not enough space for extraction and manipulation of ${item}."
+fi
 }
+
+function UnrarUnzip()
+{
+    deletearchive=$2
+    for item in *.[RrZz][IiAa][RrPp]
+    do
+##uhhh why not just have one function for rars and one for zips? that would be waay better and would remove the need to determine file type by looking at the file extension. for item in *.zip; do if [ -f $item ] then unzip/rar
+	decompressRARZIPArchivesIntoDirectory  "${item}" 
+	deleteArchive $deletearchive "${item}"
+    done
+}
+
 
 ######################
 ##Begin Script
 ######################
-    echo "This is a simple script to automate the Mangle  (Manga-Kindle) app."
+echo "This is a simple script to automate the Mangle  (Manga-Kindle) app."
 
-    numberOfImagesPerPage=5
-    wideformat=0
-    deletearchives=0
-    while getopts ":n:whd" OPTIONS 
-    do
-	case ${OPTIONS} in 
-	    n|-numberofimagesperpage) echo "numperpage ${OPTARG}"
-		numberOfImagesPerPage=${OPTARG};;
-	    w|-fullwidth) echo "fullwidth" #on the BPDN we'd flip it on side as the min dimension will be 800
-		wideformat=1;;
-	    h|-fullheight) echo "fullheight" #on the BPDN we'd flip it on side as the min dimension will be 600
-		wideformat=0;;
-	    d|-deletearchives) echo "delete archives" #on the BPDN we'd flip it on side as the min dimension will be 800
+numberOfImagesPerPage=5
+wideformat=0
+deletearchives=0
+while getopts ":n:whd" OPTIONS 
+do
+    case ${OPTIONS} in 
+	n|-numberofimagesperpage) echo "numperpage ${OPTARG}"
+	    numberOfImagesPerPage=${OPTARG};;
+	w|-fullwidth) echo "fullwidth" #on the BPDN we'd flip it on side as the min dimension will be 800
+	    wideformat=1;;
+	h|-fullheight) echo "fullheight" #on the BPDN we'd flip it on side as the min dimension will be 600
+	    wideformat=0;;
+	d|-deletearchives) echo "delete archives" #on the BPDN we'd flip it on side as the min dimension will be 800
 		deletearchives=1;;
-	esac
-    done
+    esac
+done
 #echo $numberOfImagesPerPage
-    shift $(($OPTIND - 1)) 
+shift $(($OPTIND - 1)) 
 # Decrements the argument pointer so it points to next argument.
 # $1 now references the first non-option item supplied on the command-line
 #+ if one exists.
 
-    Number_Of_Expected_Args=1
-    if [ $# -lt $Number_Of_Expected_Args ]
-    then 
-	echo "Usage: script archive archive ...."
-	echo "acting on all cbr/cbz files in this directory"
-	for item in *.[Cc][Bb][RrZz]
-	do
-	    echo "--$item--"
-
-	    Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives
-	done
-    else
-	until [ -z "$1" ] #loop through all arguments using shift to move through arguments
-	do
-	    echo $1
-	    Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchive
-	    shift
-	done
-    fi
+Number_Of_Expected_Args=1
+if [ $# -lt $Number_Of_Expected_Args ]
+then 
+    echo "Usage: script archive archive ...."
+    echo "acting on all cbr/cbz files in this directory"
+    for item in *.[Cc][Bb][RrZz]
+    do
+	echo "--$item--"
+	Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives
+    done
+else
+    until [ -z "$1" ] #loop through all arguments using shift to move through arguments
+    do
+	echo $1
+	Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchive
+	shift
+    done
+fi
 

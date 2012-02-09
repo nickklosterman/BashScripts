@@ -14,7 +14,7 @@ function downloadIndividualPages ()
     for x in ${passed_array[@]} #1
     do 
 	echo "Downloading $x"
-	wget -nc -U Mozilla "$x"
+	wget -nc -U Mozilla "$x" 2>>/tmp/wgeterrors.txt
     done
 }
 
@@ -39,7 +39,7 @@ function downloadFullImageFromFile ()
 	then 
 #we don't want our variable to be quoted otherwise we'll get a Scheme missing error from wget
 #	    wget -nc -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt $DownloadImage
-	    wget -nc -U Mozilla  $DownloadImage
+	    wget -nc -U Mozilla  $DownloadImage 2>>/tmp/wgeterrors.txt
 	fi
     done
 }
@@ -51,7 +51,7 @@ function downloadallowingclobber ()
     do 
 	echo "$x"
 #	wget -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt "$x"
-	wget -U Mozilla "$x"
+	wget -U Mozilla "$x" 2>>/tmp/wgeterrors.txt
     done
 
 }
@@ -64,7 +64,7 @@ function downloadnoclobber ()
     do 
 	echo "$x"
 #	wget -U Mozilla -nc  --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt "$x"
-	wget -U Mozilla -nc   "$x"
+	wget -U Mozilla -nc   "$x" 2>>/tmp/wgeterrors.txt
     done
 }
 
@@ -90,37 +90,37 @@ else
 	cd "$1"
 
 #debug: disable getting new index pages here
-DebugDontGetIndexPages=1
-if [[ 0 -eq $DebugDontGetIndexPages ]]
-then	
-    if [ -e index.html ]
-    then
-            rm index.html
-    fi
+	DebugDontGetIndexPages=0
+	if [[ 0 -eq $DebugDontGetIndexPages ]]
+	then	
+	    if [ -e index.html ]
+	    then
+		rm index.html
+	    fi
 #get gallery index
-	echo "Getting gallery index file"
+	    echo "Getting gallery index file"
 #without the trailing / it saves the file as gallery instead of index.html
 #	wget -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt  http://${1}.deviantart.com/gallery/ #-O $OutputFile
-	wget -U Mozilla http://${1}.deviantart.com/gallery/ #-O $OutputFile
+	    wget -U Mozilla http://${1}.deviantart.com/gallery/ 2>>/tmp/wgeterrors.txt   #-O $OutputFile
 #check if the gallery index has additional pages.
-	NextPageCheck=$(grep "gallery/?offset=" index.html | grep "Next" )
+	    NextPageCheck=$(grep "gallery/?offset=" index.html | grep "Next" )
 #2011.06.21 appears they no longer put "next page" they just do next. grep "Next Page</a>" )
 #echo "$NextPageCheck"	
 #grab all pages of the gallery
-	while [ "$NextPageCheck" != "" ]
-	do 
-	    
-	    let 'offsetcounter+=1'
-	    let "offset=${offsetcounter} * 24"
-	    echo "Getting gallery index with offset of ${offset}"
-	    wget -U Mozilla http://${1}.deviantart.com/gallery/?offset=${offset} 
-	    NextPageCheck=$(grep "gallery/?offset=" index.html?offset=${offset}  | grep "Next") # Page</a>" )
-	    cat index.html?offset=${offset} >> index.html
-	done
-	echo "Done getting all gallery pages."
-else
-    echo "In Debug mode skipping getting gallery index pages"
-fi
+	    while [ "$NextPageCheck" != "" ]
+	    do 
+		
+		let 'offsetcounter+=1'
+		let "offset=${offsetcounter} * 24"
+		echo "Getting gallery index with offset of ${offset}"
+		wget -U Mozilla http://${1}.deviantart.com/gallery/?offset=${offset} 
+		NextPageCheck=$(grep "gallery/?offset=" index.html?offset=${offset}  | grep "Next") # Page</a>" )
+		cat index.html?offset=${offset} >> index.html
+	    done
+	    echo "Done getting all gallery pages."
+	else
+	    echo "In Debug mode skipping getting gallery index pages"
+	fi
 #compile arrays of the links to the fullimg, img, address of webpage, webpage file	
 #2012.02.08 we aern't getting all the files from the index page for some reason
 # I had to formulate this roundabouts way to separate the images as they were all being put on a single line which sed was then missing.
