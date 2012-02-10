@@ -4,6 +4,12 @@
 #TODO:
 #create -h help dialog
 #catch ctrl-c and exit gracefully
+#only delete if unrar/zip was successful
+#add option to specify dimensions of converted files
+#add option and functionality to compress the images a bit
+#add option and functionality to sharpen the images
+#add option to pass imagemagick options
+#prevent splitting html across a double page image - catch filename and set flag. clear flag when not dbl (hopefully this will also keep the overview image on same html page as well)
 #DONE perform disk space check to ensure have enough space to extract archive and create images
 #DONE need to do check and see if multiple files in a directory will write to the same directory and overwrite. If so then append# to the directory. That happened with XMen First Class
 #work on collections that are rared or zipped. Then need to make sure unzip and unrar teh cbr/cbz files that were extracted.
@@ -16,6 +22,8 @@ ScannerFileNames="zGGtagT.jpg zGGtag.jpg" #need for way to captures these like d
 
 function splitLargeComicsHTML()
 {
+dir="${1}"
+flag=0 #set to 1 if we split
     ImageThreshold=30 #max number of images we'll allow before creating a set of pages with less images per page                                
     imagesPerPage=28 #could also just set to $ImageThreshold                                                                                    
 #crawl through directories and if the number of images is greater than a threshold then we'll create a set of webpages to split the         
@@ -23,11 +31,11 @@ function splitLargeComicsHTML()
 #find number of images in the directory                                                                                                     
     numimages=$(  ls -1 *.[Jj][Pp][Gg] *.[Gg][Ii][fF] *.[Pp][Nn][Gg] 2>>/dev/null | wc -l )
 #-->by redirecting stderr to /dev/null I dont get the "no such file or directory output"                                                            totalimages=$numimages #-subtractnumimages                                                        
-    echo "$totalimages >  $ImageThreshold"
+#    echo "$totalimages >  $ImageThreshold"
 #if the number of images crosses the threshold we'll make separate pages with fewer images per page                                         
     if [[ "totalimages" -gt "$ImageThreshold" ]]
     then
-        echo "$dir will be split into separate smaller webpages"
+ #       echo "$dir will be split into separate smaller webpages"
         counter=1
         pagenum=$( printf "%02d" $counter )
         HTMLpage="000$dir-$pagenum.html"
@@ -51,7 +59,7 @@ function splitLargeComicsHTML()
                     let 'page+=1'
                     pagenum=$( printf "%02d" $page )
                     HTMLpage="000$dir-$pagenum.html"
-                    echo "$counter  $pagenum"
+  #                  echo "$counter  $pagenum"
                     echo "<html><body><title>$dir pg $pagenum</title>" > $HTMLpage #start new page                                      
                 fi
 		
@@ -61,8 +69,9 @@ function splitLargeComicsHTML()
 
             fi #end if its' an image                                                                                                    
         done #end processing images in jpg gif png                                                                                      
+flag=1 
     fi #end processing if we're past the threshold and need to break into individ pages                                                 
-    
+    echo $flag
 }
 
 function createDirectoryForWebcomic()
@@ -227,6 +236,12 @@ function convertArchivesIntoWebpageDirectory()
 
 function RecurseDirs()
 {   
+    depth=$1
+    numberOfImagesPerPage=$2 
+    wideformat=$3
+    deletearchives=$4
+    unrarunzip=$5
+    echo $depth $numberOfImagesPerPage $wideformat $deletearchives $unrarzip 
     echo "1:==$1"
 #    if [ "${1}" -eq "" ]
     if [ "" != "$1" ]
@@ -236,6 +251,14 @@ function RecurseDirs()
     depth=$1
     let 'depth+=1'
     echo "$depth"
+
+
+#this is placed before so that the directories it makes are recursed into. otherwise they aren't traveresed.
+    if [[ 1 -eq $unrarzip ]]
+    then
+	UnrarUnzip $deletearchives
+    fi
+
     for dir in *
     do
         if [ -d "$dir" ]
@@ -243,12 +266,24 @@ function RecurseDirs()
             cd "$dir"
             echo -n "entered:"
             pwd
-            RecurseDirs $depth
+            RecurseDirs $depth $numberOfImagesPerPage $wideformat $deletearchives $unrarzip 
             echo -n "exiting:"
             pwd
             cd ..
         fi
     done
+    
+
+
+    for item in *.[Cc][Bb][RrZz]
+    do
+	if [ -f "${item}" ]
+	then
+	    echo "--$item--"
+	    Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives
+	fi
+    done
+    
 #    echo "Do stuff here $depth"
     let 'depth-=1'
 }
@@ -274,8 +309,9 @@ function decompressRARZIPArchivesIntoDirectory()
  if [ "$extension" = "rar" ]
  then
      echo "RAR file"
-     unrar e "$1" -d "$foldernamenospace" 2>> /tmp/DecompressErrorLog.txt # if the directory doesn't exist unrar will skip ex\
-     tracting the files                                                                                                                           else #assume that its cbz                                                                                                                olddir=$( pwd )
+     unrar e "$1" -d "$foldernamenospace" 2>> /tmp/DecompressErrorLog.txt # if the directory doesn't exist unrar will skip extracting the files
+ else #assume that its cbz                                                                                                                
+     olddir=$( pwd )
      echo "$pwd"
      echo "ZIP file"
      unzip "$1" -d /tmp/Comic 2>> /tmp/DecompressErrorLog.txt  #send stderr to log                                            
@@ -477,14 +513,36 @@ function decompressRARZIPArchivesIntoDirectory()
 	cd ..
 	
     }
+
 function deleteArchive()
 {
 #remove the archive
+    echo "deletearchive:$1--$2--"
     if [[ $1 -eq 1 ]]
     then
 	echo "deleting ${2}"
 	rm "${2}"
     fi
+}
+
+function UnrarUnzip()
+{
+    deletearchive=$1
+    for item in *.[RrZz][IiAa][RrPp]
+    do
+##uhhh why not just have one function for rars and one for zips? that would be waay better and would remove the need to determine file type by looking at the file extension. for item in *.zip; do if [ -f $item ] then unzip/rar
+	
+	if [ -f "${item}" ]
+	then
+	    DiskStatus=$( checkFileSpace "${item}" )
+	    if [[ $DiskStatus -eq 1 ]]
+	    then
+		decompressRARZIPArchivesIntoDirectory  "${item}"  
+		echo "unrarzip-$deletearchive-${item}"
+		deleteArchive $deletearchive "${item}"
+	    fi
+	fi
+    done
 }
 
 function Operations()
@@ -500,23 +558,18 @@ then
     directory=$( createDirectoryForWebcomic "${item}" ) #convertFoldername "${item}" )
     convertArchivesIntoWebpageDirectory $numberOfImagesPerPage "${item}" "$directory"
     convertImages $wideformat $directory
-    createHtml $wideformat $directory
+    splitcomic=$( splitLargeComicsHTML $directory )
+    if [[ 0 -eq $splitcomic ]]
+    then  #only do createHTML if the comic wasnt split
+	createHtml $wideformat $directory
+    fi
     deleteArchive $deletearchive "${item}"
 else
     echo "There is not enough space for extraction and manipulation of ${item}."
 fi
 }
 
-function UnrarUnzip()
-{
-    deletearchive=$2
-    for item in *.[RrZz][IiAa][RrPp]
-    do
-##uhhh why not just have one function for rars and one for zips? that would be waay better and would remove the need to determine file type by looking at the file extension. for item in *.zip; do if [ -f $item ] then unzip/rar
-	decompressRARZIPArchivesIntoDirectory  "${item}" 
-	deleteArchive $deletearchive "${item}"
-    done
-}
+
 
 
 ######################
@@ -527,7 +580,9 @@ echo "This is a simple script to automate the Mangle  (Manga-Kindle) app."
 numberOfImagesPerPage=5
 wideformat=0
 deletearchives=0
-while getopts ":n:whd" OPTIONS 
+unrarzip=0
+recursive=0
+while getopts ":n:whdur" OPTIONS 
 do
     case ${OPTIONS} in 
 	n|-numberofimagesperpage) echo "numperpage ${OPTARG}"
@@ -536,8 +591,12 @@ do
 	    wideformat=1;;
 	h|-fullheight) echo "fullheight" #on the BPDN we'd flip it on side as the min dimension will be 600
 	    wideformat=0;;
-	d|-deletearchives) echo "delete archives" #on the BPDN we'd flip it on side as the min dimension will be 800
-		deletearchives=1;;
+	d|-deletearchives) echo "delete archives after extracting" 
+	    deletearchives=1;;
+	u|-unrarzip) echo "Extracting Rar and Zip archives" 
+	    unrarzip=1;;
+	r|-recursive) echo "Running recursively on directories" 
+	    recursive=1;; #this negates running only on the files specified
     esac
 done
 #echo $numberOfImagesPerPage
@@ -546,22 +605,39 @@ shift $(($OPTIND - 1))
 # $1 now references the first non-option item supplied on the command-line
 #+ if one exists.
 
-Number_Of_Expected_Args=1
-if [ $# -lt $Number_Of_Expected_Args ]
+
+if [[ 1 -eq $recursive ]]
+then
+    RecurseDirs 0 $numberOfImagesPerPage $wideformat $deletearchives $unrarzip 
+else
+
+    Number_Of_Expected_Args=1
+    if [ $# -lt $Number_Of_Expected_Args ]
 then 
     echo "Usage: script archive archive ...."
     echo "acting on all cbr/cbz files in this directory"
+    if [[ 1 -eq $unrarzip ]]
+    then
+	UnrarUnzip $deletearchive
+    fi
     for item in *.[Cc][Bb][RrZz]
     do
-	echo "--$item--"
-	Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives
+	if [ -f "${item}" ]
+	then
+	    echo "--$item--"
+	    Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives
+	fi
     done
 else
     until [ -z "$1" ] #loop through all arguments using shift to move through arguments
     do
 	echo $1
-	Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchive
+	if [ -f "${1}" ]
+	then
+	    Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchive
+	fi
 	shift
     done
 fi
 
+fi #end recurse check
