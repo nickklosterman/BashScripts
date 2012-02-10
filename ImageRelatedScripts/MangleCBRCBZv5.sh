@@ -2,43 +2,130 @@
 #v4: performed all decompression, then all converting of images, then create all webpages
 #Difference from v4: to overcome the problem of recursing directories and creating webpages where no archive was extracted we work on 1 archive at a time (decompress X, convert Xs images, create Xs webpage)
 #TODO:
-
+#create -h help dialog
 #catch ctrl-c and exit gracefully
-#IN PROG perform disk space check to ensure have enough space to extract archive and create images
-#need to do check and see if multiple files in a directory will write to the same directory and overwrite. If so then append# to the directory. That happened with XMen First Class
+#DONE perform disk space check to ensure have enough space to extract archive and create images
+#DONE need to do check and see if multiple files in a directory will write to the same directory and overwrite. If so then append# to the directory. That happened with XMen First Class
 #work on collections that are rared or zipped. Then need to make sure unzip and unrar teh cbr/cbz files that were extracted.
 #append W or H identifier to the directory for which style they are
 #recurse directories (CLI switch to activate)
 #DONE error logging -> broken archives, empty directories
 #exclude scanner images. Have filenames listed in a file, or listed in a variable/array inside 
+
 ScannerFileNames="zGGtagT.jpg zGGtag.jpg" #need for way to captures these like did with ibd industry names
+
+function splitLargeComicsHTML()
+{
+    ImageThreshold=30 #max number of images we'll allow before creating a set of pages with less images per page                                
+    imagesPerPage=28 #could also just set to $ImageThreshold                                                                                    
+#crawl through directories and if the number of images is greater than a threshold then we'll create a set of webpages to split the         
+#images across several webpages                                                                                                             
+#find number of images in the directory                                                                                                     
+    numimages=$(  ls -1 *.[Jj][Pp][Gg] *.[Gg][Ii][fF] *.[Pp][Nn][Gg] 2>>/dev/null | wc -l )
+#-->by redirecting stderr to /dev/null I dont get the "no such file or directory output"                                                            totalimages=$numimages #-subtractnumimages                                                        
+    echo "$totalimages >  $ImageThreshold"
+#if the number of images crosses the threshold we'll make separate pages with fewer images per page                                         
+    if [[ "totalimages" -gt "$ImageThreshold" ]]
+    then
+        echo "$dir will be split into separate smaller webpages"
+        counter=1
+        pagenum=$( printf "%02d" $counter )
+        HTMLpage="000$dir-$pagenum.html"
+        page=1
+        countermod=1
+        echo "<html><body><title>$dir pg $pagenum</title>" > $HTMLpage
+	
+        for image in *.[jJ][Pp][Gg] *.[Gg][Ii][fF] *.[Pp][Nn][Gg]
+        do
+            if [ -f "$image" ] #prevents output when isn't a file; ie. catches when no images of one of the categories                  
+                then
+		
+                let "countermod = $counter % $imagesPerPage"
+                if  [ $countermod -eq 0 ] #signal need to create new page                                                               
+                then
+                    let 'pageplusone=page+1'
+                    pagenum=$( printf "%02d" $pageplusone )
+                        #place link to next page at end of present html page                                                                
+                    echo "<a href=\"000$dir-$pagenum.html\">Next Page</a>" >> "$HTMLpage"
+                    echo "</body></html>" >> "$HTMLpage" #close out last page                                                           
+                    let 'page+=1'
+                    pagenum=$( printf "%02d" $page )
+                    HTMLpage="000$dir-$pagenum.html"
+                    echo "$counter  $pagenum"
+                    echo "<html><body><title>$dir pg $pagenum</title>" > $HTMLpage #start new page                                      
+                fi
+		
+                echo "<hr>$counter<br>" >> "$HTMLpage"
+                echo "<img src=\"$image\"><br>" >> "$HTMLpage"
+                let 'counter+=1'
+
+            fi #end if its' an image                                                                                                    
+        done #end processing images in jpg gif png                                                                                      
+    fi #end processing if we're past the threshold and need to break into individ pages                                                 
+    
+}
+
+function createDirectoryForWebcomic()
+{
+    filename="${1}"
+    foldernamenospaces=$( convertFoldername "${filename}" ) #put here since would be called recursively in checkForFileNameCollision
+    number=0
+    foldername="$foldernamenospaces"
+    while [[ -e "$foldername" && -d "$foldername" ]] 
+    do
+	let 'number+=1'
+	numberformat=$( printf "%02d" $number )
+	foldername=$foldernamenospaces$numberformat
+    done
+    mkdir "$foldername"
+    echo "$foldername"
+
+}
+
+function checkForFileNameCollision()
+{ #----not used-----
+    foldernamenospaces="${1}"
+    number=$2
+    numberformat=$( print "%02d" $number )
+
+     if [ -e "${foldernamenospaces}" ]
+     then
+	 foldernamenumber="$foldernamenospaces$numberformat"
+	 #need to recursively
+     else 
+	 mkdir "${foldernamenospaces}"
+     fi
+    
+}
 
 function getArchiveSize()
 {
-size=$( du "${1}" | cut -f 1 )
+    size=$( du "${1}" | cut -f 1 )
+    echo "$size"
 }
 
 function checkFileSpace()
 {
-archive="${1}"
-archiveSize=$( getArchiveSize "$archive" )
-tempFreeSpaceStatus=$( checkdiskspace /tmp $archiveSize )
-homeFreeSpaceStatus=$( checkdiskspace /home $archiveSizze )
-Status=1
+    archive="${1}"
+    archiveSize=$( getArchiveSize "$archive" )
+    fivepercent=$(( $archiveSize / 20 ))
+    archiveSizePlus5Percent=$(( $archiveSize + $fivepercent ))
+    tempFreeSpaceStatus=$( checkdiskspace /tmp $archiveSizePlus5Percent )
+    homeFreeSpaceStatus=$( checkdiskspace /home $archiveSizePlus5Percent )
+    Status=1
 
-if [[ $tempFreeSpaceStatus -eq 0 ]]
-then
-echo "/tmp doesn't have enough free space to extract the archive."
-Status=0
-fi
-if [[ $tempFreeSpaceStatus -eq 0 ]]
-then
-echo "/home doesn't have enough free space to extract the archive."
-Status=0
-fi
-
-
-echo $Status
+    if [[ $tempFreeSpaceStatus -eq 0 ]]
+    then
+	echo "/tmp doesn't have enough free space to extract the archive."
+	Status=0
+    fi
+    if [[ $tempFreeSpaceStatus -eq 0 ]]
+    then
+	echo "/home doesn't have enough free space to extract the archive."
+	Status=0
+    fi
+    
+    echo $Status
 }
 
 function checkdiskspace()
@@ -51,6 +138,7 @@ function checkdiskspace()
     then
         Output=0
     fi
+
     echo ${Output}
 }
 
@@ -58,14 +146,23 @@ function checkdiskspace()
 
 function convertFoldername()
 {
-    i="${1}"
+    i="${1}"  #this is the archives name
 #    echo "inmakestuff=$i" # why aren't we getting anything
     IFS=$( echo -en "\n\b" )  #this changes the file delimiter which is normally a space to a newline so we can deal with files with spaces in them.
     
+#remove extension
     foldernamept2=${i%.*}       #the name was screwing stuff up cause the following commands weren't cutting the filename correctly. 
-    foldernamept1=${foldernamept2%%(*}   #<-- use %% bc want to match longest sequence  but this leaves trailing whitespace              
+
+#strip parens on back-->replaced with just stripping whats in the parens
+#    foldernamept1=${foldernamept2%%(*}   #<-- use %% bc want to match longest sequence  but this leaves trailing whitespace              
+
+#remove items in parens (typically the scanner group)
+    foldernamept1=${foldernamept2/([^)]*)}
+
+
         #foldername=${foldernamept1/%[[:space:]]/} #<-- this removes the trailing whitespace                                    
-	foldername=${foldernamept1//[[:space:]]} #<-- this removes the all whitespace                                    
+foldername=${foldernamept1//[[:space:]]} #<-- this removes all the whitespace                                    
+#remove any weird punctuation that might cause problems 
 	foldernamenospace=${foldername//[[:punct:]]} # echo "$foldername" | tr '[:punct:]' '_' }
 	echo $foldernamenospace
     }
@@ -83,42 +180,49 @@ function getFileName()
 function convertArchivesIntoWebpageDirectory()
 {
     imagesPerPage=$1
+    archive="${2}"
+    foldernamenospace=$3 #( createDirectoryForWebcomic "${2}" )
+    
+    if [[ 1 -eq 0 ]]
+    then
+	echo "----------- WTF 1 = 0 ----------------------------------------"
     #echo "variable 2:${2}"
-    foldernamenospace=$( convertFoldername "${2}" )
+	foldernamenospace=$( convertFoldername "${2}" )
 #https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html                                               
-# ${parameter/pattern/string} -->then I use the % to match at the end of 'parameter' and since string is empty we remove the pattern which specifies spaces.                            
-
-        if [ !  -e "$foldernamenospace" ]
-        then
+# ${parameter/pattern/string} -->then I use the % to match at the end of 'parameter' and since string is empty we remove the pattern which specifies spaces.         
+	if [ !  -e "$foldernamenospace" ]
+	then
             echo "creating $foldernamenospace directory" 
             mkdir "$foldernamenospace" #create folder if doesn't exist                      
-        fi
-	extension=$( getFileExtension "${2}" )
-	echo "$extension"	
-	if [ "$extension" = "cbr" ]
-	then
-	    echo "CBR file"
-	    unrar e "$2" -d "$foldernamenospace" 2>> /tmp/DecompressErrorLog.txt # if the directory doesn't exist unrar will skip extracting the files
-	else #assume that its cbz
-	    olddir=$( pwd )
-	    echo "$pwd"
-	    echo "CBZ file"
-	    unzip "$2" -d /tmp/Comic 2>> /tmp/DecompressErrorLog.txt  #send stderr to log
-	    olddir=$( pwd )
-	    echo "$olddir"
-	    for i in /tmp/Comic/*
-	    do
-		if [ -d "$i" ] 
-		then  
-		    echo "$i" 
-		    cd "$i" 
-		    ls 
-		    mv *.* "$olddir/$foldernamenospace" 
-		fi 
-	    done
-	    cd "$olddir"
-	    rm /tmp/Comic  -rf
 	fi
+    fi
+    
+    extension=$( getFileExtension "${2}" )
+    echo "$extension"	
+    if [ "$extension" = "cbr" ]
+    then
+	echo "CBR file"
+	unrar e "${2}" -d "$foldernamenospace" 2>> /tmp/DecompressErrorLog.txt # if the directory doesn't exist unrar will skip extracting the files
+    else #assume that its cbz
+	olddir=$( pwd )
+	echo "$pwd"
+	echo "CBZ file"
+	unzip "${2}" -d /tmp/Comic 2>> /tmp/DecompressErrorLog.txt  #send stderr to log
+	olddir=$( pwd )
+	echo "$olddir"
+	for i in /tmp/Comic/*
+	do
+	    if [ -d "$i" ] 
+	    then  
+		echo "$i" 
+		cd "$i" 
+		ls 
+		mv *.* "$olddir/$foldernamenospace" 
+	    fi 
+	done
+	cd "$olddir"
+	rm /tmp/Comic  -rf
+    fi
 }
 
 function RecurseDirs()
@@ -151,6 +255,7 @@ function RecurseDirs()
 
 function decompressRARZIPArchivesIntoDirectory()
 {
+
     foldernamenospace=$( convertFoldername "${1}" )
 #https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html                                                   
 # ${parameter/pattern/string} -->then I use the % to match at the end of 'parameter' and since string is empty we remove the pattern\
@@ -161,8 +266,11 @@ function decompressRARZIPArchivesIntoDirectory()
      echo "creating $foldernamenospace directory"
      mkdir "$foldernamenospace" #create folder if doesn't exist                                                               
  fi
+
+
+
  extension=$( getFileExtension "${1}" )
- echo "$extension"
+ echo "$extension"   #is there a way we could use mime types to handle the files and the app to launch?
  if [ "$extension" = "rar" ]
  then
      echo "RAR file"
@@ -389,8 +497,8 @@ deletearchive=$4
 DiskStatus=$( checkFileSpace "${item}" )
 if [[ $DiskStatus -eq 1 ]]
 then
-    convertArchivesIntoWebpageDirectory $numberOfImagesPerPage "${item}" 
-    directory=$( convertFoldername "${item}" )
+    directory=$( createDirectoryForWebcomic "${item}" ) #convertFoldername "${item}" )
+    convertArchivesIntoWebpageDirectory $numberOfImagesPerPage "${item}" "$directory"
     convertImages $wideformat $directory
     createHtml $wideformat $directory
     deleteArchive $deletearchive "${item}"

@@ -11,9 +11,11 @@ do
     then 
 	cd "$dir" #need to move into directory 
 #find number of images in the directory 
-	numimages=$(  ls -1 *.[Jj][Pp][Gg] *.[Gg][Ii][fF] *.[Pp][Nn][Gg] | wc -l ) 
+	numimages=$(  ls -1 *.[Jj][Pp][Gg] *.[Gg][Ii][fF] *.[Pp][Nn][Gg] 2>>/dev/null | wc -l ) 
 #often there aren't gif or png but the ls will say "ls: cannot access *.png: No such file or directory" so need to discount above numbr by the number of times we see that message 
-	subtractnumimages=$( ls -1 *.[Jj][Pp][Gg] *.[Gg][Ii][fF] *.[Pp][Nn][Gg] | grep -c "No such file" ) #aaggh why doesn't this work?
+#	subtractnumimages=$( ls -1 *.[Jj][Pp][Gg] *.[Gg][Ii][fF] *.[Pp][Nn][Gg] | grep -c "No such file" ) #aaggh why doesn't this work?
+#-->by redirecting stderr to /dev/null I dont get the "no such file or directory output"
+
 	totalimages=$numimages #-subtractnumimages
 echo "$totalimages >  $ImageThreshold"
 #if the number of images crosses the threshold we'll make separate pages with fewer images per page
