@@ -270,8 +270,8 @@ function RecurseDirs()
     wideformat=$3
     deletearchives=$4
     unrarunzip=$5
-    echo $depth $numberOfImagesPerPage $wideformat $deletearchives $unrarzip 
-    echo "1:==$1"
+  #  echo $depth $numberOfImagesPerPage $wideformat $deletearchives $unrarzip 
+  #  echo "1:==$1"
 #    if [ "${1}" -eq "" ]
     if [ "" != "$1" ]
     then
@@ -279,7 +279,7 @@ function RecurseDirs()
     fi
     depth=$1
     let 'depth+=1'
-    echo "$depth"
+   # echo "$depth"
 
 
 #this is placed before so that the directories it makes are recursed into. otherwise they aren't traveresed.
@@ -292,21 +292,27 @@ function RecurseDirs()
     do
         if [ -d "$dir" ]
         then
-	    writable=$(checkDirectoryWritePermission "$dir" )
+	    dire=$( renameDirectory "$dir" )
+	    writable=$(checkDirectoryWritePermission "$dire" )
 	    if [[ 1 -eq "$writable" ]]
 	    then
-		cd "$dir"
-		echo -n "entered:"
+		cd "$dire"
+		echo -n "entered:$dir"
+		temp="$dir"
 		pwd
 		RecurseDirs $depth $numberOfImagesPerPage $wideformat $deletearchives $unrarzip 
-		echo -n "exiting:"
+		echo -n "exiting:$dir:$temp:" #this dir is the whole path and doesn't match what we had before
 		pwd
 		cd ..
+#I was planning on donig the dir rename here but the dir variable is changed to the pwd, the temp variable however could've been used as well..
+
 	    else 
-		echo "Skipping ${dir}: no write permission" >> /tmp/DebugWritePermission.txt
+		echo "Skipping ${dire}: no write permission" >> /tmp/DebugWritePermission.txt
 	    fi
         fi
     done
+
+
     
 #need to do the write permission file check here as well in case we start in a dir that isn't writable
     dir=$( pwd )
@@ -326,6 +332,19 @@ function RecurseDirs()
     fi
 #    echo "Do stuff here $depth"
     let 'depth-=1'
+}
+
+function renameDirectory()
+{
+#the Android Browser can't have spaces in the directory names
+    dir="${1}"
+    directory=$( convertFoldername  "${dir}" )
+    if [  "$dir" != "$directory" ]
+    then
+#	echo "--------Performing Directory Renaming:$dir:$directory:---------"
+	mv "$dir" "$directory"
+    fi
+    echo "$directory" #can echo just directory since dir is changed to directory if it doesn't match
 }
 
 function decompressRARZIPArchivesIntoDirectory()
@@ -497,6 +516,7 @@ function convertImages()
 {
     pageformat=$1
     directory=$2
+    unsharp=$3
     echo "pageformat $pageformat; directory $directory"
     echo "Moving into directory $directory"
     cd "$directory"
@@ -520,38 +540,74 @@ function convertImages()
 	    then
 #double page
 		echo "double page"
-		extension=${imagenospaces##*.}
-		filename=${imagenospaces%.*}
+		
 		if [ 1 == $pageformat ] #variable can't be first??? alternative method is to place it in [[ expr ]] this works 
 		then 
-		    mogrify -resize 1600x2560 "$imagenospaces"
+
+		    IMDoublePage "$imagenospaces" 1600x2500 $unsharp
+
+#		    mogrify -resize 1600x2560 "$imagenospaces"
 #there is a limitation to the Android Browser/Gallery application. Images > ~1200px in any dimension are displayed with reduced resolution (almost as if it was a progressive jpg that they stopped decoding before the last quantization level)
 #the 3x1@-> make 3 horizontal by 1 vertical tile of the source image. 3x1->make 3px wide by 1 px tall tiles from the source image
-		    convert "$imagenospaces" -crop 1x3@ +repage +adjoin "$filename-%d.$extension"
+#		    convert "$imagenospaces" -crop 1x3@ +repage +adjoin "$filename-%d.$extension"
+
 		else
-		    mogrify -resize 1200x1900 "$imagenospaces"
-		    convert "$imagenospaces" -crop 1x3@ +repage +adjoin "$filename-%d.$extension"
+		    IMDoublePage "$imagenospaces" 1200x1900 $unsharp
+#		    mogrify -resize 1200x1900 "$imagenospaces"
+#		    convert "$imagenospaces" -crop 1x3@ +repage +adjoin "$filename-%d.$extension"
 		fi
 #create a smaller image so can see the whole dbl page spread nicely -kinda like the overview of the context+overview paradigm
-		mogrify -resize 800x800 "$imagenospaces"
+		#mogrify -resize 800x800 "$imagenospaces" #create the thumbnail 
 	    else
 		if [ 1 == $pageformat ]
 		then 
 #these dimensions were chosen as the BPDN (black pandigital Nove) has a 800x600 screen resolution
-		    mogrify -resize 800x1280 "$imagenospaces" #this crops a bit of width so it meets the height
+		    #mogrify -resize 800x1280 "$imagenospaces" #this crops a bit of width so it meets the height
+		    IMSinglePage "$imagenospaces"  800x1200 $unsharp
 		else
-		    mogrify -resize 600x950 "$imagenospaces" #crop so full width and height just a smidge over.
+#		    mogrify -resize 600x950 "$imagenospaces" #crop so full width and height just a smidge over.
+		    IMSinglePage "$imagenospaces"  600x950 $unsharp
 		fi
 	    fi
-	    
 #need to figure out how to only output stuff about images if there are any. 
-	    
 	fi
     done
-
     echo "Leaving directory $directory"
     cd ..
+}
+
+function IMSinglePage()
+{
+    name="$1"
+    dimensions=$2
+    unsharp=$3
+    if [[ 1 -eq $unsharp ]]
+    then
+	mogrify -resize $dimensions  -unsharp 1.5x1.5+1.5+0.08 $name
+    else
+	mogrify -resize $dimensions $name
+    fi
+}
+
+function IMDoublePage()
+{
+    name="$1"
+    dimensions=$2
+    unsharp=$3
     
+    extension=${name##*.}
+    filename=${name%.*}
+
+    if [[ 1 -eq $unsharp ]]
+    then
+	mogrify -resize $dimensions  -unsharp 1.5x1.5+1.5+0.08 $name
+	
+    else
+	mogrify -resize $dimensions $name
+	
+    fi
+    convert "$name" -crop 1x3@ +repage +adjoin "$filename-%d.$extension"
+    mogrify -resize 800x800 "$imagenospaces" #create the thumbnail
 }
 
 function deleteArchive()
@@ -592,13 +648,15 @@ function Operations()
     item=$2
     wideformat=$3
     deletearchive=$4
+    unsharp=$5
     DiskStatus=$( checkFileSpace "${item}" )
+
     if [[ $DiskStatus -eq 1 ]]
     then
 
 	directory=$( createDirectoryForWebcomic "${item}" ) #convertFoldername "${item}" )
 	convertArchivesIntoWebpageDirectory $numberOfImagesPerPage "${item}" "$directory"
-	convertImages $wideformat $directory
+	convertImages $wideformat $directory $unsharp
 	splitcomic=$( splitLargeComicsHTML $directory )
 	if [[ 0 -eq $splitcomic ]]
 	then  #only do createHTML if the comic wasnt split
@@ -624,7 +682,8 @@ wideformat=0
 deletearchives=0
 unrarzip=0
 recursive=0
-while getopts ":n:whdur" OPTIONS 
+unsharp=0
+while getopts ":n:whdurs" OPTIONS 
 do
     case ${OPTIONS} in 
 	n|-numberofimagesperpage) echo "numperpage ${OPTARG}"
@@ -639,6 +698,8 @@ do
 	    unrarzip=1;;
 	r|-recursive) echo "Running recursively on directories" 
 	    recursive=1;; #this negates running only on the files specified
+	s|-unsharp) echo "Use unsharp mask"
+	    unsharp=1;;
     esac
 done
 #echo $numberOfImagesPerPage
@@ -651,7 +712,7 @@ echo "chmod u+w . -R" > /tmp/DebugWritePermission.txt
 
 if [[ 1 -eq $recursive ]]
 then
-    RecurseDirs 0 $numberOfImagesPerPage $wideformat $deletearchives $unrarzip 
+    RecurseDirs 0 $numberOfImagesPerPage $wideformat $deletearchives $unrarzip $unsharp
 else
     dir=$( pwd )
     writable=$(checkDirectoryWritePermission "${dir}" )
@@ -671,7 +732,7 @@ else
 		if [ -f "${item}" ]
 		then
 		    echo "--$item--"
-		    Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives
+		    Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives $unsharp
 		fi
 	    done
 	else
@@ -680,7 +741,7 @@ else
 		echo $1
 		if [ -f "${1}" ]
 		then
-		    Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchive
+		    Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchive $unsharp
 		fi
 		shift
 	    done
