@@ -3,6 +3,9 @@
 #Difference from v4: to overcome the problem of recursing directories and creating webpages where no archive was extracted we work on 1 archive at a time (decompress X, convert Xs images, create Xs webpage VS decompress all, convert all....)
 #TODO:
 #create -h help dialog
+#allow for greyscale output -k (kindle) switch or -g for greyscale
+#allow for repackaging as cbr/cbz to eliminate wasted space for these smaller screens. would want to turn off the renaming due to special characters.
+#allow for a -o option that is followed by a command that is passed on to IM. allow for multiple -o options and package and send all those to IM
 #catch ctrl-c and exit gracefully
 #only delete if unrar/zip was successful
 #add option to specify dimensions of converted files
