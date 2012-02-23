@@ -235,11 +235,10 @@ function convertArchivesIntoWebpageDirectory()
 	unrar e "${2}" -d "$foldernamenospace" 2>> /tmp/DecompressErrorLog.txt # if the directory doesn't exist unrar will skip extracting the files
     else #assume that its cbz
 	olddir=$( pwd )
-	echo "$pwd"
+	echo "$olddir"
 	echo "CBZ file"
 	unzip "${2}" -d /tmp/Comic 2>> /tmp/DecompressErrorLog.txt  #send stderr to log
-	olddir=$( pwd )
-	echo "$olddir"
+#move contents of extracted directory
 	for i in /tmp/Comic/*
 	do
 	    if [ -d "$i" ] 
@@ -248,8 +247,11 @@ function convertArchivesIntoWebpageDirectory()
 		cd "$i" 
 		ls 
 		mv *.* "$olddir/$foldernamenospace" 
+		cd ..
 	    fi 
 	done
+#move contents if no dir structure
+	mv /tmp/Comic/*.* "$olddir/$foldernamenospace" 
 	cd "$olddir"
 	rm /tmp/Comic  -rf
     fi
@@ -381,6 +383,7 @@ function decompressRARZIPArchivesIntoDirectory()
 	echo "$olddir"
 	for i in /tmp/Comic/*
 	do
+#move extracted directory
             if [ -d "$i" ]
             then
 		echo "$i"
@@ -389,6 +392,8 @@ function decompressRARZIPArchivesIntoDirectory()
 		mv *.* "$olddir/$foldernamenospace"
             fi
 	done
+#move files if the zip didn't have a directory structure in it
+	mv /tmp/Comic/*.* "$olddir/$foldernamenospace"
 	cd "$olddir"
 	rm /tmp/Comic  -rf
     fi
@@ -542,7 +547,7 @@ function convertImages()
 	    if [ $width -gt $height ]  #if page is wider than it is long we consider it to be a double page
 	    then
 #double page
-		echo "double page"
+		echo -n "double page"
 		
 		if [ 1 == $pageformat ] #variable can't be first??? alternative method is to place it in [[ expr ]] this works 
 		then 
