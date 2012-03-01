@@ -3,20 +3,23 @@
 #Difference from v4: to overcome the problem of recursing directories and creating webpages where no archive was extracted we work on 1 archive at a time (decompress X, convert Xs images, create Xs webpage VS decompress all, convert all....)
 #TODO:
 #create -h help dialog
+#add ability to zip / rar contents back up 
 #allow for greyscale output -k (kindle) switch or -g for greyscale
 #allow for repackaging as cbr/cbz to eliminate wasted space for these smaller screens. would want to turn off the renaming due to special characters.
-#allow for a -o option that is followed by a command that is passed on to IM. allow for multiple -o options and package and send all those to IM
 #catch ctrl-c and exit gracefully
 #only delete if unrar/zip was successful
 #add option to specify dimensions of converted files
-#add option and functionality to compress the images a bit
-#add option and functionality to sharpen the images
-#add option to pass imagemagick options
 #prevent splitting html across a double page image - catch filename and set flag. clear flag when not dbl (hopefully this will also keep the overview image on same html page as well)
-#do check that archive is extractable (need rwx permissions?)
-#work on collections that are rared or zipped. Then need to make sure unzip and unrar teh cbr/cbz files that were extracted.
-#append W or H identifier to the directory for which style they are
-#recurse directories (CLI switch to activate)
+
+#DONE allow for a -o option that is followed by a command that is passed on to IM. allow for multiple -o options and package and send all those to IM
+#DONE VIA IM CAPABILITY add option and functionality to compress the images a bit
+#DONE add option and functionality to sharpen the images
+#DONE add option to pass imagemagick options
+#DONE do check that archive is extractable (need rwx permissions?)
+#DONE work on collections that are rared or zipped. Then need to make sure unzip and unrar the cbr/cbz files that were extracted.
+#DONE append W or H identifier to the directory for which style they are
+#DONE recurse directories (CLI switch to activate)
+#DONE allow for any IM command to be passed
 #DONE perform disk space check to ensure have enough space to extract archive and create images
 #DONE need to do check and see if multiple files in a directory will write to the same directory and overwrite. If so then append# to the directory. That happened with XMen First Class
 #DONE error logging -> broken archives, empty directories
@@ -275,6 +278,7 @@ function RecurseDirs()
     wideformat=$3
     deletearchives=$4
     unrarunzip=$5
+    imagemagickarguments="${6}"
   #  echo $depth $numberOfImagesPerPage $wideformat $deletearchives $unrarzip 
   #  echo "1:==$1"
 #    if [ "${1}" -eq "" ]
@@ -305,7 +309,7 @@ function RecurseDirs()
 		echo -n "entered:$dir"
 		temp="$dir"
 		pwd
-		RecurseDirs $depth $numberOfImagesPerPage $wideformat $deletearchives $unrarzip 
+		RecurseDirs $depth $numberOfImagesPerPage $wideformat $deletearchives $unrarzip  "${imagemagickarguments}"
 		echo -n "exiting:$dir:$temp:" #this dir is the whole path and doesn't match what we had before
 		pwd
 		cd ..
@@ -329,7 +333,7 @@ function RecurseDirs()
 	    if [ -f "${item}" ]
 	    then
 		echo "--$item--"
-		Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives
+		Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives "${imagemagickarguments}"
 	    fi
 	done
     else
@@ -525,6 +529,8 @@ function convertImages()
     pageformat=$1
     directory=$2
     unsharp=$3
+    imagemagickarguments="${4}"
+    echo "convertImage:${imagemagickarguments}"
     echo "pageformat $pageformat; directory $directory"
     echo "Moving into directory $directory"
     cd "$directory"
@@ -552,7 +558,7 @@ function convertImages()
 		if [ 1 == $pageformat ] #variable can't be first??? alternative method is to place it in [[ expr ]] this works 
 		then 
 
-		    IMDoublePage "$imagenospaces" 1600x2500 $unsharp
+		    IMDoublePage "$imagenospaces" 1600x2500 $unsharp "${imagemagickarguments}"
 
 #		    mogrify -resize 1600x2560 "$imagenospaces"
 #there is a limitation to the Android Browser/Gallery application. Images > ~1200px in any dimension are displayed with reduced resolution (almost as if it was a progressive jpg that they stopped decoding before the last quantization level)
@@ -560,7 +566,7 @@ function convertImages()
 #		    convert "$imagenospaces" -crop 1x3@ +repage +adjoin "$filename-%d.$extension"
 
 		else
-		    IMDoublePage "$imagenospaces" 1200x1900 $unsharp
+		    IMDoublePage "$imagenospaces" 1200x1900 $unsharp "${imagemagickarguments}"
 #		    mogrify -resize 1200x1900 "$imagenospaces"
 #		    convert "$imagenospaces" -crop 1x3@ +repage +adjoin "$filename-%d.$extension"
 		fi
@@ -571,10 +577,10 @@ function convertImages()
 		then 
 #these dimensions were chosen as the BPDN (black pandigital Nove) has a 800x600 screen resolution
 		    #mogrify -resize 800x1280 "$imagenospaces" #this crops a bit of width so it meets the height
-		    IMSinglePage "$imagenospaces"  800x1200 $unsharp
+		    IMSinglePage "$imagenospaces"  800x1200 $unsharp "${imagemagickarguments}"
 		else
 #		    mogrify -resize 600x950 "$imagenospaces" #crop so full width and height just a smidge over.
-		    IMSinglePage "$imagenospaces"  600x950 $unsharp
+		    IMSinglePage "$imagenospaces"  600x950 $unsharp "${imagemagickarguments}"
 		fi
 	    fi
 #need to figure out how to only output stuff about images if there are any. 
@@ -586,32 +592,52 @@ function convertImages()
 
 function IMSinglePage()
 {
+
     name="$1"
     dimensions=$2
     unsharp=$3
+    imagemagickarguments="${4}"
+    echo "${imagemagickarguments}"
     if [[ 1 -eq $unsharp ]]
     then
-	mogrify -resize $dimensions  -unsharp 1.5x1.5+1.5+0.08 $name
+	cmdstring="mogrify -resize $dimensions  -unsharp 1.5x1.5+1.5+0.08 ${imagemagickarguments} $name"
     else
-	mogrify -resize $dimensions $name
+#echo "mogrify -resize $dimensions ${imagemagickarguments} $name"
+#	mogrify -resize $dimensions "${imagemagickarguments}" $name
+	cmdstring="mogrify ${imagemagickarguments} -resize ${dimensions} $name"
     fi
+#creating a string and using eval overcomes the way variables were expanded when attempting to pass them to IM. if more than one argument was passed then it was interpreted as one argument instead of a string of separate arguments  "-modulate 150,50" was interpreted as one commmand (ie as if the command were called "-modulate 150,50") instead of a command and its argument (i.e. "-modulate" and "150,50")
+    eval "${cmdstring}"
+
 }
+
 
 function IMDoublePage()
 {
+IMSinglePage "{1}" $2 $2 "${4}"
+    name="$1"
+    extension=${name##*.}
+    filename=${name%.*}
+    convert "$name" -crop 1x3@ +repage +adjoin "$filename-%d.$extension"
+    mogrify -resize 800x800 "$imagenospaces" #create the thumbnail
+}
+
+function IMDoublePageOLD()
+{
+#I suppose the better way to do this is to make an alias for 
     name="$1"
     dimensions=$2
     unsharp=$3
-    
+    imagemagickarguments="${4}"
     extension=${name##*.}
     filename=${name%.*}
 
     if [[ 1 -eq $unsharp ]]
     then
-	mogrify -resize $dimensions  -unsharp 1.5x1.5+1.5+0.08 $name
+	mogrify -resize $dimensions  -unsharp 1.5x1.5+1.5+0.08 "${imagemagickarguments}" $name
 	
     else
-	mogrify -resize $dimensions $name
+	mogrify -resize $dimensions "${imagemagickarguments}" $name
 	
     fi
     convert "$name" -crop 1x3@ +repage +adjoin "$filename-%d.$extension"
@@ -657,6 +683,9 @@ function Operations()
     wideformat=$3
     deletearchive=$4
     unsharp=$5
+    imagemagickarguments="${6}"
+echo "$1:$2:$3:$4:$5:$6:$7:"
+    echo "Operations:$unsharp:$deletearchive:$7:${imagemagickarguments}:${6}:$6:"
     DiskStatus=$( checkFileSpace "${item}" )
 
     if [[ $DiskStatus -eq 1 ]]
@@ -664,7 +693,7 @@ function Operations()
 
 	directory=$( createDirectoryForWebcomic "${item}" ) #convertFoldername "${item}" )
 	convertArchivesIntoWebpageDirectory $numberOfImagesPerPage "${item}" "$directory"
-	convertImages $wideformat $directory $unsharp
+	convertImages $wideformat $directory $unsharp "${imagemagickarguments}"
 	splitcomic=$( splitLargeComicsHTML $directory )
 	if [[ 0 -eq $splitcomic ]]
 	then  #only do createHTML if the comic wasnt split
@@ -691,7 +720,8 @@ deletearchives=0
 unrarzip=0
 recursive=0
 unsharp=0
-while getopts ":n:whdurs" OPTIONS 
+imagemagickarguments="-strip"
+while getopts ":n:whdurs:i:" OPTIONS 
 do
     case ${OPTIONS} in 
 	n|-numberofimagesperpage) echo "numperpage ${OPTARG}"
@@ -708,8 +738,14 @@ do
 	    recursive=1;; #this negates running only on the files specified
 	s|-unsharp) echo "Use unsharp mask"
 	    unsharp=1;;
+	i|-imagemagick) echo "Passing ImageMagick arguments"
+	    imagemagickarguments=${OPTARG};;
     esac
 done
+
+echo "${imagemagickarguments}"
+
+
 #echo $numberOfImagesPerPage
 shift $(($OPTIND - 1)) 
 # Decrements the argument pointer so it points to next argument.
@@ -720,7 +756,7 @@ echo "chmod u+w . -R" > /tmp/DebugWritePermission.txt
 
 if [[ 1 -eq $recursive ]]
 then
-    RecurseDirs 0 $numberOfImagesPerPage $wideformat $deletearchives $unrarzip $unsharp
+    RecurseDirs 0 $numberOfImagesPerPage $wideformat $deletearchives $unrarzip $unsharp "${imagemagickarguments}"
 else
     dir=$( pwd )
     writable=$(checkDirectoryWritePermission "${dir}" )
@@ -740,7 +776,7 @@ else
 		if [ -f "${item}" ]
 		then
 		    echo "--$item--"
-		    Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives $unsharp
+		    Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives $unsharp "${imagemagickarguments}"
 		fi
 	    done
 	else
@@ -749,7 +785,8 @@ else
 		echo $1
 		if [ -f "${1}" ]
 		then
-		    Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchive $unsharp
+		    echo "before Operations:${imagemagickarguments}:$1:$numberOfImagesPerPage:$wideformat:$deletearchives:$unsharp"
+		    Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchives $unsharp "${imagemagickarguments}"
 		fi
 		shift
 	    done
