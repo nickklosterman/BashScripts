@@ -109,6 +109,19 @@ new_directory=${1}-favourites
 	Super_Img=$( grep super_img index.html | sed 's/.*super_img="//' | sed 's/" .*//' )
 	DataSrc=$( grep data-src index.html | sed 's/.*data-src="//;s/".*//' )
 
+#2012.02.08 we aern't getting all the files from the index page for some reason                                                                                                                                    
+# I had to formulate this roundabouts way to separate the images as they were all being put on a single line which sed was then missing. 
+#       Super_FullImg=$( grep super_fullimg index.html | sed 's/.*super_fullimg="//g;s/" .*//g' )
+        Super_FullImg=$( sed 's/super_fullimg="/super_fullimg=/g' index.html | tr '"' '\n' | grep super_fullimg |  sed 's/.*super_fullimg=//g;s/" .*//g' )
+#       Super_Img=$( grep super_img index.html | sed 's/.*super_img="//g;s/" .*//g' )
+        Super_Img=$( sed 's/super_img="/super_img=/g' index.html | tr '"' '\n' | grep super_img |  sed 's/.*super_img=//g;s/" .*//g' )
+#       DataSrc=$( grep data-src index.html | sed 's/.*data-src="//g;s/".*//' ) #these are the thumbnails
+        DataSrc=$( sed 's/data-src="/super_fullimg=/g' index.html | tr '"' '\n' | grep super_fullimg |  sed 's/.*super_fullimg=//g;s/" .*//g' )
+        echo "$Super_FullImg" > Super_FullImg.txt
+        echo "$Super_Img" > Super_Img.txt
+        echo "$DataSrc" > DataSrc.txt
+
+
 	if [ $GetFullSizeImages -eq 1 ]
 	then 
 

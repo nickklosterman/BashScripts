@@ -129,7 +129,7 @@ else
 #	Super_Img=$( grep super_img index.html | sed 's/.*super_img="//g;s/" .*//g' )
 	Super_Img=$( sed 's/super_img="/super_img=/g' index.html | tr '"' '\n' | grep super_img |  sed 's/.*super_img=//g;s/" .*//g' )
 #	DataSrc=$( grep data-src index.html | sed 's/.*data-src="//g;s/".*//' ) #these are the thumbnails
-	Super_FullImg=$( sed 's/data-src="/super_fullimg=/g' index.html | tr '"' '\n' | grep super_fullimg |  sed 's/.*super_fullimg=//g;s/" .*//g' )
+	DataSrc=$( sed 's/data-src="/super_fullimg=/g' index.html | tr '"' '\n' | grep super_fullimg |  sed 's/.*super_fullimg=//g;s/" .*//g' )
 
 	echo "$Super_FullImg" > Super_FullImg.txt
 	echo "$Super_Img" > Super_Img.txt

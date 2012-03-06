@@ -6,6 +6,7 @@
 #add ability to zip / rar contents back up 
 #allow for greyscale output -k (kindle) switch or -g for greyscale
 #allow for repackaging as cbr/cbz to eliminate wasted space for these smaller screens. would want to turn off the renaming due to special characters.
+#gracefully work on zip/rar files that really should be cbz/cbz files. 
 #catch ctrl-c and exit gracefully
 #only delete if unrar/zip was successful
 #add option to specify dimensions of converted files
@@ -30,7 +31,7 @@ ScannerFileNames="zGGtagT.jpg zGGtag.jpg" #need for way to captures these like d
 function splitLargeComicsHTML()
 {
     dir="${1}"
-    flag=0 #set to 1 if we split
+    flag=0 #set to 1 if we split; passed back as status
     ImageThreshold=30 #max number of images we'll allow before creating a set of pages with less images per page                                
     imagesPerPage=28 #could also just set to $ImageThreshold                                                                                    
 #crawl through directories and if the number of images is greater than a threshold then we'll create a set of webpages to split the         
@@ -614,7 +615,7 @@ function IMSinglePage()
 
 function IMDoublePage()
 {
-IMSinglePage "{1}" $2 $2 "${4}"
+    IMSinglePage "{1}" $2 $2 "${4}"
     name="$1"
     extension=${name##*.}
     filename=${name%.*}
@@ -684,7 +685,7 @@ function Operations()
     deletearchive=$4
     unsharp=$5
     imagemagickarguments="${6}"
-echo "$1:$2:$3:$4:$5:$6:$7:"
+    echo "$1:$2:$3:$4:$5:$6:$7:"
     echo "Operations:$unsharp:$deletearchive:$7:${imagemagickarguments}:${6}:$6:"
     DiskStatus=$( checkFileSpace "${item}" )
 
@@ -706,7 +707,33 @@ echo "$1:$2:$3:$4:$5:$6:$7:"
     fi
 }
 
-
+function HelpMessage ()
+{
+    echo "Mangle"
+    echo "option: -h, --help"
+    echo "print this help message"
+    echo "option: -n, --numberofimagesperpage"
+    echo "override the default number of images per page when splitting large html files"
+    echo "option: -w, --fullwidth"
+    echo "resize image width according to longest side of intended device, typically its height"
+    echo "option: -h, --fullheight"
+    echo "resize image width according to shortest side of intended device, typically its width"
+    echo "option: -d, --deletearchives"
+    echo "after extraction and conversion, delete the source archive"
+    echo "option: -u, --unrarzip"
+    echo "process rar and zip files. It is assumed these archives hold cbr/cbz files inside."
+    echo "option: -r, --recursive"
+    echo "recursively run the script on all children directories"
+    echo "option: -u, --unsharp"
+    echo "perform an unsharp mask on all images"
+    echo "option: -i, --imagemagick"
+    echo "pass an ImageMagick command in parentheses to be run on all images"
+    echo "+sigmoidal-contrast 10,50% , -modulate 120,75, -monitor "
+    echo "option: "
+    echo ""
+    echo "option: "
+    echo ""
+}
 
 
 ######################
@@ -721,14 +748,15 @@ unrarzip=0
 recursive=0
 unsharp=0
 imagemagickarguments="-strip"
-while getopts ":n:whdurs:i:" OPTIONS 
+help=0
+while getopts ":n:whdurs:i:t" OPTIONS 
 do
     case ${OPTIONS} in 
-	n|-numberofimagesperpage) echo "numperpage ${OPTARG}"
+	n|-numberofimagesperpage) echo "numberpage ${OPTARG}"
 	    numberOfImagesPerPage=${OPTARG};;
 	w|-fullwidth) echo "fullwidth" #on the BPDN we'd flip it on side as the min dimension will be 800
 	    wideformat=1;;
-	h|-fullheight) echo "fullheight" #on the BPDN we'd flip it on side as the min dimension will be 600
+	t|-fullheight) echo "tall/fullheight" #on the BPDN we'd flip it on side as the min dimension will be 600
 	    wideformat=0;;
 	d|-deletearchives) echo "delete archives after extracting" 
 	    deletearchives=1;;
@@ -740,58 +768,66 @@ do
 	    unsharp=1;;
 	i|-imagemagick) echo "Passing ImageMagick arguments"
 	    imagemagickarguments=${OPTARG};;
+	h|-help) 
+	    help=1;;
+	T|-template) echo "Template"
+	    template=${OPTARG};;
     esac
 done
 
-echo "${imagemagickarguments}"
+if [[ 1 -eq $help ]]
+then
+    HelpMessage
+else
 
 
 #echo $numberOfImagesPerPage
-shift $(($OPTIND - 1)) 
+    shift $(($OPTIND - 1)) 
 # Decrements the argument pointer so it points to next argument.
 # $1 now references the first non-option item supplied on the command-line
 #+ if one exists.
 
-echo "chmod u+w . -R" > /tmp/DebugWritePermission.txt
+    echo "chmod u+w . -R" > /tmp/DebugWritePermission.txt
 
-if [[ 1 -eq $recursive ]]
-then
-    RecurseDirs 0 $numberOfImagesPerPage $wideformat $deletearchives $unrarzip $unsharp "${imagemagickarguments}"
-else
-    dir=$( pwd )
-    writable=$(checkDirectoryWritePermission "${dir}" )
-    if [[ 1 -eq "$writable" ]]
+    if [[ 1 -eq $recursive ]]
     then
-	Number_Of_Expected_Args=1
-	if [ $# -lt $Number_Of_Expected_Args ]
-	then 
-	    echo "Usage: script archive archive ...."
-	    echo "acting on all cbr/cbz files in this directory"
-	    if [[ 1 -eq $unrarzip ]]
-	    then
-		UnrarUnzip $deletearchive
-	    fi
-	    for item in *.[Cc][Bb][RrZz]
-	    do
-		if [ -f "${item}" ]
-		then
-		    echo "--$item--"
-		    Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives $unsharp "${imagemagickarguments}"
-		fi
-	    done
-	else
-	    until [ -z "$1" ] #loop through all arguments using shift to move through arguments
-	    do
-		echo $1
-		if [ -f "${1}" ]
-		then
-		    echo "before Operations:${imagemagickarguments}:$1:$numberOfImagesPerPage:$wideformat:$deletearchives:$unsharp"
-		    Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchives $unsharp "${imagemagickarguments}"
-		fi
-		shift
-	    done
-	fi
+	RecurseDirs 0 $numberOfImagesPerPage $wideformat $deletearchives $unrarzip $unsharp "${imagemagickarguments}"
     else
-	echo "Skipping ${dir}: no write permission" >> /tmp/DebugWritePermission.txt
-    fi    
-fi #end recurse check
+	dir=$( pwd )
+	writable=$(checkDirectoryWritePermission "${dir}" )
+	if [[ 1 -eq "$writable" ]]
+	then
+	    Number_Of_Expected_Args=1
+	    if [ $# -lt $Number_Of_Expected_Args ]
+	    then 
+		echo "Usage: script archive archive ...."
+		echo "acting on all cbr/cbz files in this directory"
+		if [[ 1 -eq $unrarzip ]]
+		then
+		    UnrarUnzip $deletearchive
+		fi
+		for item in *.[Cc][Bb][RrZz]
+		do
+		    if [ -f "${item}" ]
+		    then
+			echo "--$item--"
+			Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives $unsharp "${imagemagickarguments}"
+		    fi
+		done
+	    else
+		until [ -z "$1" ] #loop through all arguments using shift to move through arguments
+		do
+		    echo $1
+		    if [ -f "${1}" ]
+		    then
+			echo "before Operations:${imagemagickarguments}:$1:$numberOfImagesPerPage:$wideformat:$deletearchives:$unsharp"
+			Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchives $unsharp "${imagemagickarguments}"
+		    fi
+		    shift
+		done
+	    fi
+	else
+	    echo "Skipping ${dir}: no write permission" >> /tmp/DebugWritePermission.txt
+	fi    
+    fi #end recurse check
+fi #end help message 
