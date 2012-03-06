@@ -404,7 +404,7 @@ function decompressRARZIPArchivesIntoDirectory()
     fi
 }
 
-function createHtmlAndImages()
+function createHtmlAndImagesDEPRECATED()
 {
     pageformat=$1
     echo "pageformat $pageformat"
@@ -598,7 +598,7 @@ function IMSinglePage()
     dimensions=$2
     unsharp=$3
     imagemagickarguments="${4}"
-    echo "${imagemagickarguments}"
+#    echo "${name} $dimensions $unsharp ${imagemagickarguments}" 
     if [[ 1 -eq $unsharp ]]
     then
 	cmdstring="mogrify -resize $dimensions  -unsharp 1.5x1.5+1.5+0.08 ${imagemagickarguments} $name"
@@ -615,7 +615,7 @@ function IMSinglePage()
 
 function IMDoublePage()
 {
-    IMSinglePage "{1}" $2 $2 "${4}"
+    IMSinglePage "${1}" $2 $3 "${4}"
     name="$1"
     extension=${name##*.}
     filename=${name%.*}
@@ -747,7 +747,7 @@ deletearchives=0
 unrarzip=0
 recursive=0
 unsharp=0
-imagemagickarguments="-strip"
+imagemagickarguments=""
 help=0
 while getopts ":n:whdurs:i:t" OPTIONS 
 do
