@@ -3,13 +3,16 @@
 #Difference from v4: to overcome the problem of recursing directories and creating webpages where no archive was extracted we work on 1 archive at a time (decompress X, convert Xs images, create Xs webpage VS decompress all, convert all....)
 #TODO:
 #create -h help dialog
+#ring bell when done converting
+#remove Thumbs.db files that get attached to files.
+#perform zip/rar->cbz/cbr conversion. Should warn and ask for confirm otherwise will screw up when there are big guys to be extracted. perhaps allow interactive y/n dialog. its a fast operation so wouldn't be that intrusive. should recurse through all subdirectories.
 #add ability to zip / rar contents back up 
 #allow for greyscale output -k (kindle) switch or -g for greyscale
 #allow for repackaging as cbr/cbz to eliminate wasted space for these smaller screens. would want to turn off the renaming due to special characters.
 #gracefully work on zip/rar files that really should be cbz/cbz files. 
 #catch ctrl-c and exit gracefully
 #only delete if unrar/zip was successful
-#add option to specify dimensions of converted files
+#add option to specify dimensions of converted files,otherwise use defaults
 #prevent splitting html across a double page image - catch filename and set flag. clear flag when not dbl (hopefully this will also keep the overview image on same html page as well)
 
 #DONE allow for a -o option that is followed by a command that is passed on to IM. allow for multiple -o options and package and send all those to IM
@@ -398,7 +401,7 @@ function decompressRARZIPArchivesIntoDirectory()
             fi
 	done
 #move files if the zip didn't have a directory structure in it
-	mv /tmp/Comic/*.* "$olddir/$foldernamenospace"
+	mv /tmp/Comic/*.* "$olddir/$foldernamenospace" #arrrgh this produces an error message if the if teh images weren't dumped here. I suppose I could get rid of it by touch-ing a temp file to get deleted later.
 	cd "$olddir"
 	rm /tmp/Comic  -rf
     fi
@@ -501,7 +504,7 @@ function createHtml()
     echo "<html><body><title>$directory</title>" > $HTMLpage
     echo "<h5>$directory</h5>" >> $HTMLpage
     for image in *.[jJ][Pp][Gg] *.[Gg][Ii][fF] *.[Pp][Nn][Gg]
-    do 
+    do #to be totally honest we don't really expect there to be anything else in the extracted dir but image files. So really cycling through *all* files wouldn't necessarily hurt but could lead to some weirdness that might be a bitch to track down later down the road.
 	if [ -f "$image" ] #prevents output when isn't a file; ie. catches when no images of one of the categories
 	then
 	    filenamecheck=${image%-*} #cut filename for comparison. cook-0.jpg -> cook; cook.jpg -> cook; this should work since it only captures the last hyphen and there shouldn't be any file names with hyphens since we strip that out for the images with the [:punct:]
@@ -542,7 +545,8 @@ function convertImages()
 	if [ -f "$image" ] #prevents output when isn't a file; ie. catches when no images of one of the categories
 	then
 #could mogrify here as well.
-	    imagenospaces=${image//[[:space:]]} 
+	    image_=${image//[()&]} #aggh we can't use :punct: because that removes the period that delineates the file extension. We make our own regex character class then.
+	    imagenospaces=${image_//[[:space:]]} 
 	    if [ "$image" != "$imagenospaces" ]
 	    then
 		mv "$image" "$imagenospaces" #otherwise mv complains
@@ -831,3 +835,7 @@ else
 	fi    
     fi #end recurse check
 fi #end help message 
+
+
+#ChangeLog:
+#2012-03-06: Filename rename now removes punctuation and spaces. & and () in filenames were causing problems.

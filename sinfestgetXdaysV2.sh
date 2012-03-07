@@ -19,6 +19,7 @@ else
 	let "counter-=1"
     done
     echo "${filelist}"
+#attempted to use -p for preload but it isn't working
     feh $filelist
 fi
 
