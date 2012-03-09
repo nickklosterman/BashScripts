@@ -5,6 +5,9 @@
 #create -h help dialog
 #ring bell when done converting
 #remove Thumbs.db files that get attached to files.
+#switcht to check to see if directory exists. If it dose then don't overwrite and move on to next file.
+#send any IM errors to an approp error log. use tee maybe?
+#check error log files adn notify if errrors present.
 #perform zip/rar->cbz/cbr conversion. Should warn and ask for confirm otherwise will screw up when there are big guys to be extracted. perhaps allow interactive y/n dialog. its a fast operation so wouldn't be that intrusive. should recurse through all subdirectories.
 #add ability to zip / rar contents back up 
 #allow for greyscale output -k (kindle) switch or -g for greyscale
@@ -105,16 +108,24 @@ function splitLargeComicsHTML()
 function createDirectoryForWebcomic()
 {
     filename="${1}"
+    noclobber=$2
     foldernamenospaces=$( convertFoldername "${filename}" ) #put here since would be called recursively in checkForFileNameCollision
     number=0
     foldername="$foldernamenospaces"
-    while [[ -e "$foldername" && -d "$foldername" ]] 
-    do
-	let 'number+=1'
-	numberformat=$( printf "%02d" $number )
-	foldername=$foldernamenospaces$numberformat
-    done
-    mkdir "$foldername"
+    if [[ -e "$foldername"  && -d "$foldername" &&  1 -eq "$noclobber" ]]
+    then
+	echo "true $foldername $noclobber" >> /tmp/Errors.txt
+	foldername="Exists!"
+    else
+	echo "false $foldername $noclobber" >> /tmp/Errors.txt
+	while [[ -e "$foldername" && -d "$foldername" ]] 
+	do
+	    let 'number+=1'
+	    numberformat=$( printf "%02d" $number )
+	    foldername=$foldernamenospaces$numberformat
+	done
+	mkdir "$foldername"
+    fi
     echo "$foldername"
 
 }
@@ -283,6 +294,8 @@ function RecurseDirs()
     deletearchives=$4
     unrarunzip=$5
     imagemagickarguments="${6}"
+    noclobber=$7
+    echo "recursedir  $noclobber" >> /tmp/Errors.txt
   #  echo $depth $numberOfImagesPerPage $wideformat $deletearchives $unrarzip 
   #  echo "1:==$1"
 #    if [ "${1}" -eq "" ]
@@ -313,7 +326,7 @@ function RecurseDirs()
 		echo -n "entered:$dir"
 		temp="$dir"
 		pwd
-		RecurseDirs $depth $numberOfImagesPerPage $wideformat $deletearchives $unrarzip  "${imagemagickarguments}"
+		RecurseDirs $depth $numberOfImagesPerPage $wideformat $deletearchives $unrarzip  "${imagemagickarguments}" $noclobber
 		echo -n "exiting:$dir:$temp:" #this dir is the whole path and doesn't match what we had before
 		pwd
 		cd ..
@@ -337,7 +350,7 @@ function RecurseDirs()
 	    if [ -f "${item}" ]
 	    then
 		echo "--$item--"
-		Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives "${imagemagickarguments}"
+		Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives "${imagemagickarguments}" $noclobber
 	    fi
 	done
     else
@@ -609,10 +622,10 @@ function IMSinglePage()
     else
 #echo "mogrify -resize $dimensions ${imagemagickarguments} $name"
 #	mogrify -resize $dimensions "${imagemagickarguments}" $name
-	cmdstring="mogrify ${imagemagickarguments} -resize ${dimensions} $name"
+	cmdstring="mogrify ${imagemagickarguments} -resize ${dimensions} $name "
     fi
 #creating a string and using eval overcomes the way variables were expanded when attempting to pass them to IM. if more than one argument was passed then it was interpreted as one argument instead of a string of separate arguments  "-modulate 150,50" was interpreted as one commmand (ie as if the command were called "-modulate 150,50") instead of a command and its argument (i.e. "-modulate" and "150,50")
-    eval "${cmdstring}"
+    eval "${cmdstring}" 2>>/tmp/ImageMagickErrors.txt
 
 }
 
@@ -623,8 +636,8 @@ function IMDoublePage()
     name="$1"
     extension=${name##*.}
     filename=${name%.*}
-    convert "$name" -crop 1x3@ +repage +adjoin "$filename-%d.$extension"
-    mogrify -resize 800x800 "$imagenospaces" #create the thumbnail
+    convert "$name" -crop 1x3@ +repage +adjoin "$filename-%d.$extension" 2>>/tmp/ImageMagickErrors.txt
+    mogrify -resize 800x800 "$imagenospaces" 2>>/tmp/ImageMagickErrors.txt #create the thumbnail 
 }
 
 function IMDoublePageOLD()
@@ -689,6 +702,8 @@ function Operations()
     deletearchive=$4
     unsharp=$5
     imagemagickarguments="${6}"
+    noclobber=$7
+    echo "operations $noclobber" >> /tmp/Errors.txt
     echo "$1:$2:$3:$4:$5:$6:$7:"
     echo "Operations:$unsharp:$deletearchive:$7:${imagemagickarguments}:${6}:$6:"
     DiskStatus=$( checkFileSpace "${item}" )
@@ -696,18 +711,23 @@ function Operations()
     if [[ $DiskStatus -eq 1 ]]
     then
 
-	directory=$( createDirectoryForWebcomic "${item}" ) #convertFoldername "${item}" )
-	convertArchivesIntoWebpageDirectory $numberOfImagesPerPage "${item}" "$directory"
-	convertImages $wideformat $directory $unsharp "${imagemagickarguments}"
-	splitcomic=$( splitLargeComicsHTML $directory )
-	if [[ 0 -eq $splitcomic ]]
-	then  #only do createHTML if the comic wasnt split
-	    createHtml $wideformat $directory
+	directory=$( createDirectoryForWebcomic "${item}" $noclobber ) #convertFoldername "${item}" )
+	if [[ ! "$directory" == "Exists!" ]]
+	then 
+	    echo "in operations Exists not present " >> /tmp/Errors.txt
+	    convertArchivesIntoWebpageDirectory $numberOfImagesPerPage "${item}" "$directory"
+	    convertImages $wideformat $directory $unsharp "${imagemagickarguments}"
+	    splitcomic=$( splitLargeComicsHTML $directory )
+	    if [[ 0 -eq $splitcomic ]]
+	    then  #only do createHTML if the comic wasnt split
+		createHtml $wideformat $directory
+	    fi
+	    deleteArchive $deletearchive "${item}"
+	    
+	else
+	    echo "in operations Exists not present " >> /tmp/Errors.txt
+	    echo "There is not enough space for extraction and manipulation of ${item}."
 	fi
-	deleteArchive $deletearchive "${item}"
-
-    else
-	echo "There is not enough space for extraction and manipulation of ${item}."
     fi
 }
 
@@ -733,6 +753,8 @@ function HelpMessage ()
     echo "option: -i, --imagemagick"
     echo "pass an ImageMagick command in parentheses to be run on all images"
     echo "+sigmoidal-contrast 10,50% , -modulate 120,75, -monitor "
+    echo "option: -e, --noclobber"
+    echo "if target directory exists don't overwrite, skip conversion"
     echo "option: "
     echo ""
     echo "option: "
@@ -752,8 +774,9 @@ unrarzip=0
 recursive=0
 unsharp=0
 imagemagickarguments=""
+noclobber=0
 help=0
-while getopts ":n:whdurs:i:t" OPTIONS 
+while getopts ":n:whdurs:i:te" OPTIONS 
 do
     case ${OPTIONS} in 
 	n|-numberofimagesperpage) echo "numberpage ${OPTARG}"
@@ -774,10 +797,14 @@ do
 	    imagemagickarguments=${OPTARG};;
 	h|-help) 
 	    help=1;;
+	e|-noclobber) echo "Don't overwrite or create directories if they all ready exist" 
+	    noclobber=1;; #useful for working on a directory that all ready had contents in it
 	T|-template) echo "Template"
 	    template=${OPTARG};;
     esac
 done
+
+echo "after assignment $noclobber" >> /tmp/Errors.txt
 
 if [[ 1 -eq $help ]]
 then
@@ -792,10 +819,10 @@ else
 #+ if one exists.
 
     echo "chmod u+w . -R" > /tmp/DebugWritePermission.txt
-
+#    echo -n "" > /tmp/Errors.txt
     if [[ 1 -eq $recursive ]]
     then
-	RecurseDirs 0 $numberOfImagesPerPage $wideformat $deletearchives $unrarzip $unsharp "${imagemagickarguments}"
+	RecurseDirs 0 $numberOfImagesPerPage $wideformat $deletearchives $unrarzip $unsharp "${imagemagickarguments}" $noclobber
     else
 	dir=$( pwd )
 	writable=$(checkDirectoryWritePermission "${dir}" )
@@ -815,7 +842,8 @@ else
 		    if [ -f "${item}" ]
 		    then
 			echo "--$item--"
-			Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives $unsharp "${imagemagickarguments}"
+			echo "before Operations:${imagemagickarguments}:$item:$numberOfImagesPerPage:$wideformat:$deletearchives:$unsharp:$noclobber" >> /tmp/Errors.txt
+			Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives $unsharp "${imagemagickarguments}" $noclobber
 		    fi
 		done
 	    else
@@ -824,8 +852,8 @@ else
 		    echo $1
 		    if [ -f "${1}" ]
 		    then
-			echo "before Operations:${imagemagickarguments}:$1:$numberOfImagesPerPage:$wideformat:$deletearchives:$unsharp"
-			Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchives $unsharp "${imagemagickarguments}"
+			echo "before Operations:${imagemagickarguments}:$1:$numberOfImagesPerPage:$wideformat:$deletearchives:$unsharp:$noclobber" >> /tmp/Errors.txt
+			Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchives $unsharp "${imagemagickarguments}" $noclobber
 		    fi
 		    shift
 		done
@@ -838,4 +866,5 @@ fi #end help message
 
 
 #ChangeLog:
+#2012-03-08: send IM errors to error log in tmp; create no-clobber option for directories if they all ready exist
 #2012-03-06: Filename rename now removes punctuation and spaces. & and () in filenames were causing problems.
