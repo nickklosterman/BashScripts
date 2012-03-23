@@ -17,6 +17,8 @@
 #only delete if unrar/zip was successful
 #add option to specify dimensions of converted files,otherwise use defaults
 #prevent splitting html across a double page image - catch filename and set flag. clear flag when not dbl (hopefully this will also keep the overview image on same html page as well)
+#instead of keying off the file extension key off the output of 'file' this prevents any incorrect attempts to unzip or unrar files that are of the opposite kind.
+
 
 #DONE allow for a -o option that is followed by a command that is passed on to IM. allow for multiple -o options and package and send all those to IM
 #DONE VIA IM CAPABILITY add option and functionality to compress the images a bit

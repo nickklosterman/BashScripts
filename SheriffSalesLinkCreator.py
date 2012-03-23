@@ -11,12 +11,12 @@ class MyHTMLParser(HTMLParser):
 
 
 
-
+#the input should be the summary view and not the detailed view
 AuctionListFile=open("SFLISTAUCTIONDO.CFM.htm")
 output=open("output.txt","w")
 parser=MyHTMLParser(strict=False)
 
-
+"""
 insideTRflag=0
 for line in AuctionListFile:
     if line.strip():  #remove whitespace
@@ -40,7 +40,7 @@ for line in AuctionListFile:
 
 AuctionListFile.close()
 output.close()
-
+"""
 import re
 def striphtml(data):
     p = re.compile(r'<.*?>')
@@ -54,12 +54,18 @@ AuctionListFile=open("SFLISTAUCTIONDO.CFM.htm")
 output=open("output.txt","w")
 addresslineisnext=0
 zipcodelineisnext=0
-data=""
+data="<html>"
 for line in AuctionListFile:
     if addresslineisnext==1:
         line1=line.strip()
-        dataline="http://maps.google.com/maps?oe=utf-8&q="+line1.rstrip()+"+ohio"
-        data+=stripspaces(dataline)
+#        dataline="http://maps.google.com/maps?oe=utf-8&q="+line1.rstrip()+"+ohio"
+        address=stripspaces(striphtml(line1.rstrip()))
+#        print(address)
+#        dataline="<a href=\"http://maps.google.com/maps?oe=utf-8&q="+line1.rstrip()+"+ohio\">" +line1.rstrip()+"</a> <br>"
+        dataline="<a href=\"http://maps.google.com/maps?oe=utf-8&q="+address+"+ohio\">" +striphtml(line1.rstrip())
+#        dataline=line1.rstrip()
+#        data+=stripspaces(dataline)
+        data+=dataline
         addresslineisnext=0
     if line.find("275px")!=-1:
         addresslineisnext=1
@@ -68,13 +74,15 @@ for line in AuctionListFile:
 #actually we don't need the zip...
     if zipcodelineisnext==1:
  #       print(line)
-        data+=line
+        data+=striphtml(line)+"</a> <br>" #uncomment this line if you want to include the zipcode
         #        data=""
         zipcodelineisnext=0
     if line.find("45px")!=-1:
         zipcodelineisnext=1
 
-output.write(striphtml(data))
+data+="</html>"
+#output.write(striphtml(data))
+output.write(data)
 #http://maps.google.com/maps?oe=utf-8&q=43+watervliet+avenue+dayton+ohio
 
 
