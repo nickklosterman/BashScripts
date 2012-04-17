@@ -11,15 +11,15 @@
 #perform zip/rar->cbz/cbr conversion. Should warn and ask for confirm otherwise will screw up when there are big guys to be extracted. perhaps allow interactive y/n dialog. its a fast operation so wouldn't be that intrusive. should recurse through all subdirectories.
 #add ability to zip / rar contents back up 
 #allow for greyscale output -k (kindle) switch or -g for greyscale
+#the split large images doesn't seem to work 100% with it sometimes separating each panel
 #allow for repackaging as cbr/cbz to eliminate wasted space for these smaller screens. would want to turn off the renaming due to special characters.
 #gracefully work on zip/rar files that really should be cbz/cbz files. 
 #catch ctrl-c and exit gracefully
 #only delete if unrar/zip was successful
 #add option to specify dimensions of converted files,otherwise use defaults
 #prevent splitting html across a double page image - catch filename and set flag. clear flag when not dbl (hopefully this will also keep the overview image on same html page as well)
-#instead of keying off the file extension key off the output of 'file' this prevents any incorrect attempts to unzip or unrar files that are of the opposite kind.
 
-
+#DONE 25-03-2012 instead of keying off the file extension key off the output of 'file' this prevents any incorrect attempts to unzip or unrar files that are of the opposite kind.
 #DONE allow for a -o option that is followed by a command that is passed on to IM. allow for multiple -o options and package and send all those to IM
 #DONE VIA IM CAPABILITY add option and functionality to compress the images a bit
 #DONE add option and functionality to sharpen the images
@@ -34,7 +34,23 @@
 #DONE error logging -> broken archives, empty directories
 #exclude scanner images. Have filenames listed in a file, or listed in a variable/array inside 
 
-ScannerFileNames="zGGtagT.jpg zGGtag.jpg" #need for way to captures these like did with ibd industry names
+ScannerFileNames="zGGtagT.jpg zGGtag.jpg zzz_thanks_ScanDog_tag.png" #need for way to captures these like did with ibd industry names
+
+function determineArchiveType()
+{
+flag=2 #0 for zip, 1 for rar, 2 for unknown
+filename="${1}"
+file_output=$(file -b "${filename}" | awk '{print $1}')
+if [ "${file_output}" == "Zip" ]
+then
+flag=0
+elif [ "${file_output}" == "RAR" ]
+then 
+flag=1
+fi
+echo $flag
+
+}
 
 function splitLargeComicsHTML()
 {
@@ -247,6 +263,64 @@ function convertArchivesIntoWebpageDirectory()
 	fi
     fi
     
+    archivetype=$( determineArchiveType "${archive}" )
+    echo $archivetype
+    if [[ $archivetype -eq 0 ]]
+    then
+	olddir=$( pwd )
+	echo "$olddir"
+	echo "CBZ file"
+	unzip "${2}" -d /tmp/Comic 2>> /tmp/DecompressErrorLog.txt  #send stderr to log
+#move contents of extracted directory
+	for i in /tmp/Comic/*
+	do
+	    if [ -d "$i" ] 
+	    then  
+		echo "$i" 
+		cd "$i" 
+		ls 
+		mv *.* "$olddir/$foldernamenospace" 
+		cd ..
+	    fi 
+	done
+#move contents if no dir structure
+	mv /tmp/Comic/*.* "$olddir/$foldernamenospace" 
+	cd "$olddir"
+	rm /tmp/Comic  -rf
+    elif [[ $archivetype -eq 1 ]]
+    then
+	echo "CBR file"
+	unrar e "${2}" -d "$foldernamenospace" 2>> /tmp/DecompressErrorLog.txt # if the directory doesn't exist unrar will skip extracting the files
+    else #assume that its cbz
+	echo "${archve} wasn't a zip or rar file" >> /tmp/DecompressErrorLog.txt
+    fi
+}
+
+
+function convertArchivesIntoWebpageDirectoryDEPRECATED()
+{
+    imagesPerPage=$1
+    archive="${2}"
+    foldernamenospace=$3 #( createDirectoryForWebcomic "${2}" )
+    
+    if [[ 1 -eq 0 ]]
+    then
+	echo "----------- WTF 1 = 0 ----------------------------------------"
+    #echo "variable 2:${2}"
+	foldernamenospace=$( convertFoldername "${2}" )
+#https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html                                               
+# ${parameter/pattern/string} -->then I use the % to match at the end of 'parameter' and since string is empty we remove the pattern which specifies spaces.         
+	if [ !  -e "$foldernamenospace" ]
+	then
+            echo "creating $foldernamenospace directory" 
+            mkdir "$foldernamenospace" #create folder if doesn't exist                      
+	fi
+    fi
+
+
+
+
+
     extension=$( getFileExtension "${2}" )
     echo "$extension"	
     if [ "$extension" = "cbr" ]

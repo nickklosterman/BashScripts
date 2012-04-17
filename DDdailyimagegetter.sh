@@ -53,11 +53,22 @@ fi
 #gthumb $filename &
 feh $filename &
 
+#http://www.digitaldesire.com/blog.xml <- uses html codes for < i.e. &lt;
 wget http://www.digitaldesire.com/blog/newest_post -O /tmp/DDnewpost
 #grep cdn /tmp/DDnewpost | sed 's/^.*http/http/;s/[Jj][Pp][Gg].*/jpg/'>> /tmp/BlogImages
 grep cdn /tmp/DDnewpost | sed 's/^.*http/http/;s/\x27.*//'>> /tmp/BlogImages #key off single quote on backend
+grep cdn /tmp/DDnewpost | sed 's/^.*http/"http/;s/\x27.*/"/'>> /tmp/BlogImages #key off single quote on backend
 
 #I am trying to preload so there isn't the stutter as it goes and gets the next image but it isn't working
+#cd /home/nicolae/Documents/Artwork/DD/BlogImgs
+#wget -nc -i /tmp/BlogImages
+cat /tmp/BlogImages
+
+#feh is changing the contents of /tmp/BlogImages. it overwrites the links with the tmp filenames it creates/uses
+
 feh -f /tmp/BlogImages
+#cat /tmp/BlogImages
+
+
 cd /home/nicolae/Documents/Artwork/DD/BlogImgs
-wget -i -nc /tmp/BlogImages
+#fdupes -r -d . #<- I think this wasn't showing up since I backgrounded the op
