@@ -939,7 +939,8 @@ else
 	fi    
     fi #end recurse check
 fi #end help message 
-
+cat /tmp/DebugWritePermission.txt
+cat /tmp/Errors.txt
 
 #ChangeLog:
 #2012-03-08: send IM errors to error log in tmp; create no-clobber option for directories if they all ready exist
