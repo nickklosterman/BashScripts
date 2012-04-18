@@ -640,7 +640,6 @@ function convertImages()
     do 
 	if [ -f "$image" ] #prevents output when isn't a file; ie. catches when no images of one of the categories
 	then
-	    cleanFilename "${image}" 
 	    imagenospaces=$( cleanFilename "${image}" )
 	    echo "$image $imagenospaces"
 	    if [ "$image" != "${imagenospace}s" ]
