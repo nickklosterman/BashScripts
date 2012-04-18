@@ -617,6 +617,13 @@ function createHtml()
 
 }
 
+function cleanFilename()
+{
+input="${1}"
+output=${input//[()&\'*[:space:]]} #remove crazy punctuation. can't use :punct: bc that'll strip out the period that delineates the file extension
+echo "${output}"
+}
+
 function convertImages()
 {
     pageformat=$1
@@ -633,12 +640,13 @@ function convertImages()
     do 
 	if [ -f "$image" ] #prevents output when isn't a file; ie. catches when no images of one of the categories
 	then
-#could mogrify here as well.
-	    image_=${image//[()&]} #aggh we can't use :punct: because that removes the period that delineates the file extension. We make our own regex character class then.
-	    imagenospaces=${image_//[[:space:]]} 
-	    if [ "$image" != "$imagenospaces" ]
+	    cleanFilename "${image}" 
+	    imagenospaces=$( cleanFilename "${image}" )
+	    echo "$image $imagenospaces"
+	    if [ "$image" != "${imagenospace}s" ]
 	    then
-		mv "$image" "$imagenospaces" #otherwise mv complains
+#		echo "Renaming $image to $imagenospaces"
+		mv "$image" "$imagenospaces" #otherwise mv complains if we don't mv only when necessary
 	    fi
 	    width=$( identify -format "%w" "${imagenospaces}" )
 	    height=$( identify -format "%h" "${imagenospaces}" )
@@ -646,38 +654,27 @@ function convertImages()
 	    echo -n "."
 	    if [ $width -gt $height ]  #if page is wider than it is long we consider it to be a double page
 	    then
-#double page
 		echo -n "double page"
-		
 		if [ 1 == $pageformat ] #variable can't be first??? alternative method is to place it in [[ expr ]] this works 
 		then 
-
 		    IMDoublePage "$imagenospaces" 1600x2500 $unsharp "${imagemagickarguments}"
-
-#		    mogrify -resize 1600x2560 "$imagenospaces"
 #there is a limitation to the Android Browser/Gallery application. Images > ~1200px in any dimension are displayed with reduced resolution (almost as if it was a progressive jpg that they stopped decoding before the last quantization level)
 #the 3x1@-> make 3 horizontal by 1 vertical tile of the source image. 3x1->make 3px wide by 1 px tall tiles from the source image
-#		    convert "$imagenospaces" -crop 1x3@ +repage +adjoin "$filename-%d.$extension"
-
 		else
 		    IMDoublePage "$imagenospaces" 1200x1900 $unsharp "${imagemagickarguments}"
-#		    mogrify -resize 1200x1900 "$imagenospaces"
-#		    convert "$imagenospaces" -crop 1x3@ +repage +adjoin "$filename-%d.$extension"
 		fi
 #create a smaller image so can see the whole dbl page spread nicely -kinda like the overview of the context+overview paradigm
-		#mogrify -resize 800x800 "$imagenospaces" #create the thumbnail 
 	    else
 		if [ 1 == $pageformat ]
 		then 
 #these dimensions were chosen as the BPDN (black pandigital Nove) has a 800x600 screen resolution
-		    #mogrify -resize 800x1280 "$imagenospaces" #this crops a bit of width so it meets the height
+	#this crops a bit of width so it meets the height
 		    IMSinglePage "$imagenospaces"  800x1200 $unsharp "${imagemagickarguments}"
 		else
-#		    mogrify -resize 600x950 "$imagenospaces" #crop so full width and height just a smidge over.
+#crop so full width and height just a smidge over.
 		    IMSinglePage "$imagenospaces"  600x950 $unsharp "${imagemagickarguments}"
 		fi
 	    fi
-#need to figure out how to only output stuff about images if there are any. 
 	fi
     done
     echo "Leaving directory $directory"
