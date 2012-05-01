@@ -1,0 +1,86 @@
+Genl research for a gmail checker
+http://g33k.wordpress.com/2009/02/04/check-gmail-the-python-way/ the above code was based off this
+http://stackoverflow.com/questions/953561/check-unread-count-of-gmail-messages-with-python used this info to login automatically
+http://www.holovaty.com/code/gmail.py  done in perl, it really is a page scraper as it logs into your acct and scrapes the html page.
+http://www.swaroopch.com/blog/check_gmail/ perl
+http://search.yahoo.com/search?p=python+gmail+checker&ei=UTF-8&fr=moz35
+http://null-byte.wonderhowto.com/blog/make-gmail-notifier-python-0132845/
+http://ubuntuforums.org/showthread.php?t=1042820 a gmail python reader
+http://search.yahoo.com/search?p=python+parse+gmail+atom&ei=UTF-8&fr=moz35
+http://www.linuxquestions.org/questions/linux-software-2/write-a-script-to-send-an-email-from-bash-287889/ python script to send email 
+
+Bash scripts: they are less flexible and are more cumbersome. most just involve getting the number of new emails
+http://ubuntuforums.org/showthread.php?t=812656
+http://lxer.nl/webdevelopment/gmail/
+http://www.linuxquestions.org/questions/linux-software-2/write-a-script-to-send-an-email-from-bash-287889/
+http://blog.trollmaker.com/?article10/arduino-led-notification-for-gmail-on-linux
+http://search.yahoo.com/search;_ylt=A0oG7jwftJ5Pxm4AVuJXNyoA?p=check+gmail+bash+script&fr2=sb-top&fr=moz35&type_param=
+http://search.yahoo.com/search?p=gmail+notifier+conky&ei=UTF-8&fr=moz35
+
+The feedparser module used in the code below has predefined tags that you can access. to access the rest of the XML we'll need to set up a custom dom parser
+there is a predefined set of accessible tags for the feedparser. They can be seen here: http://packages.python.org/feedparser/
+
+dom resources:
+http://docs.python.org/library/xml.dom.minidom.html
+http://www.ibm.com/developerworks/xml/library/x-hiperfparse/ <-- a little heavy for what we want here
+http://www.blog.pythonlibrary.org/2010/11/12/python-parsing-xml-with-minidom/ <--this seems to be a simple and good example
+http://search.yahoo.com/search?p=python+parse+xml&ei=UTF-8&fr=moz35
+
+
+"""
+
+## check-gmail.py -- A command line util to check GMail -*- Python -*-
+# code from http://g33k.wordpress.com/2009/02/04/check-gmail-the-python-way/
+# ======================================================================
+# Copyright (C) 2006 Baishampayan Ghose <b.ghose@ubuntu.com>
+# Time-stamp: Mon Jul 31, 2006 20:45+0530
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+# ======================================================================
+
+import urllib             # For BasicHTTPAuthentication
+import feedparser         # For parsing the feed
+from textwrap import wrap # For pretty printing assistance
+
+_URL = "https://mail.google.com/gmail/feed/atom"
+
+
+def auth():
+    '''The method to do HTTPBasicAuthentication'''
+#    opener = urllib.FancyURLopener()
+#    f = opener.open(_URL)
+    f = urllib.urlretrieve(_URL2, '/tmp/gmail')
+    feed = f.read()
+    return feed
+
+def fill(text, width):
+    '''A custom method to assist in pretty printing'''
+    if len(text) < width:
+        return text + ' '*(width-len(text))
+    else:
+        return text
+
+def readmail(feed):
+    '''Parse the Atom feed and print a summary'''
+    atom = feedparser.parse(feed)
+    print ""
+    print atom.feed.title
+    print "You have %s new mails" % len(atom.entries)
+    # Mostly pretty printing magic
+    print "+"+("-"*84)+"+"
+    print "| Sl.|"+" Subject"+' '*48+"|"+" Author"+' '*15+"|"
+    print "+"+("-"*84)+"+"
+    for i in xrange(len(atom.entries)):
+        print "| %s| %s| %s|" % (
+            fill(str(i), 3),
+            fill(wrap(atom.entries[i].title, 50)[0]+"[...]", 55), #was title, summary
+            fill(wrap(atom.entries[i].author, 15)[0]+"[...]", 21)) #author
+    print "+"+("-"*84)+"+"
+
+if __name__ == "__main__":
+    f = auth()  # Do auth and then get the feed
+    readmail(f) # Let the feed be chewed by feedparser
+
+
+"""

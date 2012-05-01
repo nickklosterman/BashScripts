@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+	<title>Dynamilcally Created Calendars</title>
+
+	<!-- link calendar resources -->
+	<link rel="stylesheet" type="text/css" href="tcal.css" />
+	<script type="text/javascript" src="tcal.js"></script> 
+</head>
+<body>
+	<script type="text/javascript">
+	//<![CDATA[
+		function f_createCalendars(n_number) {
+
+			var e_container = document.getElementById('container');
+
+			if (isNaN(n_number) || !e_container) return;
+
+			f_tcalCancel();
+			var s_html = '';
+
+			for (var i = 1; i <= n_number; i++)
+				s_html += '<div>' + i + '. <input type="text" name="date' + i + '" class="tcal" /></div>';
+
+			e_container.innerHTML = s_html;
+
+			// all you need is call this after your inputs are added
+			f_tcalInit();
+		}
+	//]]>
+	</script>
+	<form action="#">
+		<div>
+			<label for="cal-number">Create calendars:</label>
+			<select id="cal-number" onchange="f_createCalendars(this.options[this.selectedIndex].value)">
+				<option value="0">none</option>
+				<option value="1">1</option>
+				<option value="2">2</option>
+				<option value="3">3</option>
+				<option value="4">4</option>
+				<option value="5">5</option>
+			</select>
+		</div>
+		<div id="container"></div>
+	</form>
+
+	<p>This sample demonstrates how to use Tigra Calendar with input boxes created dynamically after page's initialization.</p>
+</body>
+</html>

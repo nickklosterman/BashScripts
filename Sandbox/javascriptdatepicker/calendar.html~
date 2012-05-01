@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>JavaScript Calendar Script/Date Picker Widget</title>
+<link rel="alternate"  href="http://feeds2.feedburner.com/openjs" type="application/rss+xml" title="RSS 2.0" />
+<link rel="stylesheet" href="http://www.openjs.com/style.css" type="text/css" media="all" />
+<!--[if IE]>
+<link rel="stylesheet" href="http://www.openjs.com/style_ie.css" type="text/css" media="all" />
+<![endif]-->
+<link href="calendar.css" type="text/css" rel="stylesheet" /><script type="text/javascript">
+window.google_analytics_uacct = "UA-101361-3";
+</script>
+<script type="text/javascript">
+function init() {
+	calendar.set("birthday");
+	calendar.set("anotherday");
+}
+</script>
+<meta name="description" content="There are many javascript calendar widgets(or date pickers) out there - so I decided to make another one. Yes, I have a really bad case of 'Not-Invented-Here' syndrome..." />
+<meta name="keywords" content="javascript,client,scripting,web development,calendar,widget,date,picker,script" />
+</head>
+<body>
+<div id="header">
+<a href="http://www.openjs.com/index.php"><img id="logo" src="http://www.openjs.com/images/openjs_logo.png" alt="OpenJS Logo" /></a>
+<span id="tagline">JavaScript - Opened.</span>
+
+<ul id="tabs">
+<li><a href="http://www.openjs.com/index.php">home</a></li>
+<li><a href="http://www.openjs.com/ajax/">ajax</a></li>
+<li><a href="http://www.openjs.com/articles/">articles</a></li>
+<li><a href="http://www.openjs.com/scripts/">scripts</a></li>
+</ul>
+</div>
+<div id="main">
+<div id="content">
+<div id="breadcrumbs"><a href="http://www.openjs.com/">OpenJS </a> &gt;  <a href="http://www.openjs.com/scripts/">Scripts</a> &gt; JavaScript Calendar Script/Date Picker Widget</div><div id="ad">
+<script type="text/javascript"><!--
+google_ad_client = "pub-6056201776714814";
+//OpenJS
+google_ad_slot = "4363104950";
+google_ad_width = 336;
+google_ad_height = 280;
+//--></script>
+<script type="text/javascript"
+src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div>
+.
+
+<h1>JavaScript Calendar Script/Date Picker Widget</h1>
+
+<p class="intro">There are many javascript calendar widgets(or date pickers) out there - so I decided to make another one. Yes, I have a really bad case of <a href="http://en.wikipedia.org/wiki/Not_Invented_Here">'Not-Invented-Here' syndrome</a>...</p>
+
+<h2>Demo</h2>
+
+<form action="" method="post">
+<label for="birthday">Date of Birth</label> <input type="text" name="birthday" id="birthday" /><br />
+<label for="anotherday">Another Date</label> <input type="text" name="anotherday" id="anotherday" value="2008-12-25" /><br />
+</form>
+
+<h2>Download the Code</h2>
+
+<ul>
+<li><a href="calendar.js">JavaScript File</a></li>
+<li><a href="calendar.css">Stylesheet</a></li>
+</ul>
+
+<h2>Features</h2>
+
+<ul>
+<li>Simple</li>
+<li>Supports multiple calendars on one page</li>
+<li>Self contained - don't need an external library</li>
+<li>Unobtrusive - even if JavaScript is off, you still get basic functionality(the date input box is shown)</li>
+<li>Display style can be easily configured by editing the stylesheet</li>
+</ul>
+
+<h3>Disadvantages(or To Do List)</h3>
+
+<ul>
+<li>New script - expect bugs</li>
+<li>Only English/Gregorian calendar supported.</li>
+<li>No API support.</li>
+<li>Date format for the input box cannot be configured(yet)</li>
+</ul>
+
+<h2>License</h2>
+
+<p><a href="http://www.openjs.com/license.php">BSD, as always</a></p>
+
+<h2>Similar Scripts</h2>
+
+<ul>
+<li><a href="http://sixrevisions.com/resources/free_calendar_datepicker_scripts/">Fantastic, Free Calendar and Datepicker Scripts</a></li>
+<li><a href="http://nogray.com/calendar.php">JavaScript Calendar Component</a></li>
+<li><a href="http://dev.base86.com/scripts/vista-like_ajax_calendar_version_2.html">Vista-like Ajax Calendar version 2</a></li>
+<li><a href="http://www.frequency-decoder.com/2006/10/02/unobtrusive-date-picker-widgit-update/">Unobtrusive Date-Picker Widget</a></li>
+</ul>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+  /**
+    * var disqus_identifier; [Optional but recommended: Define a unique identifier (e.g. post id or slug) for this thread] 
+    */
+  (function() {
+   var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+   dsq.src = 'http://openjs.disqus.com/embed.js';
+   (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript=openjs">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+</div>
+<div id="sidebar">
+<!-- SiteSearch Google -->
+<form action="http://www.openjs.com/search.php" id="cse-search-box">
+  <div>
+    <input type="hidden" name="cx" value="partner-pub-6056201776714814:rvq3as-ocb1" />
+    <input type="hidden" name="cof" value="FORID:10" />
+    <input type="hidden" name="ie" value="ISO-8859-1" />
+    <input type="text" name="q" size="18" />
+    <input type="submit" name="sa" value="Search" />
+  </div>
+</form>
+<script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&amp;lang=en"></script>
+<!-- SiteSearch Google -->
+
+<p><a href="http://feeds2.feedburner.com/openjs"><img src="http://feeds.feedburner.com/~fc/openjs?bg=FF0000&amp;fg=FFFFFF&amp;anim=0" height="26" width="88" style="border:0" alt="RSS Feed" /></a></p>
+<h3>JavaScript Calendar Script/Date Picker Widget</h3><div class="page-info">There are many javascript calendar widgets(or date pickers) out there - so I decided to make another one. Yes, I have a really bad case of 'Not-Invented-Here' syndrome...</div><h3>Popular Pages</h3><ul><li><a href='../../../scripts/events/keyboard_shortcuts/'>Handling Keyboard Shortcuts in JavaScript</a><br /></li>
+<li><a href='../../../scripts/data/ued_url_encoded_data/'>UED(Url Encoded Data) - Format for Sending Data to the Server Side</a><br /></li>
+<li><a href='../../../scripts/jslibrary/preview.php'>New JavaScript Library</a><br /></li>
+<li><a href='../../../articles/ajax/ajax_file_upload/'>Ajax File Upload</a><br /></li>
+<li><a href='../../../articles/ajax/transfer_methods_xmlhttprequest_alternatives.php'>Ajax Data Transfer Methods - XMLHttpRequest Alternatives</a><br /></li>
+<li><a href='../../../articles/ajax_xmlhttp_using_post.php'>Using POST method in XMLHTTPRequest(Ajax)</a><br /></li>
+<li><a href='../../../articles/ajax/ahah_asynchronous_html_over_http/'>AHAH(Asynchronous HTML over HTTP)</a><br /></li>
+<li><a href='../../../articles/ajax/target_url_hiding.php'>Hide the Target URL of a Link in Status Bar</a><br /></li>
+<li><a href='../../../articles/ajax/ajax_file_upload/response_data.php'>Ajax File Upload Response Handling</a><br /></li>
+<li><a href='../../../scripts/others/dump_function_php_print_r.php'>dump() - Javascript equivalent of PHP's print_r() function</a><br /></li>
+</ul>
+<h3>OpenJS</h3>
+<ul>
+<li><a href="http://www.openjs.com/about.php">About</a></li>
+<li><a href="http://www.openjs.com/ajax/">Ajax</a></li>
+<li><a href="http://www.openjs.com/articles/">Articles</a></li>
+<li><a href="http://www.openjs.com/scripts/">Scripts</a></li>
+<li><a href="http://www.openjs.com/sitemap.php">Sitemap</a></li>
+</ul>
+
+</div><br style="clear:both;" />
+
+</div>
+<div id='footer'></div>
+<script src="http://www.openjs.com/js/jsl.js" type="text/javascript"></script>
+<script src="http://www.openjs.com/common.js" type="text/javascript"></script>
+<script src="calendar.js" type="text/javascript"></script><script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-101361-3");
+pageTracker._trackPageview();
+</script>
+
+<script type="text/javascript">
+var disqus_shortname = 'openjs';
+(function () {
+  var s = document.createElement('script'); s.async = true;
+  s.src = 'http://disqus.com/forums/openjs/count.js';
+  (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+}());
+</script>
+</body></html>

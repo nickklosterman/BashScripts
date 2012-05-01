@@ -1,0 +1,99 @@
+/*
+	Stylesheet for Tigra Calendar v5.0
+	Product is Public Domain (Free for any kind of applicaiton, customization and derivative works are allowed) 
+	URL: http://www.softcomplex.com/products/tigra_calendar/
+
+	- all image paths are relative to path of stylesheet
+	- the styles below can be moved into the document or in existing stylesheet
+
+*/
+
+/* input box in default state */ 
+.tcInput {
+	background: url('img/cal.gif') 100% 50% no-repeat;
+	padding-right: 20px;
+	cursor: pointer;
+}
+
+/* additional properties for input boxe in activated state, above still applies unless in conflict */
+.tcActive {
+	background-image: url('img/no_cal.gif');
+}
+/* container of calendar's pop-up */
+#tc {
+	position: absolute;
+	visibility: hidden;
+	z-index: 100;
+	width: 200px;
+	background: url('img/texture.jpg');
+	margin-top: 2px;
+	padding: 0 2px 2px 2px;
+	border: 1px solid silver;
+
+	-moz-box-shadow: 3px 3px 4px silver;
+	-webkit-box-shadow: 3px 3px 4px silver;
+	box-shadow: 3px 3px 4px silver;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='silver')";
+	filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='silver');
+}
+/* table containing navigation and current month */
+#tcControls {
+	border-collapse: collapse;
+	border: 0;
+	width: 100%;
+}
+#tcControls td {
+	border-collapse: collapse;
+	border: 0;
+	padding: 0;
+	width: 16px;
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+#tcControls th {
+	border-collapse: collapse;
+	border: 0;
+	padding: 0;
+	line-height: 25px;
+	font-size: 14px;
+	text-align: center;
+	font-family: Georgia, 'Times New Roman', Times, serif;
+	font-weight: bold;
+	white-space: nowrap;
+}
+#tcPrevYear { background-image: url('img/prev_year.gif'); }
+#tcPrevMonth { background-image: url('img/prev_mon.gif'); }
+#tcNextMonth { background-image: url('img/next_mon.gif'); }
+#tcNextYear { background-image: url('img/next_year.gif'); }
+
+/* table containing week days header and calendar grid */
+#tcGrid {
+	border-collapse: collapse;
+	border: 1px solid silver;
+	width: 100%;
+}
+#tcGrid th {
+	border: 1px solid silver;
+	border-collapse: collapse;
+	padding: 3px 0;
+	text-align: center;
+	font-family: Georgia, 'Times New Roman', Times, serif;
+	font-size: 12px;
+	background-color: gray;
+	color: white;
+}
+#tcGrid td {
+	border: 0;
+	border-collapse: collapse;
+	padding: 2px 0;
+	text-align: center;
+	font-family: Georgia, 'Times New Roman', Times, serif;
+	width: 14%;
+	font-size: 14px;
+	cursor: pointer;
+}		
+#tcGrid td.tcOtherMonth { color: transparent; }
+#tcGrid td.tcWeekend { background-color: #0C0; font-weight: bold; }
+#tcGrid td.tcToday { border: 1px solid orange; }
+#tcGrid td.tcSelected { background-color: yellow; }		
