@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#for general info on using "dialog" : http://linuxgazette.net/101/sunil.html
 #for info on passing arrays:  http://stackoverflow.com/questions/1063347/passing-arrays-as-parameters-in-bash
 #also 
 
@@ -8,7 +9,7 @@
 #if stock on nasdaq vs nyse then need that to appropriately query the correct domain
 #perform computer vision on chart?
 
-#gdialog is just a wrapper for zenity
+#---->>gdialog is just a wrapper for zenity
 
 function BuildOptions() 
 {

@@ -1,0 +1,103 @@
+#http://www.daniweb.com/software-development/python/threads/228317/loan-calculator
+def calc_payment(int_rate, num_pmnts, principal, freq):
+    ''' This function will calculate the payment amount of a loan.
+    @ Inputs
+    - int_rate - The interest rate of the loan
+    - num_pmnts - The number of payments required
+    - principal - The original amount of the loan (minus down-payment)
+    - freq - Frequency of payments (weekly, monthly, quarterly, annually)
+    @ Returns
+    - pmnt_amt - The amount that each payment will be
+    '''
+    freq_lookup = {'weekly':52, 'biweekly': 26,'monthly':12, 'quarterly':4, 'annually':1}
+    int_rate = float(int_rate) / 100
+    rr = int_rate / freq_lookup[freq]
+    x = (1.0 + rr) ** num_pmnts
+    y = rr / (x - 1.0)
+    pmnt_amt = (rr + y) * principal
+    return pmnt_amt
+
+def calc_paymenttowardsinterest(int_rate,principal,freq):
+    freq_lookup = {'weekly':52, 'biweekly': 26,'monthly':12, 'quarterly':4, 'annually':1}
+    int_rate = float(int_rate) / 100
+    rr = int_rate / freq_lookup[freq]
+    return rr*principal
+
+def calc_paymenttowardsprincipal(periodicpayment,paymenttowardsinterest,principal):
+    if principal>0:
+        return periodicpayment-paymenttowardsinterest
+    else:
+        return 0
+
+def calc_newprincipal(principal,paymenttowardsprincipal,additionalperiodicpaymenttoprincipal):
+    return principal-paymenttowardsprincipal-additionalperiodicpaymenttoprincipal
+
+def DualAmortizationTable(periodicpayment,int_rate,principal,freq,additionalperiodicpaymenttoprincipal,num_pmnts):
+    p1=principal
+    p2=principal
+    i=1
+    print("#pmnt IntPmnt1 PrinPmnt1 Prin1 IntPmnt2 PrinPmnt2 Prin2 DiffIntPmnt DiffPrinPmnt DiffPrin")
+    while i <=  num_pmnts:
+        pi1,pp1,p1=CalcAmortizationValues(periodicpayment,int_rate,p1,freq,0)
+        pi2,pp2,p2=CalcAmortizationValues(periodicpayment,int_rate,p2,freq,additionalperiodicpaymenttoprincipal)
+        print("%d %10.2f  %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f %10.2f " % (i,pi1,pp1,p1,pi2,pp2,p2,pi1-pi2,pp2-pp1,p1-p2))
+        i+=1
+
+def CalcAmortizationValues(periodicpayment,int_rate,principal,freq,additionalperiodicpaymenttoprincipal):
+    paymenttowardsinterest=calc_paymenttowardsinterest(int_rate,principal,freq)
+    paymenttowardsprincipal=calc_paymenttowardsprincipal(periodicpayment,paymenttowardsinterest,principal)
+    principal=calc_newprincipal(principal,paymenttowardsprincipal,additionalperiodicpaymenttoprincipal)
+    return paymenttowardsinterest,paymenttowardsprincipal,principal
+
+def AmortizationTable(periodicpayment,int_rate,principal,freq):
+    print("month interest principal principalleft")
+    month=0
+    while principal > 0:
+        paymenttowardsinterest=calc_paymenttowardsinterest(int_rate,principal,freq)
+        paymenttowardsprincipal=calc_paymenttowardsprincipal(periodicpayment,paymenttowardsinterest)
+        principal=calc_newprincipal(principal,paymenttowardsprincipal,0)
+        month+=1
+        print("%d %2.f %2.f %2.f" % (month,paymenttowardsinterest,paymenttowardsprincipal,principal))
+
+def AmortizationTable2(periodicpayment,int_rate,principal,freq,additionalperiodicpaymenttoprincipal):
+    print("months_to_pay_off total_interest_paid")# principal principalleft")
+    month=0
+    totalinterest=0
+    while principal > 0:
+        paymenttowardsinterest=calc_paymenttowardsinterest(int_rate,principal,freq)
+        totalinterest+=paymenttowardsinterest
+        paymenttowardsprincipal=calc_paymenttowardsprincipal(periodicpayment,paymenttowardsinterest,additionalperiodicpaymenttoprincipal)
+        principal=calc_newprincipal(principal,paymenttowardsprincipal,additionalperiodicpaymenttoprincipal)
+        month+=1
+    print("%d %2.f" % (month,totalinterest))
+
+
+    
+def main():
+    one=1
+    """ 
+    r = input('What is your interest rate? ')
+    t = input('How many payments will you make? ')
+    la = input('What was the amount of the loan? ')
+    ep = input('Extra amount per payment period towards principal? ')
+    """
+    r=4.5
+    t=360
+    la=100000
+    ep=20
+    rt = "monthly"
+#    rt = None
+    while rt not in ['weekly', 'biweekly', 'monthly', 'quarterly', 'annually']:
+        if rt:
+            rt = raw_input('Sorry that was not an option, please respond with weekly, monthly, quarterly, or annually: ').lower()
+        else:
+            rt = raw_input('Do you make your payments weekly, biweekly, monthly, quarterly, or annually? ').lower()
+    payment = calc_payment(r, t, la, rt)
+    AmortizationTable2(payment,r,la,rt,0)
+    AmortizationTable2(payment,r,la,rt,ep)
+    DualAmortizationTable(payment,r,la,rt,ep,t)
+    print 'Your %s payment will be %.2f' % (rt, payment)
+
+if __name__ == '__main__':
+    main()
+#    raw_input('Press Enter to Exit...')

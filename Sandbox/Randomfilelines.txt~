@@ -1,0 +1,7 @@
+ls |sort -R |tail -$N |while read file; do
+    # Something involving $file, or you can leave
+    # off the while to just get the filenames
+done
+
+http://www.gnu.org/software/coreutils/manual/html_node/sort-invocation.html
+look at the sort -R invocation
