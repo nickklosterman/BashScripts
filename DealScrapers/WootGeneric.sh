@@ -92,16 +92,20 @@ else
 #    Thumbnail=$(GivePageReturnThumbnailImage ${Woot} )
 #    feh ${Thumbnail} & 
 
+
+#only show the FULL image for the shirt, for all other products the full image is repeated in the DETAIL images anyway
 if [ "${Website}" == "shirt.woot.com" ]
 then
     Full=$(GivePageReturnFullShirtImage ${Woot} )
-else
-    Full=$(GivePageReturnFullImage ${Woot} )
+    feh ${Full} & 
+
+#else
+#    Full=$(GivePageReturnFullImage ${Woot} )
 fi
 
     Detail=$(GivePageReturnDetailImage ${Woot} )
     GivePageReturnDetailImage ${Woot} 
-    feh ${Full} & 
+# feh ${Full} &
     feh ${Detail} & 
     cleanup
 fi

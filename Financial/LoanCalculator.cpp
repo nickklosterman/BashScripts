@@ -95,7 +95,7 @@ string AmortizedLoan::GetPeriodString()
 
 void AmortizedLoan::PrintPeriodicMortgagePayment()
 {
-  printf("Your XmonthlyXweeklyXetcXX payment will be %.2f.\n" , periodicmortgagepayment);
+  printf("Your mortgage payment will be %0.2f.\n" , periodicmortgagepayment);
 }
 
 
@@ -104,7 +104,7 @@ void AmortizedLoan::AmortizationTable()
   printf("month interest principal principalleft\n");
   int month=0;
   double totalprincipal=0, totalinterest=0;
-  while (principal > 0.000001) //the doubleing point must put the result off by just enough that the error accumulates over all the iterations.
+  while (principal > 0.000001) //the floating point must put the result off by just enough that the error accumulates over all the iterations.
     {
       //      printf("%d %2.f\n" , month,principal);
       double paymenttowardsinterest=calc_paymenttowardsinterest();
@@ -169,7 +169,7 @@ AmortizedLoan::AmortizedLoan(  double int_rate_, double loan_amount_, double add
 }
 void AmortizedLoan::set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment)
 {
-  std::cout<<"setting values";
+  //  std::cout<<"setting values";
   principal =  loan_amount_;
   int_rate_pct =  int_rate_ / 100;
   loan_amount = loan_amount_ ;
@@ -240,7 +240,7 @@ void AmortizedLoan::calc_periodicmortgagepayment() //double int_rate, int num_pm
 
     periodicmortgagepayment=moneyround(pmnt_amt);
     //periodicmortgagepayment=(pmnt_amt);
-  printf("pmntamt %f periodicpayment %f\n" , pmnt_amt,periodicmortgagepayment);
+    //  printf("pmntamt %f periodicpayment %f\n" , pmnt_amt,periodicmortgagepayment);
 }
 
 double moneyround(double amt)
@@ -276,7 +276,7 @@ double AmortizedLoan::calc_paymenttowardsprincipal()
 double AmortizedLoan::calc_paymentpercentages()
 {
   double paymenttowardsprincipal=0;
-  if ( principal>0) // is this redundant? I think it is.
+  //  if ( principal>0) // is this redundant? I think it is.
     {
       if (periodicmortgagepayment+additionalperiodicpaymenttoprincipal < principal)
 	{
@@ -299,14 +299,16 @@ void AmortizedLoan::calc_newprincipal()
     {//i was double dipping on the extra payment towards principal
       temp=principal-calc_paymenttowardsprincipal()-additionalperiodicpaymenttoprincipal;
     }
+      /*
   else
     {
-      int n=9;
-      /*
+
+
       std::cout<<"final payment was "<<principal+calc_paymenttowardsinterest()<<"; is this the same as the monthly mort payment?"<<periodicmortgagepayment<<"\n";
-      std::cout<<"Shouldn't the final payment be exactly one mortgage payment (or only off by a cent or two?)and not less?\n";
-      */
+      std::cout<<"Shouldn't the final payment be exactly one mortgage payment (or only off by a cent or two?)and not less?\nNO this is false. The final mortgage payment would only equal one full mortgage payment if when the mortgage payment was calculated it came out exactly to the hundredths place and didn't require rounding. Otherwise the rounding up will cause you to slightly overpay such that your last payment will be less than a full mortgage payment; Ugggh this might cause a problem when the mortgage payment is rounded down however. ";
+
     }
+      */
   principal=moneyround(temp); //round off the cents so don't accumulate errors. Am guessing that this is how things are calculated by the banks. They don't carry over beyond the cents position.
   //  principal=temp;
   
@@ -323,13 +325,13 @@ double AmortizedLoan::AmountOwedAfterXMonths(int mon)
 
 void AmortizedLoan::CalcAmortizationValues() //double periodicpayment,double int_rate, double principal,int freq, additionalperiodicpaymenttoprincipal)
 {
-  double paymenttowardsinterest=calc_paymenttowardsinterest();
-  double paymenttowardsprincipal=calc_paymenttowardsprincipal();
+  //  double paymenttowardsinterest=calc_paymenttowardsinterest();
+  //double paymenttowardsprincipal=calc_paymenttowardsprincipal();
   if (periodicmortgagepayment<principal)       //if aren't paying extra then you'll hit 0 principal on your final payment, but if pay extra last payment will be less than what your normal payment would've been.
     {
       calc_newprincipal();
     }
-  else //this case covers our last payment where the principal is less than the payment, don't need to make 
+  else //this case covers our last payment where the principal is less than the payment, 
     {
       principal=0;
     }
@@ -429,7 +431,7 @@ LoanComparison::LoanComparison(double rate,int terminmonths,double amount,int pa
 
 void usage()
 {
-  std::cout<<"Please define the interest rate (i), loan amount (l), number of payments (n), and payments per year (p).\nAdditionally, you can specify extra payment amount to apply toward principal each pay period (e) or a monthly payment amount that includes the base payment plus any overage towards principal(m).\n";
+  std::cout<<"Please define the interest rate (i), loan amount (l), number of payments (n), and payments per year (p).\nAdditionally, you can specify extra payment amount to apply toward principal each pay period (e) or a monthly payment amount that includes the base payment plus any overage towards principal(m).\n./a.out -i 4.5 -l 120000 -p 12 -n 360 -e 30\n";
 }
 
 // getopt: http://pubs.opengroup.org/onlinepubs/000095399/functions/getopt.html http://stackoverflow.com/questions/2219562/using-getopt-to-parse-program-arguments-in-c

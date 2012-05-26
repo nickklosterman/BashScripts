@@ -47,6 +47,7 @@ then
     echo "if this were to run in a cron job we'd append this to a log file of some sort"
 else 
     wget -q http://www.hicksphoto.com/rotating/daily_photo/getpic.php?res=1024
+#http://www.hicksphoto.com/rotating/daily_photo/full_pic_of_the_day.html?x=1
     mv getpic.php?res=1024 $filename
 fi
 #eog $filename &

@@ -8,6 +8,8 @@ echo "--Teefury--"
 bash ~/Git/BashScripts/DealScrapers/TeefuryScraper.sh
 echo "--Ript--"
 bash ~/Git/BashScripts/DealScrapers/RiptApparelScraper.sh
+echo "--TheYetee"
+bash ~/Git/BashScripts/DealScrapers/theyetee.sh
 echo "--Altrec--"
 bash ~/Git/BashScripts/DealScrapers/AltrecScraper.sh
 echo "--REI--"
