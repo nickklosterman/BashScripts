@@ -15,6 +15,16 @@ TODO: allow reading of a matrix/list of extra payments from a file that correspo
 
 //using namespace std;
 
+//The *only* way to decrease the amount of interest paid for a set of variables is to pay extra towards the principal. Increaseing the frequency of payment (but making a smaller payment) doesn't do anything towards reducing the amount of interest paid. The whole basis of the biweekly payment plan is that each year you pay an additional monthly mortgage payment that is applied towards principal. For a given amount of principal and interest rate, the only other way to decrease the amount paid towards interest besides add'l payments towards principal is to increase the frequency of payments. However, I'm not sure that banks would make amortizations schedules for less than monthly payments.
+//E.g. for a $100,000 loan at 4.5% interest you would pay $4,500 for the first year in interest. But if you pay with monthly payments you pay only $4,308.25 in interest on the first year because the amount that goes towards interest is recalculated more frequently where the principal is lower.
+
+//However, the impact of increased frequency in the amortization table isn't as big a gain as one might expect. For the above case, the amount of interest paid on 12 payments per year is $82,404.60. The amount of interest paid on 240 payments per year is $82.277.40, a difference of $127.20 -->  ./a.out -i 4.5 -l 100000 -p 12 -n 360  vs  ./a.out -i 4.5 -l 100000 -p 24 -n 7200 
+//If instead you made an additional $1 contribution per pay period on the 12 payments per year loan you would save $398.17 in interest over the life of the loan. -->  ./a.out -i 4.5 -l 100000 -p 12 -n 360 -e 1
+// ./a.out -i 4.5 -l 100000 -p 240 -n 7200 -e 1
+
+
+//---->> Ultimate Lesson: Paying off add'l principal per pay period has the greatest impact
+
 
 double moneyround(double amt);
 
