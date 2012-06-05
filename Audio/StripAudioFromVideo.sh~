@@ -1,0 +1,25 @@
+#!/bin/bash
+params=$(mplayer ${1} -vo null -ao null -frames 0 2>&1 /dev/null | egrep "(AUDIO)" )
+sampling_freq=$( sed 's/AUDIO: //' ${params} | cut -d ',' -f 1 | sed 's/ Hz//' )
+num_channels=$(  sed 's/AUDIO: //' | cut -d ',' -f 2 | sed 's/ ch//' )
+bit_rate=$(sed 's/AUDIO: //' | cut -d ',' -f 4 | sed 's/ kbit.*//' ) #or sed 's/AUDIO: //' | cut -d ',' -f 4 | sed 's/\..*//'
+#grab sampling freq, num channels, and bit rate 
+outputfilename="audio.mp3"
+if [ -e ${outputfilename} ]
+then
+echo "prompt for new name"
+#while
+else
+ffmpeg -i ${1} -ab ${bit_rate}k -ac ${num_channels} -ar ${sampling_freq} -vn ${outputfilename}
+fi
+
+#IDENTIFY VIDEO AUDIO PARAMS
+# http://savvyadmin.com/quickly-identify-video-file-attributes/
+#http://superuser.com/questions/55780/linux-command-line-tool-to-get-bitrate-of-divx-xvid
+#yahoo/google: linux identify audio bitrate video
+
+# STRIP AUDIO FROM VIDEO
+# http://linuxpoison.blogspot.com/2010/04/how-to-extract-audio-from-video-file.html
+# google/yahoo linux ffmpeg strip audio from video
+
+#mplayer *can* strip audio but it isn't as forgiving on inputs as ffmpeg is

@@ -113,4 +113,4 @@ else
     Detail=$(GivePageReturnDetailImage ${Woot} )
     feh ${Detail} & 
 fi
-#cleanup
+cleanup

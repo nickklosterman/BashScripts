@@ -32,15 +32,17 @@ class AmortizedLoan
 {
 public:
   AmortizedLoan();
-  AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthly_payment);
+  AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthly_payment, double taxes, double insurance);
 
   AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_);
-void   set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthly_payment);
+  AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double  taxes_ , double insurance_);
+  void   set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthly_payment, double taxes, double insurance);
   void PrintLoanDetails();
   void PrintCurrentIteration();
   void IteratePayment();
   double AmountOwedAfterXMonths(int mon);
   double get_periodicmortgagepayment();
+  double get_periodicmortgagepaymentwithtaxesandinsurance();
   double get_principal();
   double get_loan_amount();
   double get_overpaymenttoprincipal();
@@ -55,13 +57,14 @@ void   set_AmortizedLoan(  double int_rate_, double loan_amount_, double additio
   void AmortizationTable();
   void AmortizationTable2();
   void PrintPeriodicMortgagePayment();
+  void PrintPeriodicMortgagePaymentWithTaxesAndInsurance();
   void AmortizationAmounts();
 private:
   //  string GetPeriodString()
   void reset_principal();
   void calc_periodicmortgagepayment();//double int_rate, int num_pmnts, double principal, int freq);
   void CalcAmortizationValues();
-  double int_rate_pct,principal,loan_amount,additionalperiodicpaymenttoprincipal,periodicmortgagepayment,totalcostofloan,totalinterestonloan;
+  double int_rate_pct,principal,loan_amount,additionalperiodicpaymenttoprincipal,periodicmortgagepayment,totalcostofloan,totalinterestonloan,insurance_yearly,taxes_yearly, periodicmortgagepaymentwithtaxesandinsurance;
   int num_pmnts,freq,monthstopayoffloan;
 };
 
@@ -106,6 +109,12 @@ string AmortizedLoan::GetPeriodString()
 void AmortizedLoan::PrintPeriodicMortgagePayment()
 {
   printf("Your mortgage payment will be %0.2f.\n" , periodicmortgagepayment);
+}
+
+
+void AmortizedLoan::PrintPeriodicMortgagePaymentWithTaxesAndInsurance()
+{
+  printf("Your mortgage payment with taxes and insurance will be %0.2f.\n" , periodicmortgagepaymentwithtaxesandinsurance);
 }
 
 
@@ -160,7 +169,7 @@ void AmortizedLoan::AmortizationAmounts()
    totalinterestonloan=totalinterest;
 }
 
-AmortizedLoan::AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment)
+AmortizedLoan::AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment,  double taxes_yearly_, double insurance_yearly_)
 {
 
   principal =  loan_amount_;
@@ -170,6 +179,8 @@ AmortizedLoan::AmortizedLoan(  double int_rate_, double loan_amount_, double add
   num_pmnts =   num_pmnts_;
   freq = freq_;
   calc_periodicmortgagepayment();//int_rate_pct, num_pmnts, principal,freq);
+  insurance_yearly=insurance_yearly_;
+  taxes_yearly=taxes_yearly_;
 
   //override items if monthlypayment specified
   if (monthlypayment>periodicmortgagepayment && monthlypayment!=0) // <- will the second argument eval to false ever? use > 0.01 instead?
@@ -177,7 +188,7 @@ AmortizedLoan::AmortizedLoan(  double int_rate_, double loan_amount_, double add
 
 
 }
-void AmortizedLoan::set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment)
+void AmortizedLoan::set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment, double taxes_yearly_, double insurance_yearly_)
 {
   //  std::cout<<"setting values";
   principal =  loan_amount_;
@@ -186,11 +197,15 @@ void AmortizedLoan::set_AmortizedLoan(  double int_rate_, double loan_amount_, d
   additionalperiodicpaymenttoprincipal = moneyround(additionalperiodicpaymenttoprincipal_);
   num_pmnts =   num_pmnts_;
   freq = freq_;
+  insurance_yearly=insurance_yearly_;
+  taxes_yearly=taxes_yearly_;
+
   calc_periodicmortgagepayment();//int_rate_pct, num_pmnts, principal,freq);
 
   //override items if monthlypayment specified
   if (monthlypayment>periodicmortgagepayment)// && monthlypayment!=0) // <- will the second argument eval to false ever? use > 0.01 instead?
     additionalperiodicpaymenttoprincipal =monthlypayment-periodicmortgagepayment;
+
 
 }
 
@@ -204,17 +219,35 @@ AmortizedLoan::AmortizedLoan(  double int_rate_, double loan_amount_, double add
   num_pmnts =   num_pmnts_;
   freq = freq_;
   calc_periodicmortgagepayment();//int_rate_pct, num_pmnts, principal,freq);
+  insurance_yearly=0;
+  taxes_yearly=0;
+}
+AmortizedLoan::AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_,double taxes_,double insurance_ )
+{
+  principal =  loan_amount_;
+  int_rate_pct =  int_rate_ / 100;
+  insurance_yearly=insurance_;
+  taxes_yearly=taxes_;
+  loan_amount = loan_amount_ ;
+  additionalperiodicpaymenttoprincipal = moneyround(additionalperiodicpaymenttoprincipal_);
+  num_pmnts =   num_pmnts_;
+  freq = freq_;
+  calc_periodicmortgagepayment();//int_rate_pct, num_pmnts, principal,freq);
 
 }
 
 AmortizedLoan::AmortizedLoan()
 {
-  principal = int_rate_pct = loan_amount = additionalperiodicpaymenttoprincipal = periodicmortgagepayment = 0;
+  principal = int_rate_pct = loan_amount = additionalperiodicpaymenttoprincipal = periodicmortgagepayment = insurance_yearly = taxes_yearly = 0.0;
   num_pmnts = freq = 0;
 }
 double AmortizedLoan::get_periodicmortgagepayment()
 {
   return periodicmortgagepayment;
+}
+double AmortizedLoan::get_periodicmortgagepaymentwithtaxesandinsurance()
+{
+  return periodicmortgagepaymentwithtaxesandinsurance;
 }
 double AmortizedLoan::get_principal()
 {
@@ -248,7 +281,8 @@ void AmortizedLoan::calc_periodicmortgagepayment() //double int_rate, int num_pm
   double y = rr / (x - 1.0);
   double pmnt_amt = (rr + y) * principal;
 
-    periodicmortgagepayment=moneyround(pmnt_amt);
+  periodicmortgagepayment=moneyround(pmnt_amt);
+  periodicmortgagepaymentwithtaxesandinsurance=moneyround(pmnt_amt) +moneyround(insurance_yearly/freq)+moneyround(taxes_yearly/freq);
     //periodicmortgagepayment=(pmnt_amt);
     //  printf("pmntamt %f periodicpayment %f\n" , pmnt_amt,periodicmortgagepayment);
 }
@@ -378,7 +412,7 @@ class LoanComparison
 {
 public:
   //  LoanComparison();
-  LoanComparison(double rate,int terminmonths, double amount,int paymentsperyear,double extrapayment,double monthlypayment);
+  LoanComparison(double rate,int terminmonths, double amount,int paymentsperyear,double extrapayment,double monthlypayment,double taxes, double insurance);
   void PrintLoanAmortizationTableComparison();
   void PrintLoanDetails();
   double get_interest_saved();
@@ -408,17 +442,20 @@ void LoanComparison::PrintLoanDetails()
 
 void LoanComparison::PrintLoanAmortizationTableComparison()
 {
-  for (int i=0;i<numberofpayments;i++)
+  if ( 1==0)
     {
-      std::cout<<i<<"\t";
-      NormalLoan.PrintCurrentIteration();
-      ExtraPaymentLoan.PrintCurrentIteration();
-      NormalLoan.IteratePayment();
-      ExtraPaymentLoan.IteratePayment();
-      std::cout<<"\n";
-    }
-  
+      for (int i=0;i<numberofpayments;i++)
+	{
+	  std::cout<<i<<"\t";
+	  NormalLoan.PrintCurrentIteration();
+	  ExtraPaymentLoan.PrintCurrentIteration();
+	  NormalLoan.IteratePayment();
+	  ExtraPaymentLoan.IteratePayment();
+	  std::cout<<"\n";
+	}
+    }  
   NormalLoan.PrintPeriodicMortgagePayment();
+  NormalLoan.PrintPeriodicMortgagePaymentWithTaxesAndInsurance();
   NormalLoan.AmortizationAmounts();
   ExtraPaymentLoan.AmortizationAmounts();
   
@@ -428,14 +465,14 @@ void LoanComparison::PrintLoanAmortizationTableComparison()
 }
 
 //LoanComparison::LoanComparison(){}
-LoanComparison::LoanComparison(double rate,int terminmonths,double amount,int paymentsperyear,double extrapayment,double monthlypayment)
+LoanComparison::LoanComparison(double rate,int terminmonths,double amount,int paymentsperyear,double extrapayment,double monthlypayment, double taxes, double insurance)
 {
   //
   //  std::cout<<"setting variables etc\n";
   numberofpayments=terminmonths;
   //void AmortizedLoan::set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment)
-  NormalLoan.set_AmortizedLoan(rate,amount,0,terminmonths,paymentsperyear,monthlypayment);
-  ExtraPaymentLoan.set_AmortizedLoan(rate,amount,extrapayment,terminmonths,paymentsperyear,monthlypayment);
+  NormalLoan.set_AmortizedLoan(rate,amount,0,terminmonths,paymentsperyear,monthlypayment,taxes, insurance);
+  ExtraPaymentLoan.set_AmortizedLoan(rate,amount,extrapayment,terminmonths,paymentsperyear,monthlypayment,taxes,insurance);
 }
 //-------------------------------------------------------------------------------------
 
@@ -462,12 +499,14 @@ int main(int argc, char *argv[])
   double extraPayments=1000;//240.0;
   int paymentsPerYear = 12;//"monthly"
   float monthlyPayments =0.0;
+  double insurance=0.0;
+  double taxes=0.0;
 
   if (argc > 3 )
     {
   interest_rate = loanAmount = extraPayments = monthlyPayments = 0.0;
   numberOfPayments = paymentsPerYear = 0;
-    while ((c = getopt(argc, argv, ":i:n:l:e:p:m:")) != -1) {
+    while ((c = getopt(argc, argv, ":i:n:l:e:p:m:t:s:")) != -1) {
       switch(c) {
       case 'i':
 	interest_rate = atof(optarg);
@@ -497,6 +536,14 @@ int main(int argc, char *argv[])
          = optarg;
         printf(" is %s\n", );
         break; */
+      case 's':
+	insurance = atof(optarg);
+        printf("insurance is %f\n",insurance );
+        break;
+      case 't':
+	taxes  = atof(optarg);
+        printf("taxes is %f\n",taxes );
+        break;
       case ':':
         printf("-%c without filename\n", optopt);
         break;
@@ -511,7 +558,7 @@ int main(int argc, char *argv[])
   }
   //  AmortizedLoan al(r,la,ep,t,rt,00);
     //    if (monthlyPayments>0)
-    LoanComparison LC(interest_rate,numberOfPayments,loanAmount,paymentsPerYear,extraPayments,monthlyPayments);
+  LoanComparison LC(interest_rate,numberOfPayments,loanAmount,paymentsPerYear,extraPayments,monthlyPayments,taxes,insurance);
       //else
       // LoanComparison LC(interest_rate,numberOfPayments,loanAmount,paymentsPerYear,extraPayments,0);
 
