@@ -71,5 +71,5 @@ feh -f /tmp/BlogImages
 #cat /tmp/BlogImages
 
 
-cd /home/nicolae/Documents/Artwork/DD/BlogImgs
+cd /home/nicolae/Documents/Artwork/DD/
 #fdupes -r -d . #<- I think this wasn't showing up since I backgrounded the op

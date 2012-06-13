@@ -1,0 +1,12 @@
+import javax.swing.JFrame;
+
+public class LoanCalculatorGUIDriver
+{
+    public static void main(String[] args)
+    {
+	LoanCalculatorGUI LCG = new LoanCalculatorGUI;
+	//	buttonFrame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+	// buttonFrame.setSize( 275, 110 ); // set frame size
+	// buttonFrame.setVisible( true ); // display frame    
+}
+}

@@ -1,2 +1,13 @@
-    Symbol Lookup from Yahoo! Finance
-    Symbol Lookup from Yahoo! Finance
+VRSN: VeriSign, Inc.
+DISCA: Discovery Communications, Inc
+
+AMSG: Amsurg Corp.
+USPH: U.S. Physical Therapy, Inc.
+CRUS: Cirrus Logic, Inc.
+BYI: Bally Technologies Inc. Common 
+CHDN: Churchill Downs, Incorporated
+CYBX: Cyberonics, Inc.
+ACIW: ACI Worldwide, Inc.
+
+
+
