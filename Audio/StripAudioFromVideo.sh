@@ -1,5 +1,8 @@
 #!/bin/bash
-params=$(mplayer ${1} -vo null -ao null -frames 0 2>&1 /dev/null | egrep "(AUDIO)" )
+echo "Obtaining parameters: mplayer ${1} -vo null -ao null -frames 0 2>&1 /dev/null | egrep \"(AUDIO)\" )"
+echo "WARNING: THIS DOESN'T SEEM TO WORK ON NAMES WITH SPACES EVEN WHEN QUOTING."
+params=$(mplayer "${1}" -vo null -ao null -frames 0 2>&1 /dev/null | egrep "(AUDIO)" )
+
 sampling_freq=$( echo ${params} | sed 's/AUDIO: //' | cut -d ',' -f 1 | sed 's/ Hz//' )
 num_channels=$( echo ${params} | sed 's/AUDIO: //'  | cut -d ',' -f 2 | sed 's/ ch//' )
 bit_rate=$( echo ${params} | sed 's/AUDIO: //'  | cut -d ',' -f 4 | sed 's/ kbit.*//' ) #or sed 's/AUDIO: //' | cut -d ',' -f 4 | sed 's/\..*//'
@@ -18,7 +21,7 @@ done
 fi
 
 echo "Stripping Audio: ffmpeg -i ${1} -ab ${bit_rate}k -ac ${num_channels} -ar ${sampling_freq} -vn ${outputfilename}"
-ffmpeg -i ${1} -ab ${bit_rate}k -ac ${num_channels} -ar ${sampling_freq} -vn ${outputfilename}
+ffmpeg -i "${1}" -ab ${bit_rate}k -ac ${num_channels} -ar ${sampling_freq} -vn ${outputfilename}
 
 
 #IDENTIFY VIDEO AUDIO PARAMS

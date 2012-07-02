@@ -9,7 +9,8 @@ for Mortgage in MortgageDurationInYears:
         print "Mortgage,DownPayment,PropertyAppreciation,AnnualizedReturn,PctDownPayment"
         for PercentAnnualizedPropertyAppreciation in range(0,6,1):
             bob=100/float(PercentDownPayment)
-            PercentAnnualizedReturnOnCapital=pow((100/float(PercentDownPayment))*pow((1+(float(PercentAnnualizedPropertyAppreciation)/10)),float(Mortgage)),(1/float(Mortgage)))
+#            propertyValueAtEndOfLoan=pow(
+            PercentAnnualizedReturnOnCapital=pow((100/float(PercentDownPayment))*pow((1+(float(PercentAnnualizedPropertyAppreciation)/100)),float(Mortgage)),(1/float(Mortgage)))
             print "A",Mortgage,"yr mortgage with",PercentDownPayment,"% down and an annual property appreciation rate of",PercentAnnualizedPropertyAppreciation,"% will give a ",(PercentAnnualizedReturnOnCapital-1)*100,"% annual return on your capital"# (PercentDownPayment/100.0)
 #            print Mortgage,PercentDownPayment,"%",PercentAnnualizedPropertyAppreciation,(PercentAnnualizedReturnOnCapital-1)*100,(PercentDownPayment/100.0)
 

@@ -3,8 +3,9 @@
   TODO: allow reading of a matrix/list of extra payments from a file that correspond to months when applied. ie. 3rd line = apply extra payment to 3rd month
 
 */
+//g++ -o RentalReturnCalc RentalReturnCalculator.cpp
 
-//#include <locale.h> //for currency formatting
+
 #include <unistd.h>  //for getopt
 #include <getopt.h> //for getopt_long
 #include <math.h> //for pow 
@@ -12,9 +13,6 @@
 #include <cstdlib> //for atoi atof
 #include <string.h>
 #include <iostream>
-//#include <iterator> // 
-
-//using namespace std;
 
 //The *only* way to decrease the amount of interest paid for a set of variables is to pay extra towards the principal. Increaseing the frequency of payment (but making a smaller payment) doesn't do anything towards reducing the amount of interest paid. The whole basis of the biweekly payment plan is that each year you pay an additional monthly mortgage payment that is applied towards principal. For a given amount of principal and interest rate, the only other way to decrease the amount paid towards interest besides add'l payments towards principal is to increase the frequency of payments. However, I'm not sure that banks would make amortizations schedules for less than monthly payments.
 //E.g. for a $100,000 loan at 4.5% interest you would pay $4,500 for the first year in interest. But if you pay with monthly payments you pay only $4,308.25 in interest on the first year because the amount that goes towards interest is recalculated more frequently where the principal is lower.
@@ -26,6 +24,10 @@
 
 //---->> Ultimate Lesson: Paying off add'l principal per pay period has the greatest impact
 
+struct PropertyLoanDetails{
+  double monthlyPayments,interest_rate,rent_inflation,insurance,taxes,down_payment,loanAmount,extraPayments,downpaymentPct,house_appreciation;
+  int numberOfPayments,paymentsPerYear,rent_payment, houseprice;
+};
 
 double moneyround(double amt);
 
@@ -33,11 +35,8 @@ class AmortizedLoan
 {
 public:
   AmortizedLoan();
-  AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthly_payment, double taxes, double insurance);
-
-  AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_);
-  AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double  taxes_ , double insurance_);
-  void   set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthly_payment, double taxes, double insurance);
+  AmortizedLoan( PropertyLoanDetails);
+  void   set_AmortizedLoan(PropertyLoanDetails);
   void PrintLoanDetails();
   void PrintCurrentIteration();
   void IteratePayment();
@@ -55,6 +54,7 @@ public:
   void calc_newprincipal();
   double calc_paymentpercentages();//only return the percentage of one and subtract this for the other. want this so can see how quickly the amount going ot int drops off
   //  double get_principal();
+  void calc_equity();
   void AmortizationTable();
   void AmortizationTable2();
   void PrintPeriodicMortgagePayment();
@@ -65,8 +65,8 @@ private:
   void reset_principal();
   void calc_periodicmortgagepayment();//double int_rate, int num_pmnts, double principal, int freq);
   void CalcAmortizationValues();
-  double int_rate_pct,principal,loan_amount,additionalperiodicpaymenttoprincipal,periodicmortgagepayment,totalcostofloan,totalinterestonloan,insurance_yearly,taxes_yearly, periodicmortgagepaymentwithtaxesandinsurance;
-  int num_pmnts,freq,monthstopayoffloan;
+  double int_rate_pct,principal,loan_amount,additionalperiodicpaymenttoprincipal,periodicmortgagepayment,totalcostofloan,totalinterestonloan,insurance_yearly,taxes_yearly, periodicmortgagepaymentwithtaxesandinsurance,equity_in_property,rent_inflation,propertyprice,downpaymentPct,house_appreciation;
+  int num_pmnts,freq,monthstopayoffloan,rent_payment;
 };
 
 int AmortizedLoan::get_monthstopayoffloan()
@@ -173,75 +173,84 @@ void AmortizedLoan::AmortizationAmounts()
   //  std::cout<<"this really needs to be done in a while loop";
 }
 
-AmortizedLoan::AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment,  double taxes_yearly_, double insurance_yearly_)
+AmortizedLoan::AmortizedLoan(PropertyLoanDetails PLD)//  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment,  double taxes_yearly_, double insurance_yearly_)
 {
+  if (PLD.loanAmount>0&&PLD.houseprice>0)
+    std::cout<<"Loan amount and house price both specified. House price is overriding the loan amount."<<std::endl;
+  if (PLD.houseprice!=0 && PLD.downpaymentPct!=0) //should I use > instead of !=??
+    loan_amount=PLD.houseprice*(1-PLD.downpaymentPct);
+  //interest_rate, numberOfPayments, paymentsPerYear
+  //loanAmount or houseprice & downpaymentPct
+  //extraPayments or monthlyPayments
 
-  principal =  loan_amount_;
-  int_rate_pct =  int_rate_ / 100;
-  loan_amount = loan_amount_ ;
-  additionalperiodicpaymenttoprincipal = additionalperiodicpaymenttoprincipal_;
-  num_pmnts =   num_pmnts_;
-  freq = freq_;
-  calc_periodicmortgagepayment();//int_rate_pct, num_pmnts, principal,freq);
-  insurance_yearly=insurance_yearly_;
-  taxes_yearly=taxes_yearly_;
+  principal =  loan_amount;
+  int_rate_pct =  PLD.interest_rate;
+  additionalperiodicpaymenttoprincipal = PLD.extraPayments;
+  num_pmnts =   PLD.numberOfPayments;//num_pmnts_;
+  freq = PLD.paymentsPerYear;//freq_;
+  insurance_yearly=PLD.insurance;
+  taxes_yearly=PLD.taxes;
+  propertyprice=PLD.houseprice;
+  downpaymentPct=PLD.downpaymentPct;
+  rent_payment = PLD.rent_payment;
+  rent_inflation = PLD.rent_inflation;
+  house_appreciation=PLD.house_appreciation;
+  equity_in_property=0;
+
+  calc_periodicmortgagepayment(); //needs variables set before calculation.
 
   //override items if monthlypayment specified
-  if (monthlypayment>moneyround(taxes_yearly/12.0)+moneyround(insurance_yearly/12.0)+periodicmortgagepayment && monthlypayment!=0) // <- will the second argument eval to false ever? use > 0.01 instead?
-    additionalperiodicpaymenttoprincipal =monthlypayment-moneyround(taxes_yearly/12.0)-moneyround(insurance_yearly/12.0)-periodicmortgagepayment;
-
-}
-void AmortizedLoan::set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment, double taxes_yearly_, double insurance_yearly_)
-{
-  //  std::cout<<"setting values";
-  principal =  loan_amount_;
-  int_rate_pct =  int_rate_ / 100;
-  loan_amount = loan_amount_ ;
-  additionalperiodicpaymenttoprincipal = moneyround(additionalperiodicpaymenttoprincipal_);
-  num_pmnts =   num_pmnts_;
-  freq = freq_;
-  insurance_yearly=insurance_yearly_;
-  taxes_yearly=taxes_yearly_;
-
-  calc_periodicmortgagepayment();//int_rate_pct, num_pmnts, principal,freq);
-
-  //override items if monthlypayment specified
-  if (monthlypayment>moneyround(taxes_yearly/12.0)+moneyround(insurance_yearly/12.0)+periodicmortgagepayment && monthlypayment>0) //monthlypayment!=0) // <- will the second argument eval to false ever? use > 0.01 instead?
+  if (PLD.monthlyPayments>moneyround(taxes_yearly/12.0)+moneyround(insurance_yearly/12.0)+periodicmortgagepayment && PLD.monthlyPayments>0) // <- will the second argument eval to false ever? use > 0.01 instead?
     {
-    additionalperiodicpaymenttoprincipal = moneyround(monthlypayment-moneyround(taxes_yearly/12.0)-moneyround(insurance_yearly/12.0)-periodicmortgagepayment);
-    //    std::cout<<"statement is true";
+      additionalperiodicpaymenttoprincipal = moneyround(PLD.monthlyPayments-moneyround(taxes_yearly/12.0)-moneyround(insurance_yearly/12.0)-periodicmortgagepayment);
+      //      additionalperiodicpaymenttoprincipal =monthlypayment-moneyround(taxes_yearly/12.0)-moneyround(insurance_yearly/12.0)-periodicmortgagepayment;
     }
-    //printf("add'l payment %f",additionalperiodicpaymenttoprincipal);
-
+  else
+    additionalperiodicpaymenttoprincipal=PLD.extraPayments;
 }
 
-
-AmortizedLoan::AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_)
+void AmortizedLoan::set_AmortizedLoan(PropertyLoanDetails PLD)//  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment, double taxes_yearly_, double insurance_yearly_,int rent_payment_,double rent_inflation_)
 {
-  principal =  loan_amount_;
-  int_rate_pct =  int_rate_ / 100;
-  loan_amount = loan_amount_ ;
-  additionalperiodicpaymenttoprincipal = moneyround(additionalperiodicpaymenttoprincipal_);
-  num_pmnts =   num_pmnts_;
-  freq = freq_;
-  calc_periodicmortgagepayment();//int_rate_pct, num_pmnts, principal,freq);
-  insurance_yearly=0;
-  taxes_yearly=0;
+  std::cout<<"I should just copy the PLD object instead of doing all this crap."<<std::endl;
+  if (PLD.loanAmount>0&&PLD.houseprice>0)
+    {
+      loan_amount=PLD.houseprice*(1-PLD.downpaymentPct);
+      std::cout<<"Loan amount and house price both specified. House price is overriding the loan amount."<<std::endl<<"Loan is for "<<loan_amount<<"."<<std::endl;
+      //  if (PLD.houseprice>0 && PLD.downpaymentPct>0) //should I use > instead of !=??
+     
+    }
+  principal =    loan_amount;
+  int_rate_pct =  PLD.interest_rate;
+
+  additionalperiodicpaymenttoprincipal = PLD.extraPayments;
+  num_pmnts =   PLD.numberOfPayments;//num_pmnts_;
+  freq = PLD.paymentsPerYear;//freq_;
+
+  //  std::cout<<"pld.ins"<<PLD.insurance<<std::endl;
+  insurance_yearly=PLD.insurance;
+  taxes_yearly=PLD.taxes;
+  propertyprice=PLD.houseprice;
+  downpaymentPct=PLD.downpaymentPct;
+  //  std::cout<<"taxes : "<<taxes_yearly<<" ins :"<<insurance_yearly<<" "<<taxes_yearly/freq<<" "<<insurance_yearly/freq<<std::endl;
+  rent_payment = PLD.rent_payment;
+  rent_inflation = PLD.rent_inflation;
+  house_appreciation=PLD.house_appreciation;
+  equity_in_property=0;
+
+  calc_periodicmortgagepayment(); //needs variables set before calculation.
+
+  //override items if monthlypayment specified
+  if (PLD.monthlyPayments>moneyround(taxes_yearly/12.0)+moneyround(insurance_yearly/12.0)+periodicmortgagepayment && PLD.monthlyPayments>0) // <- will the second argument eval to false ever? use > 0.01 instead?
+    {
+      additionalperiodicpaymenttoprincipal = moneyround(PLD.monthlyPayments-moneyround(taxes_yearly/12.0)-moneyround(insurance_yearly/12.0)-periodicmortgagepayment);
+      //      additionalperiodicpaymenttoprincipal =monthlypayment-moneyround(taxes_yearly/12.0)-moneyround(insurance_yearly/12.0)-periodicmortgagepayment;
+    }
+  else
+    additionalperiodicpaymenttoprincipal=PLD.extraPayments;
 
 }
-AmortizedLoan::AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_,double taxes_,double insurance_ )
-{
-  principal =  loan_amount_;
-  int_rate_pct =  int_rate_ / 100;
-  insurance_yearly=insurance_;
-  taxes_yearly=taxes_;
-  loan_amount = loan_amount_ ;
-  additionalperiodicpaymenttoprincipal = moneyround(additionalperiodicpaymenttoprincipal_);
-  num_pmnts =   num_pmnts_;
-  freq = freq_;
-  calc_periodicmortgagepayment();//int_rate_pct, num_pmnts, principal,freq);
 
-}
+
 
 AmortizedLoan::AmortizedLoan()
 {
@@ -289,9 +298,10 @@ void AmortizedLoan::calc_periodicmortgagepayment() //double int_rate, int num_pm
   double pmnt_amt = (rr + y) * principal;
 
   periodicmortgagepayment=moneyround(pmnt_amt);
-  periodicmortgagepaymentwithtaxesandinsurance=moneyround(pmnt_amt) +moneyround(insurance_yearly/freq)+moneyround(taxes_yearly/freq);
+  periodicmortgagepaymentwithtaxesandinsurance=periodicmortgagepayment+moneyround(insurance_yearly/freq)+moneyround(taxes_yearly/freq);//moneyround(pmnt_amt) +moneyround(insurance_yearly/freq)+moneyround(taxes_yearly/freq);
+  //  printf("ins %f ins / freq %f roundeed %f taxes %f taxes /freq %f rounded %f",insurance_yearly,insurance_yearly/freq,moneyround(insurance_yearly/freq),taxes_yearly,taxes_yearly/freq,moneyround(taxes_yearly/(freq+0.0)));
   //periodicmortgagepayment=(pmnt_amt);
-  //  printf("pmntamt %f periodicpayment %f\n" , pmnt_amt,periodicmortgagepayment);
+  //printf("pmntamt %f periodicpayment %f with taxes and ins %f\n" , pmnt_amt,periodicmortgagepayment,periodicmortgagepaymentwithtaxesandinsurance);
 }
 
 double moneyround(double amt)
@@ -342,23 +352,46 @@ double AmortizedLoan::calc_paymentpercentages()
   }
   return paymenttowardsprincipal;
 }
+void AmortizedLoan::calc_equity()
+{
+  reset_principal();//make sure calculation is starting over
+  double total_equity=propertyprice*downpaymentPct;
+  //  std::cout<<"still need to add in downpayment towards equity as well as divide by the downpayment for annualized return. also need to add in house appreciation towards equity"<<std::endl;
+  int  month=0;
+  int year=0;
+  std::cout<<freq<<std::endl;
+  while ( principal > 0.000001)
+    {
+      total_equity+=rent_payment-calc_paymenttowardsinterest();//periodicmortgagepayment+calc_paymenttowardsprincipal();
+
+      year=month/freq+1;
+      int trigger=month%freq;
+      if (trigger==0)
+	{
+	  double annualreturn=pow(total_equity/(propertyprice*downpaymentPct),1/(year+0.0));
+	  printf("Annual return for rental at year %d is %f; total_equity %f: year %d: month %d\n",year,annualreturn,total_equity,year,month);
+	  rent_payment*=(1+rent_inflation);//update rent for inflation
+	  total_equity+=propertyprice*pow(house_appreciation+1,year)-propertyprice;//we just get the portion of the house price that it has appreciated. so if we bought for 100k and now worth 110, we just own the 10k of appreciation ; also you can't just divide the house_appreciation by 12 and perform appreciation monthly as this produces a diff result than compounding annually
+	}
+      //      std::cout<<principal<<std::endl;     
+      calc_newprincipal();
+      month++;
+    }
+  printf("At the end of the loan the total amount of equity you have is %f\nThe monthly rent payments are now %d\n.",total_equity,rent_payment);
+  printf("The equity calculation is true but there is the additional cost of property taxes that suck away from your annualized return.\nThe property taxes would probably grow at a rate reflected in the rate increase of rent.\nHOw often are property taxes reevaluated? Would you be workign at a reduced rate of return until you increased rent to reflect the yearly incresae in property taxes? ");
+  printf("(2012-07-02)I think that there are simply too many facets that I'm unfamiliar with, such as property taxes as well as tax reduction due to mortgage interest, to accurately formulate a return on investment at this time.");
+  //it appears that taxes are reassessed on a 6 yr cycle in ohio and updated every 3 years. Not sure what that exactly means however. source:http://tax.ohio.gov/divisions/real_estate/reappraisal_and_triennial_update.stm http://tax.ohio.gov/divisions/real_property/index.stm
+  reset_principal();
+}
 
 void AmortizedLoan::calc_newprincipal()
 {
   double temp=0;
   if (periodicmortgagepayment+additionalperiodicpaymenttoprincipal < principal)
-    {//i was double dipping on the extra payment towards principal
+    {
       temp=principal-calc_paymenttowardsprincipal()-additionalperiodicpaymenttoprincipal;
     }
-  /*
-    else
-    {
-    std::cout<<"final payment was "<<principal+calc_paymenttowardsinterest()<<"; is this the same as the monthly mort payment?"<<periodicmortgagepayment<<"\n";
-    std::cout<<"Shouldn't the final payment be exactly one mortgage payment (or only off by a cent or two?)and not less?\nNO this is false. The final mortgage payment would only equal one full mortgage payment if when the mortgage payment was calculated it came out exactly to the hundredths place and didn't require rounding. Otherwise the rounding up will cause you to slightly overpay such that your last payment will be less than a full mortgage payment; Ugggh this might cause a problem when the mortgage payment is rounded down however. ";
-    }
-  */
   principal=moneyround(temp); //round off the cents so don't accumulate errors. Am guessing that this is how things are calculated by the banks. They don't carry over beyond the cents position.
-  //  principal=temp;
   
 }
 
@@ -371,10 +404,8 @@ double AmortizedLoan::AmountOwedAfterXMonths(int mon)
   //return moneyround(loan_amount*oneplusrton)-moneyround(periodicmortgagepayment*(oneplusrton-1)*12/int_rate_pct));
 }
 
-void AmortizedLoan::CalcAmortizationValues() //double periodicpayment,double int_rate, double principal,int freq, additionalperiodicpaymenttoprincipal)
+void AmortizedLoan::CalcAmortizationValues() 
 {
-  //  double paymenttowardsinterest=calc_paymenttowardsinterest();
-  //double paymenttowardsprincipal=calc_paymenttowardsprincipal();
   if (periodicmortgagepayment<principal)       //if aren't paying extra then you'll hit 0 principal on your final payment, but if pay extra last payment will be less than what your normal payment would've been.
     {
       calc_newprincipal();
@@ -387,43 +418,37 @@ void AmortizedLoan::CalcAmortizationValues() //double periodicpayment,double int
 
 }
  
-void AmortizedLoan::AmortizationTable2()//periodicpayment,int_rate,principal,freq,additionalperiodicpaymenttoprincipal):
+void AmortizedLoan::AmortizationTable2()
 {
-  printf("months_to_pay_off total_interest_paid\n");// principal principalleft")
+  printf("months_to_pay_off total_interest_paid\n");
   int month=0;
   double totalinterest=0;
   int amountremaining=-99;
-  while (amountremaining!=0)//principal > 0)
+  while (amountremaining!=0)
     {
       double paymenttowardsinterest=calc_paymenttowardsinterest();
       totalinterest+=paymenttowardsinterest;
       double paymenttowardsprincipal=calc_paymenttowardsprincipal();
       calc_newprincipal();
       month++;
-      amountremaining=moneyround(principal);//int(principal);
+      amountremaining=moneyround(principal);
     }
   printf("%d %2.f\n" ,month,totalinterest);
 }
 
 //-------------------------------------------------------------------------------------
 
-//kept getting:
-//LoanCalculator.cpp:308: error: expected ‘)’ before ‘,’ token
-//  LoanCalculator.cpp:324: error: expected initializer before ‘)’ token
-//because I forgot to include the dataypes for the prototype since I cut and pasted.
-
 class LoanComparison
 {
 public:
-  //  LoanComparison();
-  LoanComparison(double rate,int terminmonths, double amount,int paymentsperyear,double extrapayment,double monthlypayment,double taxes, double insurance);
+
+  LoanComparison(PropertyLoanDetails);//double rate,int terminmonths, double amount,int paymentsperyear,double extrapayment,double monthlypayment,double taxes, double insurance,int rent_payment, double rent_inflation);
   void PrintLoanAmortizationTableComparison();
   void PrintLoanAmortizationComparison();
   void PrintLoanDetails();
   double get_interest_saved();
   int get_time_periods_saved();
 private:
-  //  AmortizedLoan NormalLoan(),ExtraPaymentLoan();
   AmortizedLoan NormalLoan,ExtraPaymentLoan;
   double interestsaved;
   int numberofpayments;
@@ -447,8 +472,7 @@ void LoanComparison::PrintLoanDetails()
 
 void LoanComparison::PrintLoanAmortizationTableComparison()
 {
-  if ( 1==1)
-    {
+
       for (int i=0;i<numberofpayments;i++)
 	{
 	  std::cout<<i<<"\t";
@@ -458,7 +482,7 @@ void LoanComparison::PrintLoanAmortizationTableComparison()
 	  ExtraPaymentLoan.IteratePayment();
 	  std::cout<<"\n";
 	}
-    }  
+
 }
 void LoanComparison::PrintLoanAmortizationComparison()
 {
@@ -469,25 +493,25 @@ void LoanComparison::PrintLoanAmortizationComparison()
   //  std::cout<<NormalLoan.get_totalinterestonloan()<<"-"<<ExtraPaymentLoan.get_totalinterestonloan()<<","<<NormalLoan.get_monthstopayoffloan()<<"-"<<ExtraPaymentLoan.get_monthstopayoffloan()<<std::endl;
   std::cout<<"By paying an extra $"<<ExtraPaymentLoan.get_overpaymenttoprincipal()<<" per pay period you saved $"<<NormalLoan.get_totalinterestonloan()-ExtraPaymentLoan.get_totalinterestonloan()<<" on interest and cut off "<<NormalLoan.get_monthstopayoffloan()-ExtraPaymentLoan.get_monthstopayoffloan()<<" months from the loan."<<std::endl;
   std::cout<<"Interest paid on loan without add'l payments towards principal:$"<<NormalLoan.get_totalinterestonloan()<<"\nInterest paid with extra payments:$"<<ExtraPaymentLoan.get_totalinterestonloan()<<"\n";
+  NormalLoan.calc_equity();
   
 }
 
-//LoanComparison::LoanComparison(){}
-LoanComparison::LoanComparison(double rate,int terminmonths,double amount,int paymentsperyear,double extrapayment,double monthlypayment, double taxes, double insurance)
+LoanComparison::LoanComparison(PropertyLoanDetails PLD)//double rate,int terminmonths,double amount,int paymentsperyear,double extrapayment,double monthlypayment, double taxes, double insurance,int rent,double rent_inflation)
 {
-  //
-  //  std::cout<<"setting variables etc\n";
-  //std::cout<<"extrapayment:"<<extrapayment;
-  numberofpayments=terminmonths;
-  //void AmortizedLoan::set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment)
-  NormalLoan.set_AmortizedLoan(rate,amount,0,terminmonths,paymentsperyear,0,taxes, insurance);
-  ExtraPaymentLoan.set_AmortizedLoan(rate,amount,extrapayment,terminmonths,paymentsperyear,monthlypayment,taxes,insurance);
+
+  numberofpayments=PLD.numberOfPayments;
+
+  ExtraPaymentLoan.set_AmortizedLoan(PLD);//rate,amount,extrapayment,terminmonths,paymentsperyear,monthlypayment,taxes,insurance,rent,rent_inflation);
+  PLD.extraPayments=0;//set for normal loan wo extra payment
+  //would a better way to have a flag in the PLD for extra payment and to have two separate PLD
+  NormalLoan.set_AmortizedLoan(PLD);//rate,amount,0,terminmonths,paymentsperyear,0,taxes, insurance,rent,rent_inflation);
 }
 //-------------------------------------------------------------------------------------
 
 void usage()
 {
-  std::cout<<"Please define the interest rate (i), loan amount (l), number of payments (n), and payments per year (p).\nAdditionally, you can specify extra payment amount to apply toward principal each pay period (e) or a monthly payment amount that includes the base payment plus any overage towards principal (m).\nTo simplify actual scenarios you may also specify annual property taxes(), mortgage insurance (). In lieu of calculating a loan amount you can specify the house purchase price () and down payment amount () and the required loan amount will be calculated from this information.\n ./a.out -i 4.5 -l 120000 -p 12 -n 360 -e 30 -t 2700 -h 100000 -d 20\n./a.out --interest-rate=4.5 --loan-amount=100000 --number-of-payments=360 --payments-per-year=12 --down-payment=15 --taxes=2800 --insurance=600 --monthly-payment=800 --extra-payment=30 --house-price=120000 --table";
+  std::cout<<"Please define the interest rate (i), loan amount (l), number of payments (n), and payments per year (p).\nAdditionally, you can specify extra payment amount to apply toward principal each pay period (e) or a monthly payment amount that includes the base payment plus any overage towards principal (m).\nTo simplify actual scenarios you may also specify annual property taxes(), mortgage insurance (). In lieu of calculating a loan amount you can specify the house purchase price () and down payment amount () and the required loan amount will be calculated from this information.\n ./a.out -i 4.5 -l 120000 -p 12 -n 360 -e 30 -t 2700 -h 100000 -d 20 -r 450 -f 1\n./a.out --interest-rate=4.5 --loan-amount=100000 --number-of-payments=360 --payments-per-year=12 --down-payment=15 --taxes=2800 --insurance=600 --monthly-payment=800 --extra-payment=30 --house-price=120000 --table -rent-payment 650 -rent-inflation 1";
 }
 
 // getopt: http://pubs.opengroup.org/onlinepubs/000095399/functions/getopt.html http://stackoverflow.com/questions/2219562/using-getopt-to-parse-program-arguments-in-c
@@ -507,12 +531,14 @@ int main(int argc, char *argv[])
   double extraPayments=0;//1000;//240.0;
   int paymentsPerYear = 0;//12;//"monthly"
   int houseprice=0;//100000;
-  int downpaymentPct=0;//20;
+  float downpaymentPct=0;//20;
   float monthlyPayments =0.0;
   double insurance=0.0;
   double taxes=0;//2700.0; //this amount is approximately what taxes are on 828 Greenmount (was 1362 semi-annually)
   int show_table_flag=0;
   int house_price_flag=0,down_payment_flag=0; 
+  int rent_payment=0;
+  float rent_inflation=0;
   static struct option long_options[] = {
     {"?", 0, 0, 0},
     {"interest-rate", required_argument, 0, 'i'},
@@ -525,17 +551,24 @@ int main(int argc, char *argv[])
     {"insurance", required_argument, 0, 's'},
     {"monthly-payment", required_argument, 0, 'm'},
     {"extra-payment", required_argument, 0, 'e'},
+    {"rent-payment", required_argument, 0, 'r'},
+    {"rent-inflation", required_argument, 0, 'f'},
+    {"house-appreciation", required_argument, 0, 'o'},
     {"table", no_argument, 0, 'a'},
     {NULL, 1, NULL, 0} //this MUST be last entry 
   };
+
+  PropertyLoanDetails PLD;
+  std::cout<<"  ///need to initialize PLD---------"<<std::endl;
+  PLD.insurance=0;
 
   int option_index=0;
 
   if (argc > 3 )
     {
-      interest_rate = loanAmount = extraPayments = monthlyPayments = 0.0;
-      numberOfPayments = paymentsPerYear = 0;
-      while ((c = getopt_long(argc, argv, ":i:n:l:e:p:m:t:s:d:h:a",long_options,&option_index)) != -1) {
+      PLD.interest_rate = PLD.loanAmount = PLD.extraPayments = PLD.monthlyPayments = 0.0;
+      PLD.numberOfPayments = PLD.paymentsPerYear = 0;
+      while ((c = getopt_long(argc, argv, ":i:n:l:e:p:m:t:s:d:h:ar:f:o:",long_options,&option_index)) != -1) {
 	switch(c) {
 	case 0:
 	  printf ("option %s", long_options[option_index].name);
@@ -544,50 +577,79 @@ int main(int argc, char *argv[])
 	  printf ("\n");
 	  break;
 	case 'i':
-	  interest_rate = atof(optarg);
-	  printf("interest_rate is %f\n", interest_rate);
+	  PLD.interest_rate = atof(optarg);
+	  if  (!(PLD.interest_rate<1))
+	    {//if  expressed as decimal, then convert to float e.g. 3 -> 0.03
+	      PLD.interest_rate/=100;
+	    }
+
+	  printf("interest_rate is %f\n", PLD.interest_rate);
 	  break;
 	case 'n':
-	  numberOfPayments = atoi(optarg);
-	  printf("numberOfPayments is %d\n", numberOfPayments);
+	  PLD.numberOfPayments = atoi(optarg);
+	  printf("numberOfPayments is %d\n", PLD.numberOfPayments);
 	  break;
 	case 'l':
-	  loanAmount= atof(optarg);
-	  printf("loanAmount is %f\n", loanAmount);
+	  PLD.loanAmount= atof(optarg);
+	  printf("loanAmount is %f\n", PLD.loanAmount);
 	  break;
 	case 'e':
-	  extraPayments = atof(optarg);
-	  printf("extraPayments is %f\n", extraPayments);
+	  PLD.extraPayments = atof(optarg);
+	  printf("extraPayments is %f\n", PLD.extraPayments);
 	  break;
 	case 'p':
-	  paymentsPerYear = atoi(optarg);
-	  printf("paymentsPerYear is %d\n", paymentsPerYear);
+	  PLD.paymentsPerYear = atoi(optarg);
+	  printf("paymentsPerYear is %d\n", PLD.paymentsPerYear);
 	  break;
 	case 'd':
-	  downpaymentPct = atoi(optarg);
-	  printf("downpaymentPct is %d\n", downpaymentPct);
+	  PLD.downpaymentPct = atof(optarg);
+	  if (!(PLD.downpaymentPct<1))
+	    {//if  is expressed as decimal, then convert to float
+	      PLD.downpaymentPct/=100;
+	    }
+	  printf("downpaymentPct is %f\n", downpaymentPct);
 	  down_payment_flag=1; // if we set defaults to 0 then we just need to check for that, but if we set up a default case then it's good to check flags or that it isn't the default value;
 	  break;
 	case 'h':
-	  houseprice = atoi(optarg);
-	  printf("houseprice is %d\n", houseprice); 
+	  PLD.houseprice = atoi(optarg);
+	  printf("houseprice is %d\n", PLD.houseprice); 
 	  house_price_flag=1;
 	  break;
 	case 'm':
-	  monthlyPayments = atof(optarg);
-	  printf("monthlyPayments is %f\n", monthlyPayments);
+	  PLD.monthlyPayments = atof(optarg);
+	  printf("monthlyPayments is %f\n", PLD.monthlyPayments);
 	  break;
 	  /*case '':
 	    = optarg;
 	    printf(" is %s\n", );
 	    break; */
 	case 's':
-	  insurance = atof(optarg);
-	  printf("insurance is %f\n",insurance );
+	  PLD.insurance = atof(optarg);
+	  printf("insurance is %f\n",PLD.insurance );
 	  break;
 	case 't':
-	  taxes  = atof(optarg);
-	  printf("taxes is %f\n",taxes );
+	  PLD.taxes  = atof(optarg);
+	  printf("taxes is %f\n",PLD.taxes );
+	  break;
+	case 'r':
+	  PLD.rent_payment = atoi(optarg);
+	  printf("rent amount is %d\n", PLD.rent_payment); 
+	  break;
+	case 'f':
+	  PLD.rent_inflation = atof(optarg);
+	  if (!(PLD.rent_inflation<1))
+	    {//if rent_inflation is expressed as decimal, then convert to float
+	      PLD.rent_inflation/=100;
+	    }
+	  printf("rent inflation is %f\n", PLD.rent_inflation); 
+	  break;
+	case 'o':
+	  PLD.house_appreciation = atof(optarg);
+	  if (!(PLD.house_appreciation<1))
+	    {//if rent_inflation is expressed as decimal, then convert to float
+	      PLD.house_appreciation/=100;
+	    }
+	  printf("house appreciation is %f\n", PLD.house_appreciation); 
 	  break;
 	case 'a':
 	  show_table_flag  = true;
@@ -606,51 +668,15 @@ int main(int argc, char *argv[])
     usage();
   }
 
-
-  if (houseprice!=0 && downpaymentPct!=0) //should I use > instead of !=??
-    loanAmount=houseprice*(100-downpaymentPct)/100.0;
-  //interest_rate, numberOfPayments, paymentsPerYear
-  //loanAmount or houseprice & downpaymentPct
-  //extraPayments or monthlyPayments
-    
-  //  printf("extrapayments %f",extraPayments);
-  LoanComparison LC(interest_rate,numberOfPayments,loanAmount,paymentsPerYear,extraPayments,monthlyPayments,taxes,insurance);
+	//	std::cout<<"pld.insurance in main:"<<PLD.insurance<<std::endl;
+  LoanComparison LC(PLD);//interest_rate,numberOfPayments,loanAmount,paymentsPerYear,extraPayments,monthlyPayments,taxes,insurance,rent_payment,rent_inflation);
   //else
   // LoanComparison LC(interest_rate,numberOfPayments,loanAmount,paymentsPerYear,extraPayments,0);
-
-
 
   LC.PrintLoanDetails();
   if (show_table_flag)
     LC.PrintLoanAmortizationTableComparison();
   LC.PrintLoanAmortizationComparison();
-  /*/
-    double balance = 1234.56;
-
-    std::locale usloc;//("English_US");
-    //  locale gloc("German_Germany");
-
-    //  std::cout << std::showbase;
-
-    std::cout.imbue(usloc);
-    typedef std::ostreambuf_iterator<char, std::char_traits<char> > Iter;
-    Iter begin (std::cout);
-    const std::money_put<char,Iter> &us_mon = std::use_facet<std::money_put<char,Iter> >(usloc);//std::cout.getloc());
-    //  const std::money_put<char> &us_mon = std::use_facet<std::money_put<char> >(usloc);//std::cout.getloc());
-
-
-
-
-    us_mon.put(std::cout, false, std::cout, ' ', "123456");
-    us_mon.put(std::cout, true, std::cout, ' ', -299);
-    us_mon.put(std::cout, false, std::cout, ' ', balance * 100);
-    / * /
-
-    std::locale eloc;//create copy of current locale   // ("English_US");
-    std::cout.imbue(eloc);
-
-    std::cout << "English format: " << 12345678.12 << "\n\n";
-  //*/
 
 
   //the super class would just have two AmortizedLoan objects as members and then the super class would handle the comparison
@@ -668,4 +694,3 @@ int main(int argc, char *argv[])
 //write a java version of this and see how much faster it runs.
 //write a C++ version of this and see how much faster it runs.
 //write a C version of this and see how much faster it runs.
-
