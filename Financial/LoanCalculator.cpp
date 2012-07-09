@@ -571,6 +571,11 @@ int main(int argc, char *argv[])
     {NULL, 1, NULL, 0} //this MUST be last entry 
   };
 
+  /*
+
+I totally forgot about using capital letters for optargs
+
+   */
   int option_index=0;
 
   if (argc > 3 )
@@ -712,6 +717,7 @@ int main(int argc, char *argv[])
 
 /*
 Penalty payments aren't really a concern when interest rates are low and you can make more money elsewhere.
+I read about there being stipulations in fixed rate mortgages of prepayment penalties for the first 3-5 years.
 */
 
 

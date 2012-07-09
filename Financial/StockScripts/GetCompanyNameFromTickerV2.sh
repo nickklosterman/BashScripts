@@ -46,6 +46,7 @@ function GetCompanyName()
 
 function FileMaintenance()
 {
+    file="$1"
     if [ -e "$1" ]
     then 
 	read -p "$1 exists. Would you like to overwrite its contents? (y/n)" yesno
@@ -62,6 +63,7 @@ function FileMaintenance()
 	    read -p "Please enter a new filename for the output to be written to:" file
 	fi
     fi
+    echo $file
 }
 
 ###Main###
@@ -75,8 +77,8 @@ then
     echo "When specifiying a file, commented lines and lines starting with dates will be ignored. Tickers on a single line separated by spaces will be tokenized for sorting."
 else
 
-    FileMaintenance "$output"
-    FileMaintenance "$outputnotfound"
+output=$(    FileMaintenance "$output" )
+outputnotfound=$(    FileMaintenance "$outputnotfound" )
 
     if [ -f "$1" ] #if its a file then read the file checking the tickers on each line
     then 

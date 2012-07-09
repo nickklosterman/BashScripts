@@ -642,7 +642,7 @@ function convertImages()
 	then
 	    imagenospaces=$( cleanFilename "${image}" )
 	    echo "$image $imagenospaces"
-	    if [ "$image" != "${imagenospace}s" ]
+	    if [ "$image" != "${imagenospaces}" ]
 	    then
 #		echo "Renaming $image to $imagenospaces"
 		mv "$image" "$imagenospaces" #otherwise mv complains if we don't mv only when necessary
@@ -765,6 +765,40 @@ function UnrarUnzip()
     done
 }
 
+function FileMaintenance()
+{
+    file="$1"
+    if [ -e "$1" ]
+    then
+        read -p "$1 exists. Would you like to overwrite its contents? (y/n)" yesno
+        while [ ! "$yesno" == "y" ] && [ ! "$yesno" == "n" ]
+        do
+            read -p "Please answer with a y or n:" yesno
+        done
+        if [ "$yesno" == "y" ]
+        then
+            echo "Deleting $1"
+            rm "$1"
+        elif [ "$yesno" == "n" ]
+        then
+            read -p "Please enter a new filename for the output to be written to:" file
+        fi
+    fi
+    echo $file
+}
+
+
+function FileMaintenanceSimple()
+{
+    file="$1"
+    if [ -e "$1" ]
+    then
+        echo "Deleting $1"
+        rm "$1"
+    fi
+
+}
+
 function Operations()
 {
 #perform disk check
@@ -801,6 +835,25 @@ function Operations()
 	    echo "There is not enough space for extraction and manipulation of ${item}."
 	fi
     fi
+}
+
+function CatDisplayIfExists()
+{
+file="${1}"
+if [ -e $file   ]
+then
+cat $file
+fi 
+}
+
+
+function LessDisplayIfExists()
+{
+file="${1}"
+if [ -e $file   ]
+then
+less $file
+fi 
 }
 
 function HelpMessage ()
@@ -848,6 +901,10 @@ unsharp=0
 imagemagickarguments=""
 noclobber=0
 help=0
+Errorsfile="/tmp/Errors.txt"
+WritePermissionErrorsfile="/tmp/WritePermissionErrors.txt"
+
+
 while getopts ":n:whdurs:i:te" OPTIONS 
 do
     case ${OPTIONS} in 
@@ -876,13 +933,22 @@ do
     esac
 done
 
-echo "after assignment $noclobber" >> /tmp/Errors.txt
+echo "after assignment $noclobber" >> $Errorsfile
+
+if [[ $# -lt 2 ]]
+then 
+    help=0
+fi 
 
 if [[ 1 -eq $help ]]
 then
     HelpMessage
 else
 
+#WritePermissionErrorsfile=$(FileMaintenance $WritePermissionErrorsfile  )
+FileMaintenanceSimple $WritePermissionErrorsfile  
+#Errorsfile=$(FileMaintenance $Errorsfile )
+FileMaintenanceSimple $Errorsfile 
 
 #echo $numberOfImagesPerPage
     shift $(($OPTIND - 1)) 
@@ -890,8 +956,9 @@ else
 # $1 now references the first non-option item supplied on the command-line
 #+ if one exists.
 
-    echo "chmod u+w . -R" > /tmp/DebugWritePermission.txt
-#    echo -n "" > /tmp/Errors.txt
+#    echo  $WritePermissionErrorsfile
+    echo "chmod u+w . -R" > $WritePermissionErrorsfile
+#    echo -n "" > $Errorsfile
     if [[ 1 -eq $recursive ]]
     then
 	RecurseDirs 0 $numberOfImagesPerPage $wideformat $deletearchives $unrarzip $unsharp "${imagemagickarguments}" $noclobber
@@ -914,29 +981,59 @@ else
 		    if [ -f "${item}" ]
 		    then
 			echo "--$item--"
-			echo "before Operations:${imagemagickarguments}:$item:$numberOfImagesPerPage:$wideformat:$deletearchives:$unsharp:$noclobber" >> /tmp/Errors.txt
+			echo "before Operations:${imagemagickarguments}:$item:$numberOfImagesPerPage:$wideformat:$deletearchives:$unsharp:$noclobber" >> $Errorsfile
 			Operations $numberOfImagesPerPage "${item}" $wideformat $deletearchives $unsharp "${imagemagickarguments}" $noclobber
 		    fi
 		done
 	    else
 		until [ -z "$1" ] #loop through all arguments using shift to move through arguments
 		do
-		    echo $1
+		    echo "processing  $1"
 		    if [ -f "${1}" ]
 		    then
-			echo "before Operations:${imagemagickarguments}:$1:$numberOfImagesPerPage:$wideformat:$deletearchives:$unsharp:$noclobber" >> /tmp/Errors.txt
+			echo "before Operations:${imagemagickarguments}:$1:$numberOfImagesPerPage:$wideformat:$deletearchives:$unsharp:$noclobber" >> $Errorsfile
 			Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchives $unsharp "${imagemagickarguments}" $noclobber
+		    else
+			echo "$1 is not a regular file"
 		    fi
+		    if [ 1 -eq 0 ] #on the command line don't enclose a filename in quotes.  The file all ready has the spaces escaped. Putting the filename in quotes just breaks this script bc the filename in quotes is just text it isn't a file or anything like that.
+		    then
+			if [ -d "${1}" ]
+			then
+			    echo "this is a directory"
+			#Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchives $unsharp "${imagemagickarguments}" $noclobber
+			else
+			    echo "$1 is not a directory file"
+			fi
+			if [ -c "${1}" ]
+		    then
+			echo "this is a char dev"
+			#Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchives $unsharp "${imagemagickarguments}" $noclobber
+		    else
+			echo "$1 is not a char dev"
+		    fi
+		    if [ -s "${1}" ]
+		    then
+			echo "file is zero size"
+			#Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchives $unsharp "${imagemagickarguments}" $noclobber
+		    else
+			echo "$1 is not a zero size"
+		    fi
+fi
 		    shift
 		done
 	    fi
 	else
-	    echo "Skipping ${dir}: no write permission" >> /tmp/DebugWritePermission.txt
+	    echo "Skipping ${dir}: no write permission" >> $WritePermissionErrorsfile 
 	fi    
     fi #end recurse check
+
+CatDisplayIfExists $WritePermissionErrorsfile 
+CatDisplayIfExists $Errorsfile
+
 fi #end help message 
-cat /tmp/DebugWritePermission.txt
-cat /tmp/Errors.txt
+
+
 
 #ChangeLog:
 #2012-03-08: send IM errors to error log in tmp; create no-clobber option for directories if they all ready exist
