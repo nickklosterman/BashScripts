@@ -1,9 +1,11 @@
+//g++ -o LoanCalculator LoanCalculator.cppOB
 /*
   http://en.cppreference.com/w/cpp/io/c/fprintf
-  TODO: allow reading of a matrix/list of extra payments from a file that correspond to months when applied. ie. 3rd line = apply extra payment to 3rd month
+  TODO: allow reading of a matrix/list of extra payments from a file that correspond to months when applied. ie. 3rd line = apply extra payment to 3rd month or 12:35 to symbolize a $35 add'l payment for the 12th pay period
+include opiton to prohibit add'l payments for a set # of years. 
 
 */
-
+#define DEBUG_PENALTY_PERIOD  0
 //#include <locale.h> //for currency formatting
 #include <unistd.h>  //for getopt
 #include <getopt.h> //for getopt_long
@@ -37,7 +39,7 @@ public:
 
   AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_);
   AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double  taxes_ , double insurance_);
-  void   set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthly_payment, double taxes, double insurance);
+  void   set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthly_payment, double taxes, double insurance, int penalty_periods);
   void PrintLoanDetails();
   void PrintCurrentIteration();
   void IteratePayment();
@@ -53,6 +55,7 @@ public:
   double calc_paymenttowardsinterest();
   double calc_paymenttowardsprincipal();
   void calc_newprincipal();
+  void calc_newprincipal(bool);
   double calc_paymentpercentages();//only return the percentage of one and subtract this for the other. want this so can see how quickly the amount going ot int drops off
   //  double get_principal();
   void AmortizationTable();
@@ -66,7 +69,8 @@ private:
   void calc_periodicmortgagepayment();//double int_rate, int num_pmnts, double principal, int freq);
   void CalcAmortizationValues();
   double int_rate_pct,principal,loan_amount,additionalperiodicpaymenttoprincipal,periodicmortgagepayment,totalcostofloan,totalinterestonloan,insurance_yearly,taxes_yearly, periodicmortgagepaymentwithtaxesandinsurance;
-  int num_pmnts,freq,monthstopayoffloan;
+  int num_pmnts,freq,monthstopayoffloan,penalty_periods;
+
 };
 
 int AmortizedLoan::get_monthstopayoffloan()
@@ -78,7 +82,7 @@ double AmortizedLoan::get_totalinterestonloan()
 }
 void AmortizedLoan::PrintLoanDetails()
 {
-  printf("Using %.2f %% interest rate for %d months on $ %.2f loan with payments due XXXX and additional XXX payments of $ %.2f\n", int_rate_pct*100,num_pmnts,loan_amount,additionalperiodicpaymenttoprincipal);
+  printf("Using %.2f %% interest rate for %d months on $ %.2f loan with payments due %i times a year and an additional %.2f applied towards principal each payment.\n", int_rate_pct*100,num_pmnts,loan_amount,freq,additionalperiodicpaymenttoprincipal);
 }
 void AmortizedLoan::reset_principal()
 {
@@ -148,7 +152,7 @@ void AmortizedLoan::PrintCurrentIteration()
 }
 
 void AmortizedLoan::IteratePayment()
-{
+{ //ummmm why do I have one function that simply calls another function? it'd be one thing if calc_newprincipal was private but its public
   calc_newprincipal();
 }
 
@@ -161,7 +165,22 @@ void AmortizedLoan::AmortizationAmounts()
   for (int i=0;i<num_pmnts;i++)
     {
       totalinterest+=calc_paymenttowardsinterest();//paymenttowardsinterest;
-      calc_newprincipal();
+      if (i>penalty_periods)
+	{
+#if DEBUG_PENALTY_PERIOD
+	printf("False i %i num_pmnts %i penalty_periods %i \n",i,num_pmnts,penalty_periods); 
+#endif
+	  calc_newprincipal(false);
+	}
+      else
+	{
+#if DEBUG_PENALTY_PERIOD
+	printf("True i %i num_pmnts %i penalty_periods %i \n",i,num_pmnts,penalty_periods); 
+
+#endif
+	calc_newprincipal(true);
+	}
+
       if (principal<=0.001)
 	{	
 	  monthstopayoffloan=i+1;//+1 since our first payment is at index 0 
@@ -191,7 +210,7 @@ AmortizedLoan::AmortizedLoan(  double int_rate_, double loan_amount_, double add
     additionalperiodicpaymenttoprincipal =monthlypayment-moneyround(taxes_yearly/12.0)-moneyround(insurance_yearly/12.0)-periodicmortgagepayment;
 
 }
-void AmortizedLoan::set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment, double taxes_yearly_, double insurance_yearly_)
+void AmortizedLoan::set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment, double taxes_yearly_, double insurance_yearly_,int penalty_periods_)
 {
   //  std::cout<<"setting values";
   principal =  loan_amount_;
@@ -202,7 +221,8 @@ void AmortizedLoan::set_AmortizedLoan(  double int_rate_, double loan_amount_, d
   freq = freq_;
   insurance_yearly=insurance_yearly_;
   taxes_yearly=taxes_yearly_;
-
+  penalty_periods=penalty_periods_;
+  printf("%i %i",  penalty_periods,penalty_periods_);
   calc_periodicmortgagepayment();//int_rate_pct, num_pmnts, principal,freq);
 
   //override items if monthlypayment specified
@@ -343,6 +363,27 @@ double AmortizedLoan::calc_paymentpercentages()
   return paymenttowardsprincipal;
 }
 
+void AmortizedLoan::calc_newprincipal(bool Penalty)
+{
+  double temp=0;
+  if (periodicmortgagepayment+additionalperiodicpaymenttoprincipal < principal)
+    {//i was double dipping on the extra payment towards principal
+      temp=principal-calc_paymenttowardsprincipal();
+	if (!Penalty) //If we are outside the prepayment penalty period then apply the additional payments.
+	temp-=additionalperiodicpaymenttoprincipal;
+    }
+  /*
+    else
+    {
+    std::cout<<"final payment was "<<principal+calc_paymenttowardsinterest()<<"; is this the same as the monthly mort payment?"<<periodicmortgagepayment<<"\n";
+    std::cout<<"Shouldn't the final payment be exactly one mortgage payment (or only off by a cent or two?)and not less?\nNO this is false. The final mortgage payment would only equal one full mortgage payment if when the mortgage payment was calculated it came out exactly to the hundredths place and didn't require rounding. Otherwise the rounding up will cause you to slightly overpay such that your last payment will be less than a full mortgage payment; Ugggh this might cause a problem when the mortgage payment is rounded down however. ";
+    }
+  */
+  principal=moneyround(temp); //round off the cents so don't accumulate errors. Am guessing that this is how things are calculated by the banks. They don't carry over beyond the cents position.
+  //  principal=temp;
+  
+}
+
 void AmortizedLoan::calc_newprincipal()
 {
   double temp=0;
@@ -416,7 +457,7 @@ class LoanComparison
 {
 public:
   //  LoanComparison();
-  LoanComparison(double rate,int terminmonths, double amount,int paymentsperyear,double extrapayment,double monthlypayment,double taxes, double insurance);
+  LoanComparison(double rate,int terminmonths, double amount,int paymentsperyear,double extrapayment,double monthlypayment,double taxes, double insurance,int penatly_periods);
   void PrintLoanAmortizationTableComparison();
   void PrintLoanAmortizationComparison();
   void PrintLoanDetails();
@@ -473,21 +514,21 @@ void LoanComparison::PrintLoanAmortizationComparison()
 }
 
 //LoanComparison::LoanComparison(){}
-LoanComparison::LoanComparison(double rate,int terminmonths,double amount,int paymentsperyear,double extrapayment,double monthlypayment, double taxes, double insurance)
+LoanComparison::LoanComparison(double rate,int terminmonths,double amount,int paymentsperyear,double extrapayment,double monthlypayment, double taxes, double insurance,int penalty_periods)
 {
   //
   //  std::cout<<"setting variables etc\n";
   //std::cout<<"extrapayment:"<<extrapayment;
   numberofpayments=terminmonths;
   //void AmortizedLoan::set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment)
-  NormalLoan.set_AmortizedLoan(rate,amount,0,terminmonths,paymentsperyear,0,taxes, insurance);
-  ExtraPaymentLoan.set_AmortizedLoan(rate,amount,extrapayment,terminmonths,paymentsperyear,monthlypayment,taxes,insurance);
+  NormalLoan.set_AmortizedLoan(rate,amount,0,terminmonths,paymentsperyear,0,taxes, insurance,penalty_periods);
+  ExtraPaymentLoan.set_AmortizedLoan(rate,amount,extrapayment,terminmonths,paymentsperyear,monthlypayment,taxes,insurance,penalty_periods);
 }
 //-------------------------------------------------------------------------------------
 
 void usage()
 {
-  std::cout<<"Please define the interest rate (i), loan amount (l), number of payments (n), and payments per year (p).\nAdditionally, you can specify extra payment amount to apply toward principal each pay period (e) or a monthly payment amount that includes the base payment plus any overage towards principal (m).\nTo simplify actual scenarios you may also specify annual property taxes(), mortgage insurance (). In lieu of calculating a loan amount you can specify the house purchase price () and down payment amount () and the required loan amount will be calculated from this information.\n ./a.out -i 4.5 -l 120000 -p 12 -n 360 -e 30 -t 2700 -h 100000 -d 20\n./a.out --interest-rate=4.5 --loan-amount=100000 --number-of-payments=360 --payments-per-year=12 --down-payment=15 --taxes=2800 --insurance=600 --monthly-payment=800 --extra-payment=30 --house-price=120000 --table";
+  std::cout<<"Please define the interest rate (i), loan amount (l), number of payments (n), and payments per year (p).\nAdditionally, you can specify extra payment amount to apply toward principal each pay period (e) or a monthly payment amount that includes the base payment plus any overage towards principal (m).\nTo simplify actual scenarios you may also specify annual property taxes(), mortgage insurance (),. In lieu of calculating a loan amount you can specify the house purchase price () and down payment amount () and the required loan amount will be calculated from this information.\n ./a.out -i 4.5 -l 120000 -p 12 -n 360 -e 30 -t 2700 -h 100000 -d 20\n./a.out --interest-rate=4.5 --loan-amount=100000 --number-of-payments=360 --payments-per-year=12 --down-payment=15 --taxes=2800 --insurance=600 --monthly-payment=800 --extra-payment=30 --house-price=120000 --table  --penatly-periods=36 ";
 }
 
 // getopt: http://pubs.opengroup.org/onlinepubs/000095399/functions/getopt.html http://stackoverflow.com/questions/2219562/using-getopt-to-parse-program-arguments-in-c
@@ -512,7 +553,7 @@ int main(int argc, char *argv[])
   double insurance=0.0;
   double taxes=0;//2700.0; //this amount is approximately what taxes are on 828 Greenmount (was 1362 semi-annually)
   int show_table_flag=0;
-  int house_price_flag=0,down_payment_flag=0; 
+  int house_price_flag=0,down_payment_flag=0,penalty_periods=0; 
   static struct option long_options[] = {
     {"?", 0, 0, 0},
     {"interest-rate", required_argument, 0, 'i'},
@@ -525,6 +566,7 @@ int main(int argc, char *argv[])
     {"insurance", required_argument, 0, 's'},
     {"monthly-payment", required_argument, 0, 'm'},
     {"extra-payment", required_argument, 0, 'e'},
+    {"penalty-period", required_argument, 0, 'y'},
     {"table", no_argument, 0, 'a'},
     {NULL, 1, NULL, 0} //this MUST be last entry 
   };
@@ -589,6 +631,10 @@ int main(int argc, char *argv[])
 	  taxes  = atof(optarg);
 	  printf("taxes is %f\n",taxes );
 	  break;
+	case 'y':
+	  penalty_periods  = atoi(optarg);
+	  printf("penalty_periods is %i; is it better to take penalty than to not pay during penalty period? I bet the banks made it so it isn't worth it\n",penalty_periods );
+	  break;
 	case 'a':
 	  show_table_flag  = true;
 	  printf("show amortization table");
@@ -612,9 +658,12 @@ int main(int argc, char *argv[])
   //interest_rate, numberOfPayments, paymentsPerYear
   //loanAmount or houseprice & downpaymentPct
   //extraPayments or monthlyPayments
+
+
+
     
   //  printf("extrapayments %f",extraPayments);
-  LoanComparison LC(interest_rate,numberOfPayments,loanAmount,paymentsPerYear,extraPayments,monthlyPayments,taxes,insurance);
+  LoanComparison LC(interest_rate,numberOfPayments,loanAmount,paymentsPerYear,extraPayments,monthlyPayments,taxes,insurance,penalty_periods);
   //else
   // LoanComparison LC(interest_rate,numberOfPayments,loanAmount,paymentsPerYear,extraPayments,0);
 
@@ -624,6 +673,8 @@ int main(int argc, char *argv[])
   if (show_table_flag)
     LC.PrintLoanAmortizationTableComparison();
   LC.PrintLoanAmortizationComparison();
+  std::cout<<"Redo passing single variables with a struct?? Like I did in Gweled."<<std::endl;
+
   /*/
     double balance = 1234.56;
 
@@ -659,6 +710,10 @@ int main(int argc, char *argv[])
 
 }
 
+/*
+Penalty payments aren't really a concern when interest rates are low and you can make more money elsewhere.
+*/
+
 
 //Create a function to calculate how much extra per month you would need to pay to pay off loan in X months instead of on normal schedule.
 //This is just the difference between the normal mortgage payment for X periods vs Y periods.
@@ -668,4 +723,5 @@ int main(int argc, char *argv[])
 //write a java version of this and see how much faster it runs.
 //write a C++ version of this and see how much faster it runs.
 //write a C version of this and see how much faster it runs.
+
 

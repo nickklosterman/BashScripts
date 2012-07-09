@@ -1,7 +1,15 @@
 #!/bin/bash
 #sudo killall clamd
-guake &
-conky &
+#only start process if not all ready running
+if  ps aux | grep -q "guake" | grep -v grep
+then
+    guake &
+fi
+
+if ps aux | grep -q "conky" | grep -v grep
+then 
+    conky &
+fi
 bash ~/.conkystartup2.sh &
 bash ~/Git/BashScripts/DDdailyimagegetter.sh &
 bash ~/Git/BashScripts/WebComics/Sinfest/sinfestgetXdaysV2.sh 1 &
