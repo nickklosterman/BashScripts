@@ -1,6 +1,10 @@
 #!/bin/bash
 echo "Obtaining parameters: mplayer ${1} -vo null -ao null -frames 0 2>&1 /dev/null | egrep \"(AUDIO)\" )"
-echo "WARNING: THIS DOESN'T SEEM TO WORK ON NAMES WITH SPACES EVEN WHEN QUOTING."
+
+#echo "WARNING: THIS DOESN'T SEEM TO WORK ON NAMES WITH SPACES EVEN WHEN QUOTING."
+#this seemed to work just fine on a mp3 file that had a space in it. 
+#nicolae@nicolae-desktop:~/Shared$ bash ../Git/BashScripts/Audio/StripAudioFromVideo.sh Fefe\ Dobson\ -\ Ghost.mp3 
+
 # could I mv/cp the file to a temp filename if it has spaces in it and then work on that temp file which doesn't have spaces.
 
 params=$(mplayer "${1}" -vo null -ao null -frames 0 2>&1 /dev/null | egrep "(AUDIO)" )

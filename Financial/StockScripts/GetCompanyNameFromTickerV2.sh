@@ -77,8 +77,8 @@ then
     echo "When specifiying a file, commented lines and lines starting with dates will be ignored. Tickers on a single line separated by spaces will be tokenized for sorting."
 else
 
-output=$(    FileMaintenance "$output" )
-outputnotfound=$(    FileMaintenance "$outputnotfound" )
+output=$( FileMaintenance "$output" )
+outputnotfound=$( FileMaintenance "$outputnotfound" )
 
     if [ -f "$1" ] #if its a file then read the file checking the tickers on each line
     then 
