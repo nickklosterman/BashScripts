@@ -50,7 +50,7 @@ function FileMaintenance()
     if [ -e "$1" ]
     then 
 	read -p "$1 exists. Would you like to overwrite its contents? (y/n)" yesno
-	while [ ! "$yesno" == "y" || ! "$yesno" == "n" ]
+	while [ ! "$yesno" == "y" ] && [ ! "$yesno" == "n" ]
 	do
 	    read -p "Please answer with a y or n:" yesno
 	done

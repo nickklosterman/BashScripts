@@ -17,3 +17,5 @@ echo "-------------------------------------------------------------------------"
 bash ~/Git/BashScripts/DealScrapers/WootGeneric.sh home.woot.com
 echo "-------------------------------------------------------------------------"
 bash ~/Git/BashScripts/DealScrapers/WootGeneric.sh sports.woot.com
+echo "-------------------------------------------------------------------------"
+bash ~/Git/BashScripts/DealScrapers/WootGeneric.sh tech.woot.com

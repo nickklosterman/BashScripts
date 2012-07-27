@@ -1,0 +1,20 @@
+ALXN: Alexion Pharmaceuticals, Inc.
+TJX: TJX Companies, Inc. (The) Commo
+ROST: Ross Stores, Inc.
+DG: Dollar General Corporation Comm
+SPG: Simon Property Group, Inc. Comm
+HSY: The Hershey Company Common Stoc
+AMT: American Tower Corporation (REI
+CMCSA: Comcast Corporation
+ESRX: Express Scripts Holding Company
+BIIB: Biogen Idec Inc.
+AMGN: Amgen Inc.
+WFM: Whole Foods Market, Inc.
+ECL: Ecolab Inc. Common Stock
+HCP: HCP, Inc. Common Stock
+WMT: Wal-Mart Stores, Inc. Common St
+MON: Monsanto Company Common Stock
+MCK: McKesson Corporation Common Sto
+ABT: Abbott Laboratories Common Stoc
+CVS: CVS Caremark Corporation Common
+COST: Costco Wholesale Corporation
