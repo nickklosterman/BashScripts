@@ -1165,31 +1165,31 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	echo "Wget didn't return a 200 OK response when getting the Whiskey Militia webpage"
 	WMTimeLeftSeconds=120
     fi
-    echo "------------------------------------BT------------------------------------"
-    BonktownPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.bonktown.com 2 )
-    if [ "$BonktownPage" != "Error" ]
-    then 
-	BonktownText=$(GivePageReturnText ${BonktownPage} )
-	Bonktown=$(GivePageReturnProductDescriptionV2  ${BonktownPage} )
-	BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
+#    echo "------------------------------------BT------------------------------------"
+#    BonktownPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.bonktown.com 2 )
+#    if [ "$BonktownPage" != "Error" ]
+#    then 
+#	BonktownText=$(GivePageReturnText ${BonktownPage} )
+#	Bonktown=$(GivePageReturnProductDescriptionV2  ${BonktownPage} )
+#	BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
 
-	if [ "${Bonktown}" != "${BonktownTemp}" ]
-	then
-	    echo ${Bonktown}
-	    BonktownImage=$(GivePageAndWebsiteReturnImage ${BonktownPage} http://www.bonktown.com )
-	    GiveProductKeywordDatabaseTablethenNotify "${BonktownText}" ${BonktownImage}
-	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db "Backcountrydeals"  ${BonktownPage} 2
-	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${BonktownPage} 2
-	    GiveProductProductImageEnterIntoDatabase "${Bonktown}" "${BonktownImage}"
-	    UpdateWebpage 2 "${BonktownText}" "${BonktownImage}"  "${WebpageIndex}"
+#	if [ "${Bonktown}" != "${BonktownTemp}" ]
+#	then
+#	    echo ${Bonktown}
+#	    BonktownImage=$(GivePageAndWebsiteReturnImage ${BonktownPage} http://www.bonktown.com )
+#	    GiveProductKeywordDatabaseTablethenNotify "${BonktownText}" ${BonktownImage}
+#	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db "Backcountrydeals"  ${BonktownPage} 2
+#	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${BonktownPage} 2
+#	    GiveProductProductImageEnterIntoDatabase "${Bonktown}" "${BonktownImage}"
+#	    UpdateWebpage 2 "${BonktownText}" "${BonktownImage}"  "${WebpageIndex}"
 #            notify-send  "$BonktownText" -i ${BonktownImage} -t 3
 
-	    BonktownTemp=`echo ${Bonktown}`
-	fi
-    else
-	echo "Wget didn't return a 200 OK response when getting the Bonktown webpage"
-	BTTimeLeftSeconds=120
-    fi
+#	    BonktownTemp=`echo ${Bonktown}`
+#	fi
+#    else
+#	echo "Wget didn't return a 200 OK response when getting the Bonktown webpage"
+#	BTTimeLeftSeconds=120
+#    fi
     echo "------------------------------------CL------------------------------------"
     ChainlovePage=$(GiveWebsiteCodeGetWebpageTempFile http://www.chainlove.com 3 )
     if [ "$ChainlovePage" != "Error" ]  
@@ -1221,11 +1221,11 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	SleepTime=${WMTimeLeftSeconds}
 	NextDeal="WhiskeyMilitia"
     fi
-    if [ ${BTTimeLeftSeconds} -lt ${SleepTime} ] 
-    then
-	SleepTime=${BTTimeLeftSeconds}
-	NextDeal="Bonktown"
-    fi
+#    if [ ${BTTimeLeftSeconds} -lt ${SleepTime} ] 
+#    then
+#	SleepTime=${BTTimeLeftSeconds}
+#	NextDeal="Bonktown"
+#    fi
     if [ ${CLTimeLeftSeconds} -lt ${SleepTime} ]
     then
 	SleepTime=${CLTimeLeftSeconds} 
