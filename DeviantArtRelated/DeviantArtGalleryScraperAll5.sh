@@ -78,8 +78,8 @@ then
 else
     until [ -z "$1" ] #loop through all arguments using shift to move through arguments
     do 
-	deviantID=( echo "$1" | sed 's/\\$//' ) #strip out the trailing \ when you are updating directories that you have all ready downloaded and are updating.
-
+	deviantID=$( echo "$1" | sed 's/\/$//' ) #strip out the trailing \ when you are updating directories that you have all ready downloaded and are updating.
+	echo $deviantID
 	offsetcounter=0
 
 #create a directory with the deviantID and move into it for saving of images
