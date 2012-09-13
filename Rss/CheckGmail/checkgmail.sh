@@ -15,8 +15,8 @@
 #
 #####################
 # replace these with your account settings :
-username=( username1 username2 username3 )
-passwd=( pass1 pass2 pass3 )
+username=( user )
+passwd=( passwd )
 tempfile="/tmp/gm/"
 
 #########
