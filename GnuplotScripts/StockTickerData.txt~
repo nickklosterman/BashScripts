@@ -1,3 +1,0 @@
-set xdata time
-set timefmt "%Y-%m-%d"
-plot "sample.dat" using 1:2 with boxes

@@ -1,0 +1,10 @@
+from urllib import urlopen, urlencode
+f = open('OUTPUT.TXT', 'wb')
+data = urlopen("http://www.mcohio.org/sheriff/sflistauction.cfm", urlencode({
+            "idate1":"04/06/0012",
+            "idate1":"06/15/0012",
+            "iSUMDET":"DET",
+            "submit":"VIEW AUCTION LIST"
+            }))
+print(data)
+#f.write(data)

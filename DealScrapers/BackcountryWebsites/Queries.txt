@@ -16,7 +16,7 @@ delete from SearchTermsAndContactAddress where prim_key = 39;
 describe SearchTermsAndContactAddress;
 alter table SearchTermsAndContactAddress add column ImageAttachment tinyint(1);
 
-
+SELECT * FROM SearchTermsAndContactAddress order by prim_key desc
 select * from ProductImages where number_of_times_seen > 3;
 select max(number_of_times_seen)  from ProductImages;
 select * from ProductImages where filename like "Shimano%" order by image_id desc limit 4 offset 4;

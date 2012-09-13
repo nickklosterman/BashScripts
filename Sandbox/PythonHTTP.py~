@@ -1,0 +1,5 @@
+from urllib import urlopen, urlencode
+f = open('OUTPUT.TXT', 'wb')
+data = urlopen("http://www.mctreas.org/Forms/Datalets.aspx?idx=1&parid=R72 14006 0019&jur=000&roll=&taxyear=2011&ownseq=1&sIndex=1")
+print(data)
+#f.write(data)

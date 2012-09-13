@@ -1,14 +1,16 @@
 #!/bin/bash
 pwd
 echo "--All Woots--"
-bash ./WootAll.sh
+bash ~/Git/BashScripts/DealScrapers/WootAll.sh
 echo "--Qwertee--"
-bash ./QwerteeScraper.sh
+bash ~/Git/BashScripts/DealScrapers/QwerteeScraper.sh
 echo "--Teefury--"
-bash ./TeefuryScraper.sh
+bash ~/Git/BashScripts/DealScrapers/TeefuryScraper.sh
 echo "--Ript--"
-bash ./RiptApparelScraper.sh
+bash ~/Git/BashScripts/DealScrapers/RiptApparelScraper.sh
+echo "--TheYetee"
+bash ~/Git/BashScripts/DealScrapers/theyetee.sh
 echo "--Altrec--"
-bash ./AltrecScraper.sh
+bash ~/Git/BashScripts/DealScrapers/AltrecScraper.sh
 echo "--REI--"
-bash ./REIScraper.sh
+bash ~/Git/BashScripts/DealScrapers/REIScraper.sh

@@ -1,7 +1,0 @@
-set datafile separator "|"
-set xdata time
-set timefmt "%Y-%m-%d" #for plotting time plots : http://t16web.lanl.gov/Kawano/gnuplot/datetime-e.html
-set xrange [ "2011-05-01":"2011-12-01"]
-set yrange [0:51]
-plot "/home/arch-nicky/sample.dat" using 1:2 with lines #dots #boxes
-pause 3

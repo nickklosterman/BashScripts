@@ -38,7 +38,8 @@ function downloadFullImageFromFile ()
 	if [ "$DownloadImage" != "" ]
 	then 
 #we don't want our variable to be quoted otherwise we'll get a Scheme missing error from wget
-	    wget -nc -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt $DownloadImage
+#	    wget -nc -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt $DownloadImage
+	    wget -nc -U Mozilla  $DownloadImage
 	fi
     done
 }
@@ -49,7 +50,8 @@ function downloadallowingclobber ()
     for x in ${passed_array[@]} 
     do 
 	echo "$x"
-	wget -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt "$x"
+#	wget -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt "$x"
+	wget -U Mozilla "$x"
     done
 
 }
@@ -61,7 +63,8 @@ function downloadnoclobber ()
     for x in ${passed_array[@]} 
     do 
 	echo "$x"
-	wget -U Mozilla -nc  --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt "$x"
+#	wget -U Mozilla -nc  --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt "$x"
+	wget -U Mozilla -nc   "$x"
     done
 }
 
@@ -80,13 +83,25 @@ else
 
 #create a directory with the deviantID and move into it for saving of images
 	echo "Making directory ${1} and moving into it"
-	mkdir "$1"
+	if [ ! -e "$1" ]
+	then #mkdir if it doesn't exist
+	    mkdir "$1"
+	fi
 	cd "$1"
-	
+
+#debug: disable getting new index pages here
+DebugDontGetIndexPages=1
+if [[ 0 -eq $DebugDontGetIndexPages ]]
+then	
+    if [ -e index.html ]
+    then
+            rm index.html
+    fi
 #get gallery index
 	echo "Getting gallery index file"
 #without the trailing / it saves the file as gallery instead of index.html
-	wget -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt  http://${1}.deviantart.com/gallery/ #-O $OutputFile
+#	wget -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt  http://${1}.deviantart.com/gallery/ #-O $OutputFile
+	wget -U Mozilla http://${1}.deviantart.com/gallery/ #-O $OutputFile
 #check if the gallery index has additional pages.
 	NextPageCheck=$(grep "gallery/?offset=" index.html | grep "Next" )
 #2011.06.21 appears they no longer put "next page" they just do next. grep "Next Page</a>" )
@@ -103,11 +118,22 @@ else
 	    cat index.html?offset=${offset} >> index.html
 	done
 	echo "Done getting all gallery pages."
-
+else
+    echo "In Debug mode skipping getting gallery index pages"
+fi
 #compile arrays of the links to the fullimg, img, address of webpage, webpage file	
-	Super_FullImg=$( grep super_fullimg index.html | sed 's/.*super_fullimg="//' | sed 's/" .*//' )
-	Super_Img=$( grep super_img index.html | sed 's/.*super_img="//' | sed 's/" .*//' )
-	DataSrc=$( grep data-src index.html | sed 's/.*data-src="//;s/".*//' )
+#2012.02.08 we aern't getting all the files from the index page for some reason
+# I had to formulate this roundabouts way to separate the images as they were all being put on a single line which sed was then missing.
+#	Super_FullImg=$( grep super_fullimg index.html | sed 's/.*super_fullimg="//g;s/" .*//g' )
+	Super_FullImg=$( sed 's/super_fullimg="/super_fullimg=/g' index.html | tr '"' '\n' | grep super_fullimg |  sed 's/.*super_fullimg=//g;s/" .*//g' )
+#	Super_Img=$( grep super_img index.html | sed 's/.*super_img="//g;s/" .*//g' )
+	Super_Img=$( sed 's/super_img="/super_img=/g' index.html | tr '"' '\n' | grep super_img |  sed 's/.*super_img=//g;s/" .*//g' )
+#	DataSrc=$( grep data-src index.html | sed 's/.*data-src="//g;s/".*//' ) #these are the thumbnails
+	Super_FullImg=$( sed 's/data-src="/super_fullimg=/g' index.html | tr '"' '\n' | grep super_fullimg |  sed 's/.*super_fullimg=//g;s/" .*//g' )
+
+	echo "$Super_FullImg" > Super_FullImg.txt
+	echo "$Super_Img" > Super_Img.txt
+	echo "$DataSrc" > DataSrc.txt
 
 	if [ $GetFullSizeImages -eq 1 ]
 	then 

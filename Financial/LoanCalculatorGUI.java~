@@ -1,0 +1,76 @@
+import java.applet.Applet;
+import java.awt.*;
+
+public class LoanCalculatorGUI extends Applet 
+{
+    private Label interest_rateLBL, principalLBL, insuranceLBL, taxesLBL, freqLBL, extra_paymentLBL, monthly_paymentLBL,loan_lengthLBL;
+    private Button button;
+    private TextField interest_rateTF, principalTF, insuranceTF, taxesTF, freqTF, extra_paymentTF, monthly_paymentTF,loan_lengthTF;
+
+    //    private ButtonActionHandler buttonActionHandler;
+
+    public void init()
+    //public static void main(String[] args)
+    {
+	//Set up labels
+	interest_rateLBL= new Label("Interest Rate"); 
+	principalLBL= new Label("Principal"); 
+	insuranceLBL= new Label("Insurance"); 
+	taxesLBL= new Label("Yearly Property Taxes"); 
+	freqLBL= new Label("Frequency of Payments"); 
+	extra_paymentLBL= new Label("Extra Monthly Payment Towards Principal"); 
+	monthly_paymentLBL= new Label("Monthly Payment");
+	loan_lengthLBL=new Label("Loan Length");
+
+	interest_rateTF = new TextField(5);
+	principalTF  = new TextField(7);
+	insuranceTF = new TextField(5);
+	taxesTF  = new TextField(5); 
+	freqTF  = new TextField(2); 
+	extra_paymentTF = new TextField(6);
+	monthly_paymentTF = new TextField(6);
+	loan_lengthTF = new TextField(3);
+
+	add (interest_rateLBL); 
+	add(interest_rateTF);
+	add( principalLBL); 
+	add( principalTF); 
+	add( insuranceLBL); 
+	add( insuranceTF); 
+	add( taxesLBL); 
+	add( taxesTF); 
+	add( freqLBL); 
+	add( freqTF); 
+	add(loan_lengthLBL);
+	add(loan_lengthTF);
+	add( extra_paymentLBL); 
+	add( extra_paymentTF); 
+	add( monthly_paymentLBL );
+	add( monthly_paymentTF );  //am pretty sure there is a better weay to do this.
+
+	//set up textfields
+
+	//set up button
+	button=new Button("Calculate Mortgage");
+	//button.addActionListener( buttonActionHandler);
+	add( button);
+    }
+    /*
+      public void paint( Graphics g)
+      {
+
+      }
+    */
+}
+/*
+class ButtonActionHandler implements ActionListener
+{
+    Applet applet;
+    public ButtonActionHandler( Applet a)
+    {applet=a;}
+    public void actionPerformed( ActionEvent e)
+    {
+	System.out.println("you pressed: " + e.paramString() );
+	//call constructor for the mortgage objects and go from there
+    }
+    }*/

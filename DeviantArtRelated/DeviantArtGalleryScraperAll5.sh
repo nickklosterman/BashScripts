@@ -78,16 +78,17 @@ then
 else
     until [ -z "$1" ] #loop through all arguments using shift to move through arguments
     do 
-
+	deviantID=$( echo "$1" | sed 's/\/$//' ) #strip out the trailing \ when you are updating directories that you have all ready downloaded and are updating.
+	echo $deviantID
 	offsetcounter=0
 
 #create a directory with the deviantID and move into it for saving of images
-	echo "Making directory ${1} and moving into it"
-	if [ ! -e "$1" ]
+	echo "Making directory $deviantID and moving into it"
+	if [ ! -e "$deviantID" ]
 	then #mkdir if it doesn't exist
-	    mkdir "$1"
+	    mkdir "$deviantID"
 	fi
-	cd "$1"
+	cd "$deviantID"
 
 #debug: disable getting new index pages here
 	DebugDontGetIndexPages=0

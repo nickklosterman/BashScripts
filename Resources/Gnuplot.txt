@@ -1,0 +1,139 @@
+call gnuplot with 'persist' to keep the plot window open or add 'pause -1' to the gnuplot file
+
+http://www.ibm.com/developerworks/library/l-gnuplot/
+
+http://www.krazyworks.com/timeline-plots-with-gnuplot/
+Timeline Plots with GNUPlot
+Submitted by Igor on April 13, 2006 – 10:52 amNo Comment
+Timeline Plots with GNUPlot
+
+GNUPlot is an open-source versitile data plotting and mathematical charting application. Timeline plot is the most common type of a plot you would generate. It also seems that it’s one of the more capricious features of GNUPlot. Here are a few simple examples to get you over some problems that otherwise may not be obvious.
+
+The most common date/time format used by most databases and applications looks something like this: 2006-04-13 11:42:12; or in general form: YYYY-MM-DD hh:mm:ss. Below is a generic data sample where the first column is date/time, while the second, third and fourth columns represent three different types of data. Each value in clumns 2, 3, and 4 is, therefore, a function of time. Let’s also suppose that this data file is /tmp/data1.dat.
+
+Create a new text file and call it, say, /tmp/plot1.gnu.
+?View Code BASH
+
+set title ‘Title of Your Plot’
+set xdata time
+set key box
+set key bottom right
+set size 1.5,1.5
+set xlabel ‘Time’
+set ylabel ‘Data’ font ‘Arial,12′
+set autoscale
+set timefmt “%Y-%m-%d %H:%M:%S”
+set term png color
+set output ‘/tmp/plot1.png’
+plot \
+‘/tmp/data1.dat’ using 1:3 title ‘Data 1’ with linespoints, \
+‘/tmp/data1.dat’ using 1:4 title ‘Data 1’ with linespoints, \
+‘/tmp/data1.dat’ using 1:5 title ‘Data 1’ with linespoints
+
+And now to plot it:
+?View Code BASH
+
+gnuplot < /tmp/plot1.gnu > /dev/null
+
+If you paid attention, you should now have a /tmp/plot1.png file that shows a plot of your three data types as a function of time.
+
+Sample GNUPlot timeline plot with three data types
+
+Let’s review the options in the /tmp/plot1.gnu file line by line.
+
+set title ‘Title of Your Plot’
+This is simply the title of your plot. It will appear at the top of the resulting image.
+
+set xdata time
+You need to tell GNUPlot that you desire a timeline type of a plot.
+
+set key box
+GNUPlot will create a little box with the plot key. It’s useful for knowing which line represents what data.
+
+set key bottom right
+And, of course, you want to tell GNUPlot to place the key in an appropriate location so it doesn’t clash with the rest of the plot.
+
+set size 1.5,1.5
+The desired size of the resulting plot image in mysterious units.
+
+set xlabel ‘Time’
+X-Axis label
+
+set ylabel ‘Data’ font ‘Arial,12′
+Y-Axis label and font type/size. You can also specify font type and size for the X-axis.
+
+set autoscale
+Unless you want to plot only a specific chunk of data (say, from last Monday until today), you should tell GNUPlot to automatically scale the plot to include all available data.
+
+set timefmt “%Y-%m-%d %H:%M:%S”
+Now, this is important, so pay attention. Here you tell GNUPlot about the format of your date/time field. Because date and time are usually separated with a space, you need to include the whole thing in quotes.
+
+set term png color
+Here you express your desire for a color plot, unless you are into black-and-white.
+
+set output ‘/tmp/plot1.png’
+This is where GNUPlot will store the resulting image.
+
+
+plot \
+‘/tmp/data1.dat’ using 1:3 title ‘Data 1’ with linespoints, \
+‘/tmp/data1.dat’ using 1:4 title ‘Data 1’ with linespoints, \
+‘/tmp/data1.dat’ using 1:5 title ‘Data 1’ with linespoints
+
+OK, so here is the most important part. The “using 1:something” part tells GNUPlot that your X-Axis value (date and time in this case) is in the first column and your data is in clumns 3, 4, and 5. And that you would like to plot all three data types as separate lines that would also show data points (the linespoints option).
+
+But shouldn’t it be “using 1:2″, “using 1:3″, and “using 1:4″ instead, since your data contains only four columns: date/time, data1, data2, and data3? No it shouldn’t. Keep in mind that your date/time column is in fact two columns: date and time are separated by a space. So there you go.
+
+
+!------------------------------------------------------------------
+from:http://www.krazyworks.com/using-gnuplot-to-chart-mysql-data/
+Using GNUPlot to chart MySQL data
+Submitted by Igor on November 20, 2005 – 12:17 pmNo Comment
+Using GNUPlot to chart MySQL data
+
+The following Korn shell function connects to a MySQL database and extracts specified data, which is then plotted as a function of time using GNUPlot.  Using correct syntax is critical. Note the use of single- and double-quotes.  In the example below, “using 2:4″ mean that that the second column in your database table will be the X-axis values and the fourth column – the Y-axis value F(x). The graph below utilizes Bezier smoothing. This makes the chart look cleaner, but it may not be appropriate for your data.
+?View Code BASH
+
+GNUPlot_Update_Func() {
+ 
+#------ Client Disk Allocation and Utilization vs. Time ------
+ 
+$MYSQL --column-names=0 -u$DBUSER -p$DBPASS $DBNAME << EOF | while read HOSTNAME
+SELECT DISTINCT host_name FROM sandisk_clients ORDER BY host_name;
+EOF
+do
+$MYSQL --column-names=0 -u$DBUSER -p$DBPASS $DBNAME << EOF > "${TMPDIR}/${HOSTNAME}_gnuplot_client.dat"
+SELECT host_name, line_datetime, SUM(alloc_kb), SUM(used_kb) \
+FROM sandisk_clients \
+WHERE host_name LIKE '$HOSTNAME'
+GROUP BY YEAR(line_datetime), MONTH(line_datetime), DAYOFMONTH(line_datetime);
+EOF
+echo "set title '$HOSTNAME'"					 >  "${TMPDIR}/${HOSTNAME}_gnuplot_client.gnu"
+echo "set xdata time"										>>  "${TMPDIR}/${HOSTNAME}_gnuplot_client.gnu"
+echo "set key box"													 >>  "${TMPDIR}/${HOSTNAME}_gnuplot_client.gnu"
+echo "set key bottom right"												        >>  "${TMPDIR}/${HOSTNAME}_gnuplot_client.gnu"
+echo "set size 1.5,1.5"														        >>  "${TMPDIR}/${HOSTNAME}_gnuplot_client.gnu"
+echo "set xlabel 'Date'"														       >>  "${TMPDIR}/${HOSTNAME}_gnuplot_client.gnu"
+echo "set ylabel 'Size, Kb' font 'Arial,12'"												       	    >>  "${TMPDIR}/${HOSTNAME}_gnuplot_client.gnu"
+echo "set autoscale"	    	 														    	 >>  "${TMPDIR}/${HOSTNAME}_gnuplot_client.gnu"
+echo 'set timefmt "%Y-%m-%d %H-%M-%S"'															       >>  "${TMPDIR}/${HOSTNAME}_gnuplot_client.gnu"
+echo "set term png color"   																       	     >>  "${TMPDIR}/${HOSTNAME}_gnuplot_client.gnu"
+echo "set output '${CHARDIR}/${HOSTNAME}_client_001.png'"													     >>  "${TMPDIR}/${HOSTNAME}_gnuplot_client.gnu"
+echo "plot '${TMPDIR}/${HOSTNAME}_gnuplot_client.dat' using 2:4 title 'Allocated, Kb' smooth bezier with
+linespoints, '${TMPDIR}/${HOSTNAME}_gnuplot_client.dat' using 2:5 title 'Used, Kb' smooth bezier with linespoints" >>  "${TMPDIR}/${HOSTNAME}_gnuplot_client.gnu"
+ 
+$GNUPLOT < "${TMPDIR}/${HOSTNAME}_gnuplot_client.gnu" > /dev/null 2>&1
+done
+}
+
+Here’s an example of the resulting image:
+
+GNUPlot chart
+!------------------------------------------------------------------
+http://en.wikipedia.org/wiki/Kernel_density_estimation#Practical_estimation_of_the_bandwidth
+kdensity command for gnuplot
+!------------------------------------------------------------------
+!------------------------------------------------------------------
+!------------------------------------------------------------------
+!------------------------------------------------------------------
+!------------------------------------------------------------------

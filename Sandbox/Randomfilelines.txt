@@ -1,0 +1,12 @@
+ls |sort -R |tail -$N |while read file; do
+    # Something involving $file, or you can leave
+    # off the while to just get the filenames
+done
+
+http://www.gnu.org/software/coreutils/manual/html_node/sort-invocation.html
+look at the sort -R invocation
+
+Sort the file randomly and pick first 100 lines:
+
+$ sort -R input | head -n 100 >output
+sort actually sorts identical lines together, so if you may have duplicate lines and you have shuf (a gnu tool) installed, it's better to use it for this
