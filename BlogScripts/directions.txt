@@ -1,3 +1,11 @@
+run BlogDriver.sh
+copy 
+ls *.* >files.txt
+copy files.txt to directory you'll be downloading in.
+sed -i 's/$/touch "/g;s/^/"/' files.txt
+that should put in the appr commands
+bash files.txt to touch the files so you can run getblogimagesnoclobber without redownloading files.
+
 download (with wget) the index file from the website you want to get images from
 GetAllBlogPages2.sh index.html
 this will create a whole bunch of search=... pages

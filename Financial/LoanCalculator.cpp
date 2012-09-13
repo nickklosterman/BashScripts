@@ -40,6 +40,7 @@ public:
   AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_);
   AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double  taxes_ , double insurance_);
   void   set_AmortizedLoan(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthly_payment, double taxes, double insurance, int penalty_periods);
+  void   set_AmortizedLoan2(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthly_payment, double taxes, double insurance, int penalty_periods, float association_fees_);
   void PrintLoanDetails();
   void PrintCurrentIteration();
   void IteratePayment();
@@ -63,12 +64,13 @@ public:
   void PrintPeriodicMortgagePayment();
   void PrintPeriodicMortgagePaymentWithTaxesAndInsurance();
   void AmortizationAmounts();
+  double ComputeLoanAmountAsIfMortgagePaymentPlusAssociationFeesWasTheMortgagePayment();
 private:
   //  string GetPeriodString()
   void reset_principal();
   void calc_periodicmortgagepayment();//double int_rate, int num_pmnts, double principal, int freq);
   void CalcAmortizationValues();
-  double int_rate_pct,principal,loan_amount,additionalperiodicpaymenttoprincipal,periodicmortgagepayment,totalcostofloan,totalinterestonloan,insurance_yearly,taxes_yearly, periodicmortgagepaymentwithtaxesandinsurance;
+  double int_rate_pct,principal,loan_amount,additionalperiodicpaymenttoprincipal,periodicmortgagepayment,totalcostofloan,totalinterestonloan,insurance_yearly,taxes_yearly, periodicmortgagepaymentwithtaxesandinsurance,association_fees;
   int num_pmnts,freq,monthstopayoffloan,penalty_periods;
 
 };
@@ -224,6 +226,31 @@ void AmortizedLoan::set_AmortizedLoan(  double int_rate_, double loan_amount_, d
   penalty_periods=penalty_periods_;
   printf("%i %i",  penalty_periods,penalty_periods_);
   calc_periodicmortgagepayment();//int_rate_pct, num_pmnts, principal,freq);
+
+  //override items if monthlypayment specified
+  if (monthlypayment>moneyround(taxes_yearly/12.0)+moneyround(insurance_yearly/12.0)+periodicmortgagepayment && monthlypayment>0) //monthlypayment!=0) // <- will the second argument eval to false ever? use > 0.01 instead?
+    {
+    additionalperiodicpaymenttoprincipal = moneyround(monthlypayment-moneyround(taxes_yearly/12.0)-moneyround(insurance_yearly/12.0)-periodicmortgagepayment);
+    //    std::cout<<"statement is true";
+    }
+    //printf("add'l payment %f",additionalperiodicpaymenttoprincipal);
+
+}
+void AmortizedLoan::set_AmortizedLoan2(  double int_rate_, double loan_amount_, double additionalperiodicpaymenttoprincipal_,   int num_pmnts_, int freq_, double monthlypayment, double taxes_yearly_, double insurance_yearly_,int penalty_periods_, float association_fees_)
+{
+  //  std::cout<<"setting values";
+  principal =  loan_amount_;
+  int_rate_pct =  int_rate_ / 100;
+  loan_amount = loan_amount_ ;
+  additionalperiodicpaymenttoprincipal = moneyround(additionalperiodicpaymenttoprincipal_);
+  num_pmnts =   num_pmnts_;
+  freq = freq_;
+  insurance_yearly=insurance_yearly_;
+  taxes_yearly=taxes_yearly_;
+  penalty_periods=penalty_periods_;
+  printf("%i %i",  penalty_periods,penalty_periods_);
+  calc_periodicmortgagepayment();//int_rate_pct, num_pmnts, principal,freq);
+  association_fees=association_fees_;
 
   //override items if monthlypayment specified
   if (monthlypayment>moneyround(taxes_yearly/12.0)+moneyround(insurance_yearly/12.0)+periodicmortgagepayment && monthlypayment>0) //monthlypayment!=0) // <- will the second argument eval to false ever? use > 0.01 instead?
@@ -446,6 +473,17 @@ void AmortizedLoan::AmortizationTable2()//periodicpayment,int_rate,principal,fre
   printf("%d %2.f\n" ,month,totalinterest);
 }
 
+double AmortizedLoan::ComputeLoanAmountAsIfMortgagePaymentPlusAssociationFeesWasTheMortgagePayment()
+{
+  double rr = int_rate_pct / freq;
+  double principal_no_condo_fees = 0;
+  
+  principal_no_condo_fees=(periodicmortgagepayment+association_fees)*(1-(pow(1+rr,-num_pmnts)))/rr;
+  printf("A %0.2f monthly mortgage payment with %0.2f in condo and association fees for a %0.2f loan would be akin to a %0.2f monthly mortgage payment on a %0.2f loan.\n", periodicmortgagepayment,association_fees,principal, periodicmortgagepayment+association_fees, principal_no_condo_fees);
+  return principal_no_condo_fees ;
+   
+
+}
 //-------------------------------------------------------------------------------------
 
 //kept getting:
@@ -485,6 +523,7 @@ void LoanComparison::PrintLoanDetails()
   std::cout<<"Details for loan --with-- extra payments:\n";
   ExtraPaymentLoan.PrintLoanDetails();
 }
+
 
 void LoanComparison::PrintLoanAmortizationTableComparison()
 {
@@ -528,7 +567,7 @@ LoanComparison::LoanComparison(double rate,int terminmonths,double amount,int pa
 
 void usage()
 {
-  std::cout<<"Please define the interest rate (i), loan amount (l), number of payments (n), and payments per year (p).\nAdditionally, you can specify extra payment amount to apply toward principal each pay period (e) or a monthly payment amount that includes the base payment plus any overage towards principal (m).\nTo simplify actual scenarios you may also specify annual property taxes(), mortgage insurance (),. In lieu of calculating a loan amount you can specify the house purchase price () and down payment amount () and the required loan amount will be calculated from this information.\n ./a.out -i 4.5 -l 120000 -p 12 -n 360 -e 30 -t 2700 -h 100000 -d 20\n./a.out --interest-rate=4.5 --loan-amount=100000 --number-of-payments=360 --payments-per-year=12 --down-payment=15 --taxes=2800 --insurance=600 --monthly-payment=800 --extra-payment=30 --house-price=120000 --table  --penatly-periods=36 ";
+  std::cout<<"Please define the interest rate (i), loan amount (l), number of payments (n), and payments per year (p).\nAdditionally, you can specify extra payment amount to apply toward principal each pay period (e) or a monthly payment amount that includes the base payment plus any overage towards principal (m).\nTo simplify actual scenarios you may also specify annual property taxes(), mortgage insurance (),. In lieu of calculating a loan amount you can specify the house purchase price () and down payment amount () and the required loan amount will be calculated from this information.\n ./a.out -i 4.5 -l 100000  -n 360  -p 12 -d 20 -t 2700  -e 30 -h 120000  -f 120\n./a.out --interest-rate=4.5 --loan-amount=100000 --number-of-payments=360 --payments-per-year=12 --down-payment=20 --taxes=2700 --insurance=600 --monthly-payment=800 --extra-payment=30 --house-price=120000 --table  --penatly-periods=36 --association-fee=120";
 }
 
 // getopt: http://pubs.opengroup.org/onlinepubs/000095399/functions/getopt.html http://stackoverflow.com/questions/2219562/using-getopt-to-parse-program-arguments-in-c
@@ -554,6 +593,7 @@ int main(int argc, char *argv[])
   double taxes=0;//2700.0; //this amount is approximately what taxes are on 828 Greenmount (was 1362 semi-annually)
   int show_table_flag=0;
   int house_price_flag=0,down_payment_flag=0,penalty_periods=0; 
+  double /*float*/ association_fee=0;
   static struct option long_options[] = {
     {"?", 0, 0, 0},
     {"interest-rate", required_argument, 0, 'i'},
@@ -567,6 +607,7 @@ int main(int argc, char *argv[])
     {"monthly-payment", required_argument, 0, 'm'},
     {"extra-payment", required_argument, 0, 'e'},
     {"penalty-period", required_argument, 0, 'y'},
+    {"association-fee", required_argument, 0, 'f'},
     {"table", no_argument, 0, 'a'},
     {NULL, 1, NULL, 0} //this MUST be last entry 
   };
@@ -582,7 +623,7 @@ I totally forgot about using capital letters for optargs
     {
       interest_rate = loanAmount = extraPayments = monthlyPayments = 0.0;
       numberOfPayments = paymentsPerYear = 0;
-      while ((c = getopt_long(argc, argv, ":i:n:l:e:p:m:t:s:d:h:a",long_options,&option_index)) != -1) {
+      while ((c = getopt_long(argc, argv, ":i:n:l:e:p:m:t:s:d:h:f:a",long_options,&option_index)) != -1) {
 	switch(c) {
 	case 0:
 	  printf ("option %s", long_options[option_index].name);
@@ -640,6 +681,12 @@ I totally forgot about using capital letters for optargs
 	  penalty_periods  = atoi(optarg);
 	  printf("penalty_periods is %i; is it better to take penalty than to not pay during penalty period? I bet the banks made it so it isn't worth it\n",penalty_periods );
 	  break;
+	case 'f': //why does this segfault? because you were trying to atoi(null) you had the : before the f not after to denote that an option is mandatory
+	  association_fee  = atoi(optarg);
+	  //	  printf("optarg:%s",optarg);
+	  //association_fee  = 150;
+	  printf("monthly association fee of %f\n",association_fee ); //this is difficult since we I feel like there are monthly condo fees, plus querterly/yearly assoc fees etc. So how do we handle this so that the user just inputs numbers and the program does the math. ?
+	  break;
 	case 'a':
 	  show_table_flag  = true;
 	  printf("show amortization table");
@@ -657,6 +704,8 @@ I totally forgot about using capital letters for optargs
     usage();
   }
 
+  //I need to check and make sure that enough information is being supplied to actually compute a calculation
+
 
   if (houseprice!=0 && downpaymentPct!=0) //should I use > instead of !=??
     loanAmount=houseprice*(100-downpaymentPct)/100.0;
@@ -664,9 +713,16 @@ I totally forgot about using capital letters for optargs
   //loanAmount or houseprice & downpaymentPct
   //extraPayments or monthlyPayments
 
+    AmortizedLoan NormalLoan;
+  NormalLoan.set_AmortizedLoan2(interest_rate,loanAmount,0,numberOfPayments,paymentsPerYear,0,taxes,insurance,penalty_periods,association_fee);//rate,amount,0,terminmonths,paymentsperyear,0,taxes, insurance,penalty_periods);
+  // NormalLoan.;
+  
+    NormalLoan.ComputeLoanAmountAsIfMortgagePaymentPlusAssociationFeesWasTheMortgagePayment();
+    NormalLoan.PrintPeriodicMortgagePayment();
+  //double AmortizedLoan::ComputeLoanAmountAsIfMortgagePaymentPlusAssociationFeesWasTheMortgagePayment()
+  if (false)
+    {    
 
-
-    
   //  printf("extrapayments %f",extraPayments);
   LoanComparison LC(interest_rate,numberOfPayments,loanAmount,paymentsPerYear,extraPayments,monthlyPayments,taxes,insurance,penalty_periods);
   //else
@@ -680,6 +736,7 @@ I totally forgot about using capital letters for optargs
   LC.PrintLoanAmortizationComparison();
   std::cout<<"Redo passing single variables with a struct?? Like I did in Gweled."<<std::endl;
 
+    }
   /*/
     double balance = 1234.56;
 

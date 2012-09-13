@@ -103,8 +103,9 @@ function on_exit()
     for item in "${WebpageArray[@]}"
     do
 	if [ -e ${item}  ]
-	then 
-	    rm ${item}
+	then
+	    echo $item " Exists, deleting"
+#	    rm ${item}
 	fi
     done
     WebImage=( "/tmp/SteepAndCheap.jpg" "/tmp/WhiskeyMilitia.jpg" "/tmp/Chainlove.jpg" "/tmp/Bonktown.jpg" "/tmp/ProductImage")
@@ -597,13 +598,19 @@ function GiveWebsiteCodeGetWebpageTempFile()
 	3)
 	    Webpage='/tmp/ChainlovePage';;
     esac
-    wget ${1} -O ${Webpage} 2>&1 | grep -q "200 OK"
-    WgetExitStatus=$?
-    if [ $WgetExitStatus -eq 0 ]
+    wget ${1} -O ${Webpage} & 2>&1 | grep -q "200 OK" #this was causing 
+   # wget ${1} -O ${Webpage} #& 2>&1 | grep -q "200 OK" #this was causing 
+    if [ -e "${Webpage}" ]
     then
-	echo ${Webpage}
+	WgetExitStatus=$?
+	if [ $WgetExitStatus -eq 0 ]
+	then
+	    echo ${Webpage}
+	else
+	    echo "Error"
+	fi
     else
-	echo "Error"
+	echo "Error" #Tmp file doesn't exit!!"
     fi
 }
 
@@ -1113,6 +1120,7 @@ NetStatus=$( checknet )
 while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -eq 1 ]] ; do 
     echo "------------------------------------SC------------------------------------"
     SteepAndCheapPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.steepandcheap.com 0 )
+    echo "$SteepAndCheapPage"
     if [ "$SteepAndCheapPage" != "Error" ] 
     then 
 	SteepAndCheapText=$(GivePageReturnText ${SteepAndCheapPage} )
@@ -1165,31 +1173,31 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	echo "Wget didn't return a 200 OK response when getting the Whiskey Militia webpage"
 	WMTimeLeftSeconds=120
     fi
-    echo "------------------------------------BT------------------------------------"
-    BonktownPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.bonktown.com 2 )
-    if [ "$BonktownPage" != "Error" ]
-    then 
-	BonktownText=$(GivePageReturnText ${BonktownPage} )
-	Bonktown=$(GivePageReturnProductDescriptionV2  ${BonktownPage} )
-	BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
+#    echo "------------------------------------BT------------------------------------"
+#    BonktownPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.bonktown.com 2 )
+#    if [ "$BonktownPage" != "Error" ]
+#    then 
+#	BonktownText=$(GivePageReturnText ${BonktownPage} )
+#	Bonktown=$(GivePageReturnProductDescriptionV2  ${BonktownPage} )
+#	BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
 
-	if [ "${Bonktown}" != "${BonktownTemp}" ]
-	then
-	    echo ${Bonktown}
-	    BonktownImage=$(GivePageAndWebsiteReturnImage ${BonktownPage} http://www.bonktown.com )
-	    GiveProductKeywordDatabaseTablethenNotify "${BonktownText}" ${BonktownImage}
-	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db "Backcountrydeals"  ${BonktownPage} 2
-	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${BonktownPage} 2
-	    GiveProductProductImageEnterIntoDatabase "${Bonktown}" "${BonktownImage}"
-	    UpdateWebpage 2 "${BonktownText}" "${BonktownImage}"  "${WebpageIndex}"
+#	if [ "${Bonktown}" != "${BonktownTemp}" ]
+#	then
+#	    echo ${Bonktown}
+#	    BonktownImage=$(GivePageAndWebsiteReturnImage ${BonktownPage} http://www.bonktown.com )
+#	    GiveProductKeywordDatabaseTablethenNotify "${BonktownText}" ${BonktownImage}
+#	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db "Backcountrydeals"  ${BonktownPage} 2
+#	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${BonktownPage} 2
+#	    GiveProductProductImageEnterIntoDatabase "${Bonktown}" "${BonktownImage}"
+#	    UpdateWebpage 2 "${BonktownText}" "${BonktownImage}"  "${WebpageIndex}"
 #            notify-send  "$BonktownText" -i ${BonktownImage} -t 3
 
-	    BonktownTemp=`echo ${Bonktown}`
-	fi
-    else
-	echo "Wget didn't return a 200 OK response when getting the Bonktown webpage"
-	BTTimeLeftSeconds=120
-    fi
+#	    BonktownTemp=`echo ${Bonktown}`
+#	fi
+#    else
+#	echo "Wget didn't return a 200 OK response when getting the Bonktown webpage"
+#	BTTimeLeftSeconds=120
+#    fi
     echo "------------------------------------CL------------------------------------"
     ChainlovePage=$(GiveWebsiteCodeGetWebpageTempFile http://www.chainlove.com 3 )
     if [ "$ChainlovePage" != "Error" ]  
@@ -1221,11 +1229,11 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	SleepTime=${WMTimeLeftSeconds}
 	NextDeal="WhiskeyMilitia"
     fi
-    if [ ${BTTimeLeftSeconds} -lt ${SleepTime} ] 
-    then
-	SleepTime=${BTTimeLeftSeconds}
-	NextDeal="Bonktown"
-    fi
+#    if [ ${BTTimeLeftSeconds} -lt ${SleepTime} ] 
+#    then
+#	SleepTime=${BTTimeLeftSeconds}
+#	NextDeal="Bonktown"
+#    fi
     if [ ${CLTimeLeftSeconds} -lt ${SleepTime} ]
     then
 	SleepTime=${CLTimeLeftSeconds} 
