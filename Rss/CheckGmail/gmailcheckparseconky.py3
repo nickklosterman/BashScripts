@@ -1,0 +1,57 @@
+#!/usr/bin/python
+
+def getEmailAlias(data):
+    import re
+    p = re.compile(r'\(.*')
+    return p.sub('', data)
+
+def getUsernamePassword(file):
+    import linecache 
+    username=linecache.getline(file,1) #username on 1st line
+    password=linecache.getline(file,2) #password on 2nd line
+    return username.strip(),password.strip()  #remove the CRLF
+
+def fill(text, width):
+    '''A custom method to assist in pretty printing'''
+    if len(text) < width:
+        return text + ' '*(width-len(text))
+    else:
+        return text
+def ObtainEmailFeed(user,password):
+    string = bytes("%s:%s" % (user,password), 'utf-8')
+    b64bytes = base64.encodebytes(string)
+    b64auth = b64bytes.decode('ascii')
+    auth = "Basic " + b64auth
+# Build the request
+    req = urllib.request.Request("https://mail.google.com/mail/feed/atom/")
+    req.add_header("Authorization", auth)
+    handle = urllib.request.urlopen(req)
+    atom=feedparser.parse( handle) 
+    return atom
+
+def PrintFeed(atom):
+    for i in range(len(atom.entries)):
+        print("| %s| %s| %s|" % (
+            fill(str(i), 3),
+            fill(wrap(atom.entries[i].title, 50)[0], 55), #was title, summary
+            fill(wrap(getEmailAlias(atom.entries[i].author), 15)[0], 21))) #author
+    
+# some useful predefined tags: title summary author
+#there is a predefined set of accessible tags for the feedparser. They can be seen here: http://packages.python.org/feedparser/
+#to access the rest of the XML we'll need to set up a custom dom parser
+#I don't see a huge need for the other info
+#See Resources.txt
+#http://www.blog.pythonlibrary.org/2010/11/12/python-parsing-xml-with-minidom/ <--this seems to be a simple and good example    
+#-----------------===============-----------------
+import sys,urllib.request,urllib.error,urllib.parse,base64
+from textwrap import wrap
+import feedparser 
+
+
+if len(sys.argv)>1 and  sys.argv[1]!="":
+    inputfilename=sys.argv[1]
+    user,password=getUsernamePassword(inputfilename)
+    feed=ObtainEmailFeed(user,password)
+    PrintFeed(feed)
+else:
+    print("No Login File Specified: gmailcheckparseconky.py loginfile.txt")
