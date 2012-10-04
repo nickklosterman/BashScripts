@@ -196,5 +196,105 @@ I bet there is someway to modify the python-mode.el file to accept other files t
 python try block urllib
 http://www.techniqal.com/blog/2011/01/18/python-3-file-read-write-with-urllib/
 can also be found in Git/IBD/Scripts/GetHistoricalPricesDual.py3
+looping and retrying in try/except:
+http://bytes.com/topic/python/answers/802708-returning-try-block-after-catching-exception2
+
+git ignore files: create a .gitignore file in the root of the git repo populate it with file extensions (*.o)  or filenames.
+https://help.github.com/articles/ignoring-files
+
+for some DBMS, "count(*)" is slower than "count(column_name)".  If your table  is wide, it might make a difference. 
+
+SQLite duplicate records:
+sqlite3 IBDdatabase.sqlite "delete from BC20StockData where id not in ( select min(id) from BC20StockData group by rank,stockticker,date ) "
+http://stackoverflow.com/questions/8190541/deleting-duplicate-rows-from-sqlite-database
+http://stackoverflow.com/questions/1173963/how-to-delete-duplicate-rows-with-sql
+For mysql,postgresql,oracle better way is SELF JOIN.
+Postgresql:
+DELETE FROM table t1 USING table t2 WHERE t1.date=t2.date AND t1.id<t2.id;
+MySQL        
+DELETE FROM table
+USING table, table as vtable
+WHERE (table.id < vtable.id)
+AND (table.date=vtable.date)
+SQL aggregate (max,group by) functions almost always are very slow.
+http://stackoverflow.com/questions/5381907/sqlite-remove-duplicate-rows-when-entire-row-is-not-unique
+the above post discusses using UNIQUE to prevent duplicate entries from being entered. UNIQUE dictates that any entry must not collide with a entry in the field specified as UNIQUE -->http://www.sqlite.org/lang_createtable.html#constraints
+http://stackoverflow.com/questions/6127338/sql-select-distinct-but-return-all-columns
+http://stackoverflow.com/questions/1641718/how-to-select-unique-records-by-sql
+https://groups.google.com/forum/?fromgroups=#!topic/web2py/_oUz6cy5PBs
+http://www.sqlite.org/lang_altertable.html
+
+http://www.sqlite.org/lang_update.html
+
+SQLite drop table: sqlite3 IBDdatabase.sqlite "drop table <if exists> BC20StockData "
+http://www.sqlite.org/lang_droptable.html
+
+check if a string is a number in python:http://stackoverflow.com/questions/354038/how-do-i-check-if-a-string-is-a-number-in-python
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+or f = float(s); return True, f
+
+Python length of list
+>>> stuff= [['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Adj Clos'], ['2011-07-06', '57.52', '59.70', '57.52', '59.12', '689600', '59.1']]
+>>> len(stuff)
+2
+>>> stuff2= [['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Adj Clos']]
+>>> len(stuff2)
+1
+>>> len(stuff2[0])
+7
+
+sqlite3 list tables in database:http://www.sqlite.org/sqlite.html or see below
+sqlite3 check if table exists: from http://stackoverflow.com/questions/1601151/how-do-i-check-in-sqlite-whether-a-table-exists and  http://sqlite.org/faq.html#q7
+From within a C/C++ program (or a script using Tcl/Ruby/Perl/Python bindings) you can get access to table and index names by doing a SELECT on a special table named "SQLITE_MASTER". Every SQLite database has an SQLITE_MASTER table that defines the schema for the database. The SQLITE_MASTER table looks like this:
+
+CREATE TABLE sqlite_master (
+  type TEXT,
+  name TEXT,
+  tbl_name TEXT,
+  rootpage INTEGER,
+  sql TEXT
+);
+For tables, the type field will always be 'table' and the name field will be the name of the table. So to get a list of all tables in the database, use the following SELECT command:
+SELECT name FROM sqlite_master
+WHERE type='table'
+ORDER BY name;
+e.g.:sqlite3 IBDdatabase.sqlite " select case when tbl_name ='BC20StockData' then 1 else 0 end  from sqlite_master where type='table' and name='BC20StockData' order by name" 
+-->returns 1 if it exists
+
+
+Git stash:http://git-scm.com/book/en/Git-Tools-Stashing
+Your local changes to the following files would be overwritten by merge:
+        IBDdatabase.sqlite
+Please, commit your changes or stash them before you can merge.
+git status
+git stash
+git pull git@github.com:nickklosterman/IBD.git master
+git stash list
+git stash apply
+-->you stash your changes to allow for the pull down, then you apply your changes and it merges over what you had.
+This is what git stash apply says:
+warning: Cannot merge binary files: IBDdatabase.sqlite (Updated upstream vs. Stashed changes)
+Removing IBDdatabase.sqlite-journal
+Auto-merging IBDdatabase.sqlite
+CONFLICT (content): Merge conflict in IBDdatabase.sqlite
+
+javascript js hex to decimal and vice versa
+http://javascript.about.com/library/blh2d.htm
+function d2h(d) {return d.toString(16);}
+function h2d(h) {return parseInt(h,16);}
+there are limitations for large numbers however!--> http://www.danvk.org/wp/2012-01-20/accurate-hexadecimal-to-decimal-conversion-in-javascript/
+http://stackoverflow.com/questions/57803/how-to-convert-decimal-to-hex-in-javascript
+
+git diff:
+just run git diff on repo and it'll show you what's diff. It only seemed to show what was diff 
+git log -p 
+will cycle through the differences :http://learn.github.com/p/diff.html
+git show 
+seems to be a shortcut for git log -p
 
 

@@ -46,18 +46,19 @@ function GetCompanyName()
 
 function FileMaintenance()
 {
+#due to this function being called so we can grab its output you can't echo out debug stuff and see them!
     file="$1"
-    if [ -e "$1" ]
+    if [ -e "$file" ]
     then 
-	read -p "$1 exists. Would you like to overwrite its contents? (y/n)" yesno
+	read -p "$file exists. Would you like to overwrite its contents? (y/n)" yesno
 	while [ ! "$yesno" == "y" ] && [ ! "$yesno" == "n" ]
 	do
 	    read -p "Please answer with a y or n:" yesno
 	done
 	if [ "$yesno" == "y" ]
 	then
-	    echo "Deleting $1"
-	    rm "$1"
+	    echo "Deleting $file"
+	    rm "$file"
 	elif [ "$yesno" == "n" ]
 	then
 	    read -p "Please enter a new filename for the output to be written to:" file
@@ -76,7 +77,6 @@ then
     echo "Usage: VerifyStockTickers file"
     echo "When specifiying a file, commented lines and lines starting with dates will be ignored. Tickers on a single line separated by spaces will be tokenized for sorting."
 else
-
 output=$( FileMaintenance "$output" )
 outputnotfound=$( FileMaintenance "$outputnotfound" )
 
@@ -97,7 +97,7 @@ outputnotfound=$( FileMaintenance "$outputnotfound" )
 	    shift 
 	done
     fi
-echo "Is there a bulk method as it takes forever to do it one by one???"
+echo "Is there a bulk method as it takes forever to do it one by one??? yes, I did it elsewhere but then you'd have to parse later to separate good from bad.(I think)"
 fi
 
 echo "Could I just perform a query and then pipe that to the script?"
