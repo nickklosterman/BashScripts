@@ -297,4 +297,50 @@ will cycle through the differences :http://learn.github.com/p/diff.html
 git show 
 seems to be a shortcut for git log -p
 
+Visualizing SQL Joins
+http://www.codeproject.com/Articles/33052/Visual-Representation-of-SQL-Joins
+http://www.codinghorror.com/blog/2007/10/a-visual-explanation-of-sql-joins.html
 
+Inner/Outer Join on Multiple Fields
+http://www.bryantwebconsulting.com/blog/index.cfm/2005/3/14/outer_join_on_multiple_fields
+http://stackoverflow.com/questions/2366780/how-to-do-an-inner-join-on-multiple-columns
+http://stackoverflow.com/questions/9370437/multiple-inner-join-from-the-same-table
+
+SQL Indices and Triggers:
+http://www.indigorose.com/forums/threads/24472-SQLite-indexes-and-how-to-use-them
+
+Emacs modified buffer exists save?
+press 'd' to view a diff of the changes that you made.
+http://stackoverflow.com/questions/626492/emacs-highlight-buffer-modifications
+
+diff:
+http://www.unixtutorial.org/2008/02/compare-text-files-using-diff/
+Diff change notation includes 2 numbers and a character between them. Characters tell you what kind of change was discovered:
+d . a line was deleted
+c . a line was changed
+a . a line was added
+Number to the left of the character gives you the line number in the original (first) file, and the number to the right of the character tells you the line number in the second file used in comparison.
+
+
+Debugging Mozilla Firefox sessionstore files that don't load.
+http://stackoverflow.com/questions/352098/how-to-pretty-print-json-script
+dumping them into http://jsonlint.com/ doesn't turn anything up as they are validated fine. One possible hiccup is when the entire string is enclosed in (). Removing those makes the document validate fine.
+https://bugzilla.mozilla.org/show_bug.cgi?id=668359 comments here suggest that 
+If the file begin like this:
+{"windows":[],"selectedWindow":0,"_closedWindows":[{"tabs":[{"entries":[{"url":"https://
+Only delete:
+],"selectedWindow":0,"_closedWindows":[
+So you get:
+{"windows":[{"tabs":[{"entries":[{"url":"https://
+TADA!  All tabs are back!
+--this didn't work for me. I TRIED AGAIN AND IT WORKED. 
+http://forums.mozillazine.org/viewtopic.php?t=622036 this is a strong thread on the topic that I've hit upon back in the day.
+-changing the "index" node changes which tab  is used. uses 1 based indexing and not 0 based.
+I think this corresponds to the docIdentifier field.
+If the index is set to an invalid identifier it will open a blank 'new tab' if you set the index field to a negative value or it will open the tab with the highest index for an index that is greater than the greatest valid identifier/index.
+-use json_reformat and json_verify on the file. need to cat it in tho. or throw code into http://www.shell-tools.net/index.php?op=json_format or http://jsonlint.com/ to prettify the script and organize into a readable structure. Will need to run this 00> sed 's/,"children"/,\n"children"/g;s/{"url":/\n{"url":/g' to break up the single line entry into something that you can copy and paste into the online tool. 
+-I've been successful in parsing the individual entries using : sed 's/{"entries":/\n{"entries":/g' sessionstore-18.js > sessionstore-18_entries.js and then copying the 'entries' line I separated and adding it into a brand new sessionstore file that was generated after the crash. 
+-Even though most people don't have multiple windows there are also options/keywords in the xml/json for mutliple windows.
+It doesn't look like there is a simple way to load sessionstore data into the browser without renaming the suspect files sessionstore.js and then 'rebooting' FF.
+-The OP who started the bugzilla thread stated that using http://sessionmanager.mozdev.org stated that they installed sessionmanager.mozdev.org and hasn't had a repeat of the problem.
+As I stated above although for some reason the first time I attempted to simply remove the offending code and restart a subsequent try did work.
