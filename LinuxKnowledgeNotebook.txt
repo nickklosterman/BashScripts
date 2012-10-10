@@ -344,3 +344,73 @@ If the index is set to an invalid identifier it will open a blank 'new tab' if y
 It doesn't look like there is a simple way to load sessionstore data into the browser without renaming the suspect files sessionstore.js and then 'rebooting' FF.
 -The OP who started the bugzilla thread stated that using http://sessionmanager.mozdev.org stated that they installed sessionmanager.mozdev.org and hasn't had a repeat of the problem.
 As I stated above although for some reason the first time I attempted to simply remove the offending code and restart a subsequent try did work.
+Resources:
+http://dag.wieers.com/blog/what-if-firefox-loses-your-tabs
+http://jacaranda.org/firefox/fixstore.py code to extract the 'entries'
+http://computerforensics.parsonage.co.uk/downloads/WebBrowserSessionRestoreForensics.pdf decent overview
+http://learnpython.wordpress.com/2010/04/11/python-and-recovering-firefox-sessions/ after searching for "python json parser sessionstore" it has some code to pull ou the entries and place them in an html file. I tried it but it didn't work. worthwhile as a skeleton to make our own version.
+
+How to pretty print json : http://stackoverflow.com/questions/352098/how-to-pretty-print-json-script
+
+Emacs Matching brackets/braces/parens: C-M-f and C-M-b you can also do M-C-f and M-C-b 
+
+Emacs C-M-x and M-C-x commands: you can use the M-C as a substitute for C-M commands since C-M in windows is the default keybinding for the popping open the start menu.
+
+json.org json spec:http://tools.ietf.org/html/rfc4627
+Python & JSON. Once Python loads the JSON it is simply represented as a dictionary list.  http://docs.python.org/tutorial/datastructures.html
+You may opt to create a datatype to load the json into for easier parsing/traversing
+http://www.doughellmann.com/PyMOTW/json/
+
+List of realtime quotes on Google: http://www.google.com/intl/en/googlefinance/disclaimer/
+
+http://stackoverflow.com/questions/1480572/how-to-have-emacs-auto-refresh-all-buffers-when-files-have-changed-on-disk
+
+http://stackoverflow.com/questions/4177929/how-to-change-the-indentation-width-in-emacs-javascript-mode
+http://witnapatat.blogspot.com/2012/04/emacs-no-tab.html
+
+Emacs indent region: M-x h (select all) TAB
+This will indent the file.
+
+Pyton: alternating output from two lists
+http://stackoverflow.com/questions/3678869/pythonic-way-to-combine-two-lists-in-an-alternating-fashion
+>>> list1 = ['f', 'o', 'o']
+>>> list2 = ['hello', 'world']
+>>> result = [None]*(len(list1)+len(list2))
+>>> result[::2] = list1
+>>> result[1::2] = list2
+>>> result
+['f', 'hello', 'o', 'world', 'o']
+there is also mention of using itertools in that post. 
+alternative using chain and zip : http://stackoverflow.com/questions/2017895/alternating-between-iterators-in-python
+I used : zip http://stackoverflow.com/questions/7010060/writing-alternate-lists-elements-python
+understanding how zip works: http://stackoverflow.com/questions/2511300/why-does-x-y-zipzipa-b-work-in-python
+http://www.saltycrane.com/blog/2008/04/how-to-use-pythons-enumerate-and-zip-to/
+diong the reverse: http://stackoverflow.com/questions/1442782/python-program-to-split-a-list-into-two-lists-with-alternating-elements
+
+Python iterate list with indexes:http://stackoverflow.com/questions/126524/iterate-a-list-with-indexes-in-python
+>>> a = [3,4,5,6]
+>>> for i, val in enumerate(a):
+...     print i, val
+...
+0 3
+1 4
+2 5
+3 6
+
+
+emacs recenter screen on cursor
+C-l 
+thats an L
+
+Download Yahoo Finance Quotes
+download.finance.yahoo.com/d/quotes.csv?s=%40%5EDJI,GOOG&f=nsl1op&e=.csv	this doesn't actually get the DJIA it returns the components of it.
+http://finance.yahoo.com/q/hp?s=alxn gives a full html page of the historical data
+http://code.google.com/p/yahoo-finance-managed/wiki/csvQuotesDownload
+
+multi-line comment in emacs
+M-; works for python and gets rid of nasty 'IndentationError: unexpected indent' messages when using triple apostrophes etc
+http://www.gnu.org/software/emacs/manual/html_node/emacs/Comment-Commands.html
+
+Python:
+TypeError: GetTicker() takes no arguments (1 given)
+--> this means that you forget to define the function with the argument self i.e. def GetTicker(self):
