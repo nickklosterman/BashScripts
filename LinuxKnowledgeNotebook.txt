@@ -116,6 +116,8 @@ Because I have lots of files within sub-directories on both folders the mv comma
 After search around people have come up with elaborate bash scripts to do the task, and I like to throw a bash script together every now and again but in this situation it's really not necessary, we just need to use rsync:
     rsync -avh ./directory2/ ./directory1/
 That rsync command will override all the files in directory1 with the files in directory2 and recurse through all sub-directories, it will override them regardless if they're older/newer/different sized etc so do a backup of your original directory before running the command
+more on brace expansion: http://www.softpanorama.info/Scripting/Shellorama/brace_expansion.shtml
+http://semicrazy.wordpress.com/category/programming/bash/
 
 svn restore older version of a file:
 to restore the version of file.ext from the latest commit: svn revert file.ext
@@ -406,6 +408,8 @@ Download Yahoo Finance Quotes
 download.finance.yahoo.com/d/quotes.csv?s=%40%5EDJI,GOOG&f=nsl1op&e=.csv	this doesn't actually get the DJIA it returns the components of it.
 http://finance.yahoo.com/q/hp?s=alxn gives a full html page of the historical data
 http://code.google.com/p/yahoo-finance-managed/wiki/csvQuotesDownload
+http://bytes.com/topic/python/answers/32921-script-download-yahoo-finance-data
+http://stackoverflow.com/questions/3679870/yahoo-finance-csv-file-will-not-return-dow-jones-dji discussion on DJIA disappearing yet way to get it.
 
 multi-line comment in emacs
 M-; works for python and gets rid of nasty 'IndentationError: unexpected indent' messages when using triple apostrophes etc
@@ -413,4 +417,47 @@ http://www.gnu.org/software/emacs/manual/html_node/emacs/Comment-Commands.html
 
 Python:
 TypeError: GetTicker() takes no arguments (1 given)
---> this means that you forget to define the function with the argument self i.e. def GetTicker(self):
+--> this means that you forgot to define the function with the argument self i.e. def GetTicker() ---> def GetTicker(self):
+
+Emacs
+elisp file names must all be lower case. Otherwise, you'll get an "emacs required feature Somepackage.el was not provided"
+
+Recursively make a copy of a file in the same directory with the extension changed.
+find . -name "*.js" -exec sh -c 'name={}; cp $name ${name%.js}.ts' \;
+--> this will recursively find *.js files and create *.ts copies in the same directory
+find . -name "*.js" -exec bash -c 'name="{}"; cp "$name" "${name%.js}.ts"' \;
+find allows you to execute a command directly on a file found using -exec; you don't need to pipe it through xargs. It takes the command name followed by arguments to the command, followed by a single argument ;, which you have to escape to avoid the shell interpreting it. find will replace any occurrence of {} in the command name or arguments with the file found.
+In order call a command with the appropriate ending substituted, there are multiple approaches you can take, but a simple one is to use Bash's parameter expansion. You need to define a shell parameter that contains the name (in this case, I creatively chose name={}), and then you can use parameter expansion on it. ${variable%suffix} strips off suffix from the value of $variable; I then add on .ts to the end, and have the name I'm looking for.
+http://stackoverflow.com/questions/12923341/linux-cygwin-recursively-copy-file-change-extension
+
+sed 's/).*//' TFLN.txt | sort | uniq -c
+uniq can do counts
+
+
+Notepad++ ; column mode selection ; Alt-Shift-Arrow keys or Alt + left mouse click column editor,
+
+Using a bash variable in a sed command
+basically you need to use double quotes instead of single quotes.
+I know that the first time I looked into this, doing this didn't solve my problem (Or at least I don't think it did)
+http://stackoverflow.com/questions/11146098/bash-use-a-variable-in-a-sed-command
+http://stackoverflow.com/questions/3204302/how-to-use-a-bash-script-variable-with-sed
+
+
+nick.klosterman@MAS002326-LAP ~/Sandbox/jsToTS
+$ bash ../JStoTS.sh
+../JStoTS.sh: line 43: syntax error near unexpected token `$ts_file'
+../JStoTS.sh: line 43: `CleanEndingParensBrackets() $ts_file'
+--> this is because you need to remove the () on the function name when calling it. It is even optional when defining a function (although it adds to portability according to ans-guide.pdf). 
+
+http://alexjmackey.wordpress.com/2012/10/06/what-is-typescript/
+http://stackoverflow.com/questions/12845810/typescript-module-namespacing-in-multiple-files
+
+http://www.emacswiki.org/emacs/RegularExpression#toc7 icicles interactive way to learn regexp
+
+http://www.linuxquestions.org/questions/programming-9/bash-script-executing-a-script-through-subdirectories-438205/
+http://www.linuxquestions.org/questions/linux-newbie-8/how-to-do-recursive-file-copy-of-directory-for-specific-files-199134/
+
+emacs
+Display column number in the mode line:	M-x column-number-mode
+
+http://www.grymoire.com/Unix/Sed.html#uh-8

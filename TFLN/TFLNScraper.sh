@@ -11,13 +11,15 @@ LastPage=$( grep "class=\"pagination\"" "${TempFile}" | sed 's/.*hellip\; //;s/<
 counter=2
 while [ "$counter" -lt "$LastPage" ]
 do 
-wget -q http://www.textsfromlastnight.com/texts/page:${counter} -O "${TempFile}"
+    wget -q http://www.textsfromlastnight.com/texts/page:${counter} -O "${TempFile}"
 #grep "textarea" "${TempFile}" | sed 's/<[^>]*>//g;s/&#39;/\x27/g;s/http.*//g;s/&quot/\"/g;s/&#45/-/g' | grep "&"
-grep "textarea" "${TempFile}" | recode html | sed 's/<[^>]*>//g;s/http.*//g;s/^[ \t]*//'
-let "counter+=1"
+    grep "textarea" "${TempFile}" | recode html | sed 's/<[^>]*>//g;s/http.*//g;s/^[ \t]*//'
+    let "counter+=1"
 done
 
 if [ -e ${TempFile} ]
 then 
-rm ${TempFile}
+    rm ${TempFile}
 fi
+
+# http://feeds.feedburner.com/tfln http://www.textsfromlastnight.com/texts/page:3
