@@ -461,3 +461,85 @@ emacs
 Display column number in the mode line:	M-x column-number-mode
 
 http://www.grymoire.com/Unix/Sed.html#uh-8
+
+Thu Oct 18 13:43:41 EDT 2012
+
+Trying to get emacs to auto enter date into my muddle for me.
+resources: 
+http://stackoverflow.com/questions/5019581/emacs-function-to-open-file-current-date-tex
+http://emacswiki.org/emacs/AutomaticFileHeaders
+http://www.emacswiki.org/emacs/AutoInsertMode
+google:emacs open file and enter date
+Emacs enter date into file
+C-u M-! date 
+M-! is the keyboard shortcut for the function shell-command. So M-! date will call the shell command date, and show it in the output area (the minibuffer, since the output is short enough to fit). The C-u is a prefix argument that makes M-! put its output in the current buffer instead.
+http://stackoverflow.com/questions/251908/how-can-i-insert-current-date-and-time-into-a-file-using-emacs
+Put in your .emacs file:
+
+;; ====================
+;; insert date and time
+
+(defvar current-date-time-format "%a %b %d %H:%M:%S %Z %Y"
+  "Format of date to insert with `insert-current-date-time' func
+See help of `format-time-string' for possible replacements")
+
+(defvar current-time-format "%a %H:%M:%S"
+  "Format of date to insert with `insert-current-time' func.
+Note the weekly scope of the command's precision.")
+
+(defun insert-current-date-time ()
+  "insert the current date and time into current buffer.
+Uses `current-date-time-format' for the formatting the date/time."
+       (interactive)
+       (insert "==========\n")
+;       (insert (let () (comment-start)))
+       (insert (format-time-string current-date-time-format (current-time)))
+       (insert "\n")
+       )
+
+(defun insert-current-time ()
+  "insert the current time (1-week scope) into the current buffer."
+       (interactive)
+       (insert (format-time-string current-time-format (current-time)))
+       (insert "\n")
+       )
+
+(global-set-key "\C-c\C-d" 'insert-current-date-time)
+(global-set-key "\C-c\C-t" 'insert-current-time)
+
+
+
+sed '/---/!s/--/\\(em/g'
+this script will only replace double dashes but not triple dashes
+It says, simply, "If you find a line containing three consecutive hyphens, don't apply the edit." On
+all other lines, the substitute command will be applied.
+
+from O'reilly sed & awk 2nd ed: sect 4.4.1
+s/\.  */.  /g
+This command replaces a period followed by any number of spaces with a period followed by two
+spaces. It should be noted that the previous command reduces multiple spaces to one, so that only one
+space will be found following a period.[4] Nonetheless, this pattern works regardless of how many
+spaces follow the period, as long as there is at least one. (It would not, for instance, affect a filename of
+the form test.ext if it appeared in the document.)
+
+sed:The N command reads another line into the pattern space without removing the current line, so you can test for patterns across multiple lines
+
+sed: unmatched parens:
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -n 's/^[ ]*Class\(/-::-/p'
+sed: -e expression #1, char 21: Unmatched ( or \(
+you can put the offending character into its own character class if you can't get it escaped
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -n 's/^[ ]*Class[(]"/-::-/p'
+-::-I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+http://dbaspot.com/shell/420232-huh-how-do-i-escape-left-paren-sed.html
+
+Sed: seems that you have to escape quite a bit of the quantifiers etc in sed for the regexp
+http://stackoverflow.com/questions/234797/regex-in-sed?rq=1
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -n 's/^[ ]*Class[(]"I((\.[A-Za-z]+)+)/-::-/p'
+nick.klosterman@MAS002326-LAP ~/Sandbox/jsToTS
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -n 's/^[ ]*Class[(]"I\(\(\.[A-Za-z]\+\)\+\)/-::-/p'
+-::-", I.ViewChassis.ComponentView, {
+
+http://stackoverflow.com/questions/2933474/escape-characters-contained-by-bash-variable-in-regex-pattern?rq=1
+
+http://sed.sourceforge.net/grabbag/tutorials/
+
