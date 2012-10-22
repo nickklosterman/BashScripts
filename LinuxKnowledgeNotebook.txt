@@ -454,8 +454,12 @@ http://stackoverflow.com/questions/12845810/typescript-module-namespacing-in-mul
 
 http://www.emacswiki.org/emacs/RegularExpression#toc7 icicles interactive way to learn regexp
 
+http://superuser.com/questions/299938/linux-recursively-copy-file-by-file-extension-preserving-directory-structure  <--
+cd /top/level/to/copy
+find . -name '*.txt' | cpio -pdm /path/to/destdir
+
 http://www.linuxquestions.org/questions/programming-9/bash-script-executing-a-script-through-subdirectories-438205/
-http://www.linuxquestions.org/questions/linux-newbie-8/how-to-do-recursive-file-copy-of-directory-for-specific-files-199134/
+
 
 emacs
 Display column number in the mode line:	M-x column-number-mode
@@ -542,4 +546,258 @@ $ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.Compo
 http://stackoverflow.com/questions/2933474/escape-characters-contained-by-bash-variable-in-regex-pattern?rq=1
 
 http://sed.sourceforge.net/grabbag/tutorials/
+http://sed.sourceforge.net/sedfaq4.html
+http://sed.sourceforge.net/sedfaq3.html
 
+Fri Oct 19 08:46:00 EDT 2012
+19-10-2012
+
+windows button + tab -> 3d window rotation...
+
+http://www.zytrax.com/tech/web/regex.htm more regexp goodness
+
+it appears that sed doesn't support POSIX character classes.
+Also all seds aren'te equal Linux sed != Mac sed
+ed does allow use of POSIX character classes but it isn't stream/line oriented. it reads in the entire file.
+sed uses BRE (basic regular expressions). Look this up to find what exactly it supports/doesn't
+
+
+http://www.linuxtopia.org/online_books/linux_tool_guides/the_sed_faq/sedfaq3_010.html
+Though character classes don't generally conserve space on the line, they help make scripts portable for international use. The equivalent character sets for U.S. users follows:
+     [[:alnum:]]  - [A-Za-z0-9]     Alphanumeric characters
+     [[:alpha:]]  - [A-Za-z]        Alphabetic characters
+     [[:blank:]]  - [ \x09]         Space or tab characters only
+     [[:cntrl:]]  - [\x00-\x19\x7F] Control characters
+     [[:digit:]]  - [0-9]           Numeric characters
+     [[:graph:]]  - [!-~]           Printable and visible characters
+     [[:lower:]]  - [a-z]           Lower-case alphabetic characters
+     [[:print:]]  - [ -~]           Printable (non-Control) characters
+     [[:punct:]]  - [!-/:-@[-`{-~]  Punctuation characters
+     [[:space:]]  - [ \t\v\f]       All whitespace chars
+     [[:upper:]]  - [A-Z]           Upper-case alphabetic characters
+     [[:xdigit:]] - [0-9a-fA-F]     Hexadecimal digit characters
+
+------------------------------------Trying to understand regex and sed---------------------------------------------
+http://www.ibm.com/developerworks/linux/library/l-sed2/index.html
+$cat myfile.txt
+foo bar oni
+eeny meeny miny
+larry curly moe
+jimmy the weasel
+
+$ sed -e 's/\(.*\) \(.*\) \(.*\)/Victor \1-\2 Von \3/' myfile.txt
+Victor foo-bar Von oni
+Victor eeny-meeny Von miny
+Victor larry-curly Von moe
+Victor jimmy-the Von weasel
+
+Trying to get I.ViewChassis.DialogView and I.ViewChassis.ComponentView in separate patterns.
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -e 's/"\(I\(\.\([[:alpha:]]\+\)\+\)\)",[ ]*\(I\(\.\([[:alpha:]]\+\)\+\)\) /class \1 extends \2/'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+
+
+$ sed -e 's/\(.*\) \(.*\) \(.*\)/Victor \1-\2 Von \3/' myfile.txt
+Victor foo-bar Von oni
+Victor eeny-meeny Von miny
+Victor larry-curly Von moe
+Victor jimmy-the Von weasel
+
+
+$ sed -e 's/\([[:alpha:]]\+\) \(.*\) \(.*\)/Victor \1-\2 Von \3/' myfile.txt
+Victor foo-bar Von oni
+Victor eeny-meeny Von miny
+Victor larry-curly Von moe
+Victor jimmy-the Von weasel
+
+first pattern must match 4 or more alpha characters
+$ sed -e 's/\([[:alpha:]]\{4,\}\) \(.*\) \(.*\)/Victor \1-\2 Von \3/' myfile.txt
+foo bar oni
+Victor eeny-meeny Von miny
+Victor larry-curly Von moe
+Victor jimmy-the Von weasel
+
+Looking at sed and identifying/replacing duplicates
+http://stackoverflow.com/questions/7368636/remove-repeating-and-control-characters-in-sed
+$ echo HHEELLLLOO | sed 's/\(.\)\1/\1/g'
+HELLO
+$ echo HEEEOLLLLOOOSDFLKKKKKSDFJKLSDL | sed 's/([a-zA-Z])\1+/\1/g'
+sed: -e expression #1, char 20: Invalid back reference
+$ echo HEEEOLLLLOOOSDFLKKKKKSDFJKLSDL | sed 's/([[:alpha:]])\1+/\1/g'
+sed: -e expression #1, char 23: Invalid back reference
+does nothing..need to escape the + for anything to happen
+$ echo HEEEOLLLLOOOSDFLKKKKKSDFJKLSDL | sed 's/\([[:alpha:]]\)\1+/\1/g'
+HEEEOLLLLOOOSDFLKKKKKSDFJKLSDL
+
+This script marches through grabbing sets of two and spitting out only a single character. So if there isn't a set of two it simply outputs the character
+$ echo HEEEOLLLLOOOSDFLKKKKKSDFJKLSDL | sed 's/\([[:alpha:]]\)\1/\1/g'
+HEEOLLOOSDFLKKKSDFJKLSDL
+
+This script finds multiple repeats and spits out a single instance of the character
+$ echo HEEEOLLLLOOOSDFLKKKKKSDFJKLSDL | sed 's/\([[:alpha:]]\)\1\+/\1/g'
+HEOLOSDFLKSDFJKLSDL
+$ echo HHEELLLLLOO | sed 's/\(.\)\1/\1/g'
+HELLLO
+$ echo HHEELLLLLLOO | sed 's/\(.\)\1/\1/g'
+HELLLO
+$ echo " abccddefgh" | sed 's/(\\w)\\1+/9/'
+ abccddefgh
+$ echo " abccddefgh" | sed 's/\(\\w\)\\1+/9/'
+ abccddefgh
+$ echo " abccddefgh" | sed 's/.*[[:alpha:]]/9/'
+9
+$ echo " abccddefgh" | sed 's/.*[[:alpha:]]*/9/'
+9
+
+I think it's bitching bc I don't have a * after [[:alpha:]]
+$ echo " abccddefgh" | sed 's/.*[[:alpha:]]/--\1--/'
+sed: -e expression #1, char 23: invalid reference \1 on `s' command's RHS
+
+$ echo " abccddefgh" | sed -e 's/.*[[:alpha:]]/ --\1-- /'
+sed: -e expression #1, char 25: invalid reference \1 on `s' command's RHS
+
+$ sed -e 's/\([[:alpha::]]\+\) \(.*\) \(.*\)/Victor \1-\2 Von \3/' myfile.txt
+sed: -e expression #1, char 55: unterminated `s' command
+
+http://superuser.com/questions/336816/regex-find-and-replace-with-sed-matching-group-and-replacing-on-condition
+You can reference groups you just defined, but sed uses \n, not $n, for that. In addition, grouping with ( ) only works in "extended" mode (enable with the -r option):
+sed -r 's/^(.+) - \1/\1/'
+In "basic" mode, you'd use:
+sed 's/^\(.*\) - \1/\1/'
+AAaaaaaaaaaaaaahhhh the -r option
+It seems that the -r option allows you to use regexp the way most regexp editors show them without the escaped parens etc. 
+
+$ echo " abccddefgh" | sed 's/.*[[:alpha:]]\1\+/9/'
+sed: -e expression #1, char 22: Invalid back reference
+$ echo " abccddefgh" | sed 's/[[:alpha:]]\1\+/9/'
+sed: -e expression #1, char 20: Invalid back reference
+
+put the [[:alpha:]] in a group 
+$ echo " abccddefgh" | sed 's/\([[:alpha:]]\)\1\+/9/'
+ ab9ddefgh
+now make it global
+$ echo " abccddefgh" | sed 's/\([[:alpha:]]\)\1\+/9/g'
+ ab99efgh
+now try the r option 
+$ echo " abccddefgh" | sed -r 's/\([[:alpha:]]\)\1\+/9/g'
+sed: -e expression #1, char 25: Invalid back reference
+remove all the unnecessary escaping
+$ echo " abccddefgh" | sed -r 's/([[:alpha:]])\1+/9/g'
+ ab99efgh
+
+FAILURES
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e 's/"(I(\.([[:alpha:]]+)+))",[ ]*(I(\.([[:alpha:]]+)+)) /class \1 extends \2/'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e 's/"(I(\.([[:alpha:]]+)+))",[ ]*(I(\.([[:alpha:]]+)+)) /class \1 extends \2/'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e 's/"(I(\.([[:alpha:]]+)+))",[ ]*(I(\.([[:alpha:]]+)+)) /class \1 extends \2/g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e 's/"(I(.([[:alpha:]]+)+))",[ ]*(I(.([[:alpha:]]+)+)) /class \1 extends \2/g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e 's/"(I(.([[:alpha:]]+)+))",[ ]*(I(.([[:alpha:]]+)+)) /class  extends /g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r  's/"(I(.([[:alpha:]]+)+))",[ ]*(I(.([[:alpha:]]+)+)) /class  extends /g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r  's/"(I(.([[:alpha:]]+)+))",[ ]*(I(.([[:alpha:]]+)+)), /class  extends /g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r  's/"(I(.([[:alpha:]]+)+))"/class  extends /g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r  's/"I(.([[:alpha:]]+)+)"/class  extends /g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e  's/"I(.([[:alpha:]]+)+)"/class  extends /g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e  's/"I(.([[A-Za-z]]+)+)"/class  extends /g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e  's/"I.ViewChassis/class  extends /g'
+ Class(class  extends .DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e 's/"(I(.([[:alpha:]]+)+))",[ ]*(I(.([[:alpha:]]+)+)) /class \2 extends \1/g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e 's/"(I(.([[:alpha:]]+)+))",[ ]*(I(.([[:alpha:]]+)+)) /class \2 extends \1/p'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e  's/"I.ViewChassis/class  extends /p'
+ Class(class  extends .DialogView", I.ViewChassis.ComponentView, {
+ Class(class  extends .DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -n  's/"I.ViewChassis/class  extends /p'
+ Class(class  extends .DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -n  's/"I.[[:alpha:]]*/class  extends /p'
+ Class(class  extends .DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -n  's/"I.([[:alpha:]]+)/class  extends /p'
+ Class(class  extends .DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -n  's/"I(.([[:alpha:]]+)+)/class  extends /p'
+ Class(class  extends .DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -n  's/"I(.([[:alpha:]]+))+/class  extends /p'
+ Class(class  extends ", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -n  's/"I(.([[:alpha:]]+))+/class  extends /g'
+
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r   's/"I(.([[:alpha:]]+))+/class  extends /g'
+ Class(class  extends ", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r   's/I(.([[:alpha:]]+))+/class  extends /g'
+ Class("class  extends ", class  extends , {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r   's/I(.([[:alpha:]]+))+/class \2 extends \1/g'
+ Class("class DialogView extends .DialogView", class ComponentView extends .ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r   's/(I(.([[:alpha:]]+))+)/class \2 extends \1 /g'
+ Class("class .DialogView extends I.ViewChassis.DialogView ", class .ComponentView extends I.ViewChassis.ComponentView , {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r   's/(I(.([[:alpha:]]+))+)/one \1 two \2 three \3 four \4 /g'
+sed: -e expression #1, char 57: invalid reference \4 on `s' command's RHS
+
+Starting to make progress
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r   's/(I(.([[:alpha:]]+))+)/one \1 two \2 three \3  /g'
+ Class("one I.ViewChassis.DialogView two .DialogView three DialogView  ", one I.ViewChassis.ComponentView two .ComponentView three ComponentView  , {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r   's/(I(.([[:alpha:]]+))+)/class \3 extends  \1 two \2 three \3  /g'
+ Class("class DialogView extends  I.ViewChassis.DialogView two .DialogView three DialogView  ", class ComponentView extends  I.ViewChassis.ComponentView two .ComponentView three ComponentView  , {
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -n 's/^[ ]*Class[(]"I\(\(\.[A-Za-z]\+\)\+\)"[ ]*,[ ]*I\(\(.[A-z]\+\)\+\),[ ]*{/-::-/p'
+-::-
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r 's/^[ ]*Class[(]"I((.[A-Za-z]+)+)"[ ]*,[ ]*I((.[A-z]+)+),[ ]*{/v-::-v/p'
+sed: -e expression #1, char 70: Unmatched \{
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r 's/^[ ]*Class[(]"I((.[A-Za-z]+)+)"[ ]*,[ ]*I((.[A-z]+)+),[ ]*\{/v-::-v/p'
+v-::-v
+v-::-v
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"I((.[A-Za-z]+)+)"[ ]*,[ ]*I((.[A-z]+)+),[ ]*\{/v-::-v/p'
+v-::-v
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"I((.[A-Za-z]+)+)"[ ]*,[ ]*I((.[A-z]+)+),[ ]*\{/ \1 -=- \2 -=- \3 -=- \4/p'
+ .ViewChassis.DialogView -=- .DialogView -=- .ViewChassis.ComponentView -=- .ComponentView
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"(I((.[A-Za-z]+)+))"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{/ class \1 -=- \2 -=- \3 -=- extends \4 -=- \5 -=- \6/p'
+ class I.ViewChassis.DialogView -=- .ViewChassis.DialogView -=- .DialogView -=- extends I.ViewChassis.ComponentView -=- .ViewChassis.ComponentView -=- .ComponentView
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"(I((.[A-Za-z]+))+)"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{/ class \1 -=- \2 -=- \3 -=- extends \4 -=- \5 -=- \6/p'
+ class I.ViewChassis.DialogView -=- .DialogView -=- .DialogView -=- extends I.ViewChassis.ComponentView -=- .ViewChassis.ComponentView -=- .ComponentView
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"(I((.([A-Za-z])+))+)"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{/ class \1 -=- \2 -=- \3 -=- extends \4 -=- \5 -=- \6/p'
+ class I.ViewChassis.DialogView -=- .DialogView -=- .DialogView -=- extends w -=- I.ViewChassis.ComponentView -=- .ViewChassis.ComponentView
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"(I((.([A-Za-z]+)))+)"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{/ class \1 -=- \2 -=- \3 -=- extends \4 -=- \5 -=- \6/p'
+ class I.ViewChassis.DialogView -=- .DialogView -=- .DialogView -=- extends DialogView -=- I.ViewChassis.ComponentView -=- .ViewChassis.ComponentView
+
+Using backreferences : taken from http://www.regular-expressions.info/brackets.html
+To figure out the number of a particular backreference, scan the regular expression from left to right and count the opening round brackets. The first bracket starts backreference number one, the second number two, etc. Non-capturing parentheses are not counted. This fact means that non-capturing parentheses have another benefit: you can insert them into a regular expression without changing the numbers assigned to the backreferences. This can be very useful when modifying a complex regular expression
+
+SUCCESS
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"(I((.([A-Za-z]+)))+)"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{/ class \4 extends \5 {/p'  
+ class DialogView extends I.ViewChassis.ComponentView {
+------------------------------------END END END Trying to understand regex and sed---------------------------------------------
+
+Recursively copy files with a certain extension , recreating the same directory structure:
+find /path/to/dir/to/copy/from/ -name "*.ts" | cpio -pmd .
+as previously stated from http://superuser.com/questions/299938/linux-recursively-copy-file-by-file-extension-preserving-directory-structure
+
+
+http://stackoverflow.com/questions/3343642/shell-script-to-traverse-files-recursively
+http://stackoverflow.com/questions/3343642/shell-script-to-traverse-files-recursively
+http://serverfault.com/questions/44080/recursively-traverse-a-directory
+find . -type d -exec ls -ld {} \;
+This will enumerate all the directories under your base directory. 
+http://www.linuxquestions.org/questions/programming-9/bash-make-rename-script-traverse-directories-499744/
+
+Mon Oct 22 08:47:01 EDT 2012
+
+newline in echo:
+The mixed history of echo means its default operation varies from shell to shell.
+It is more reliable to use printf (either as a built-in command or an external command) where the behavior is more well defined: the C-style backslash escapes and format specifiers are supported in the format string (the first argument).
+printf 'foo\nbar\n'
+
+http://www.shell-fu.org/lister.php?id=882 find last modified files on a filesystem
+To find the last modified files in a directory you can use ls -ltr. To find the last modified file on a file system it will not work, but the following command will work:
+
+find /etc -type f -printf "%T@ %T+ %p\n" | sort -n
+
+Yes, I also had to add '\n'.  I also piped through 'sort -rn|head' to limit the output.  It's also possible to speed things up by using the test '-cnewer' in 'find'.  Just picking any file in the directory your searching.  If you don't get any output you've managed to pick the most recent modified file.
+
+sudo find /etc -type f -printf "%T@ %T+ %p \n" | sort -n | less
+
+find . -type f -mtime 0
