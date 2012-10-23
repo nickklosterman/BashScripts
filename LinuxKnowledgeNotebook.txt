@@ -783,6 +783,7 @@ http://serverfault.com/questions/44080/recursively-traverse-a-directory
 find . -type d -exec ls -ld {} \;
 This will enumerate all the directories under your base directory. 
 http://www.linuxquestions.org/questions/programming-9/bash-make-rename-script-traverse-directories-499744/
+find . -name "*.js" -exec sh -c 'name={}; cp $name ${name%.js}.ts' \;
 
 Mon Oct 22 08:47:01 EDT 2012
 
@@ -793,11 +794,36 @@ printf 'foo\nbar\n'
 
 http://www.shell-fu.org/lister.php?id=882 find last modified files on a filesystem
 To find the last modified files in a directory you can use ls -ltr. To find the last modified file on a file system it will not work, but the following command will work:
-
+comments for this post:
 find /etc -type f -printf "%T@ %T+ %p\n" | sort -n
-
 Yes, I also had to add '\n'.  I also piped through 'sort -rn|head' to limit the output.  It's also possible to speed things up by using the test '-cnewer' in 'find'.  Just picking any file in the directory your searching.  If you don't get any output you've managed to pick the most recent modified file.
-
 sudo find /etc -type f -printf "%T@ %T+ %p \n" | sort -n | less
+i simply use:find . -type f -mtime 0
+ 
+Tue Oct 23 08:34:23 EDT 2012
+23-10-2012
 
-find . -type f -mtime 0
+http://stackoverflow.com/questions/13018918/sed-printing-pattern-space-when-there-isnt-a-match/13019239#13019239
+sed -i -r 's/^[ ]*Class[(]"(I((.([A-Za-z]+)))+)"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{/ class \4 extends \5 { /p
+/^[ ]*Class[(]"(I((.([A-Za-z]+)))+)"[ ]*,/ ! t done
+/^[ ]*Class[(]"(I((.([A-Za-z]+)))+)"[ ]*,/ {
+N
+s/ *\n/ /
+s/^[ ]*Class[(]"(I((.([A-Za-z]+)))+)"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{*/ class \4 extends \5 { \
+/p
+: done
+d
+}
+'
+
+http://stackoverflow.com/questions/11146098/bash-use-a-variable-in-a-sed-command
+http://stackoverflow.com/questions/3204302/how-to-use-a-bash-script-variable-with-sed
+sed "s/\${version.number}/$version/" template.txt > readme.txt
+Only double quotes do dollar-sign replacement. That also means single quotes don't require the dollar sign to be escaped.
+
+echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"(I((.([A-Za-z]+)))+)"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{/ class \1 -=- \2 -=- \3 -=- extends \4 -=- \5 -=- \6/p'
+I was getting invalid range end. 
+This was caused by the [A-z]. It should actually be [a-Z].  The prev version works on windows but not on Linux. The corrected character class works on both.
+
+http://www.linuxquestions.org/questions/linux-general-1/bash-programming-append-single-line-to-end-of-file-265534/
+sed -i '$a\text to append to file' $filename #can't be used with the -r switch in this form.
