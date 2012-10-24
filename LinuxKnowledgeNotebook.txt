@@ -827,3 +827,308 @@ This was caused by the [A-z]. It should actually be [a-Z].  The prev version wor
 
 http://www.linuxquestions.org/questions/linux-general-1/bash-programming-append-single-line-to-end-of-file-265534/
 sed -i '$a\text to append to file' $filename #can't be used with the -r switch in this form.
+
+Wed Oct 24 08:19:15 EDT 2012
+24-10-2012
+
+Things I learned/used from playing around with typescript: 
+#goto root svn directory
+cd /cygdrive/c/Intelligrated
+#make a .ts copy of all .js files
+find . -name "*.js" -exec sh -c 'name={}; cp $name ${name%.js}.ts' \;
+#copy only ts files locally, mirroring directory structure
+find /cygdrive/c/Intelligrated/Branches/Intelligrated/Meerkat/Product/ -name "*.ts" | cpio -pmd .
+#run our bash script in each directory
+find . -type d -exec bash ../JStoTS.sh {} \;
+
+obtain ip address
+ip addr
+
+Open SSH Key Management:
+from the ssh key archwiki(https://wiki.archlinux.org/index.php/SSH_Keys) and the open ssh key management page on IBM developerworks http://www.ibm.com/developerworks/library/l-keyc/index.html http://www.ibm.com/developerworks/library/l-keyc2/ http://www.ibm.com/developerworks/linux/library/l-keyc3/
+1)generate ssh key
+ssh-keygen -b 521 -t ecdsa -C "$(id -un)@$(hostname)-$(date --rfc-3339=date)"
+or
+ssh-keygen -b 521 -t ecdsa -C "$(whoami)@$(hostname)-$(date -I)"
+2)copy key to remote machines
+use ssh-copy-id or scp -P portnumber ~/.ssh/keyyoumade.pub usera@host:
+you need th etrialing colot to specify which directory to place it in.
+the ':' places it in /home/user/
+3) on the REMOTE machine copy / append the key you just copied to 
+~/.ssh/authorized_keys
+cat nick.pub >> ~/.ssh/authorized_keys
+Note: at this point you have passphrase autnetication setup but will need to enter in the passpharase for every new connection and every new shell
+4)  make use of ssh variavles
+eval `ssh-agent`
+or
+eval $(ssh-agent)
+5) add your RSA private key to the ssh-agent cache
+ssh-add ~/.ssh/privatekey (not the .pub one)
+now that the passphrase is in the cache you can establish connections without supplying your passphrase
+6)download and install the keychain script written by Daniel Robbines.
+edit your .bash_profile to include;
+/usr/bin/keychain ~/.ssh/privatekey1 ~/.ssh/privatekey2 .....
+source ~/.ssh-agent > /dev/null
+source ~/.bashrc
+7) logout and login and enter your passphrase when prompted.
+8) tada! done
+
+image convert to pdf
+convert *.jpg output.pdf
+convert *.jpg -quality 100 output.pdf
+
+cut /merge PDFS
+1)pdfjoin foo.pdf bar.pdf --outfile foobar.pdf (requires padlatex)
+2) pdftk
+3) use pdflatex
+\usepackaage{pdfpages}
+\begin{document}
+   optional: \includepdfset{pages=-}
+\includepdf{1.pdf}
+\includepdf{2.pdf}
+\end{document}
+
+bash variable trick:
+if you are trying to pass an option etc to a command from a variable then try creating a string. Typically the variable will be expanded correctly. Then run 'eval' on the string that you constructed. Things shoud work beautifully. Useds trick i nMangle
+
+grep SSN
+grep '[0-9]\{3\}-[0-9]\{2\}-[0-9]\{4\}'
+this will only match the pattern and not the line containing the pattern.
+
+wget append to file
+wget url -O - >> file
+the - means to send the output to stdout
+
+View who last logged into PC and form where
+gnu 'last' command
+cat /var/log/lastlog and/or /var/log/wtmp (this is a binary file you read w/ last)
+may also want to check /var/log/auth.log, /var/spool, and /var/lib
+the last two would be more for usage. also checking the shell history would be useful
+also /var/log/messages can hold logs of successful ssh attempts
+
+grep recursively
+grep -r --include="*.sh" foo . # search from the curr diretory in bash files
+grep -r foo . #search all files from curr dir
+grep -r foo a* #search all files in dirs starting w/ a
+
+svn repository change of URL
+in an svn controlled directory type 'svn info' to view details that include the URL used to connect to the repository server.
+to change the URL use 
+svn switch --relocate oldprotocol:oldurl newprotocol:newurl
+e.g.
+svn switch --relocate svn+sshtunnel://192.168.0.3/home/nicola/svn/bash svn+sshtunnel://192.168.1.70/home/nicolae/svn/bash
+
+Git: files rm'ed wo git-rm
+git add -A (prev used 'git add -u')
+git ls-files --deleted | xargs git rm 
+
+Valggrind - memory usage/leak tool
+valgrind --tool=massif programname
+will perform memory usage/leak on program
+
+Bignicky HDD into Dell (HDD migration)
+https://wiki.archlinux.org/index.php/Pacman#Q:_After_updating_my_system.2C_I_get_a_.22unable_to_find_root_device.22_error_after_rebooting_and_my_system_will_no_longer_boot.
+After the bignicky motherboard died because of the blown caps I took the HDD out and placed it in the Dell. Upon boot I got "
+Waiting 10 seconds for /dev/sda1
+ERROR: Unable to find root device '/dev/sda1'
+You are being dropped to a recovery shell
+"
+I booted into the arch installation CD
+https://bbs.archlinux.org/viewtopic.php?pid=1062638
+ls /dev/s* 
+--> see what partitions there are on the HDD that wont' mount
+It showed four partitions so at the root prompt I created four directories.
+mkdir one two three four
+then ls /dev/sda
+actually I think the command was
+blkid -o list -c /dev/null 
+--> view device information from wiki.archlinux.org/index.php/Persistent_block_device_naming
+I then mounted the partitions onto the mount point directories that I made. you only really need to mount the partition that holds the OS and the boot partition.  I'm pretty sure I don't have a separate boot partition so I didn't need to worry about mounting that. It appeared that the partitions were OS, home,swap, and tmp. Now move into the folder where you mounted the OS. Here I mounted the OS on the "one" mountpoint.
+cd one
+at this point we are going to mount appropriate thinsg so that when we perform the update it is performed on the OS on the HDD and not the temporary OS afforded by the arch installation disc
+mount -t proc proc proc/
+mount -t sysfs sys sys/
+mount -o bind /dev/ dev/
+we need to use the change root command 
+chroot . /bin/bash
+-->that last step was a key step
+setup the wired network
+dhcpcd eth0
+now update the system
+pacman -Syy
+pacman -Syu 
+pacman -S udev
+pacman -S mkinitcpio
+mkinitcpio -p linux 
+reboot
+This fixed the problem. I'm not sure if it was an update problem or new harddware or a problem caused by the caps blowing while the system was running.
+
+FStab problem w/ bignicky HDD transfer to Dell
+the fstab had entries for automounting the 2nd HDD,dvd, and card reader
+The 2nd HDD was creating this error
+"fsck.ext4:No such file or directory while trying to open /dev/sdb1
+Possibly non-existent device?"
+I could then reboot or perform maintenance as root.
+I had to log in as root, comment out hte offending line and reboot. I also had to remount the HDD as rw b/c by default it is mounted read only.
+
+Nicolae move to Dell from JDSU rackmount:
+X was broken due to using a new monitor and new graphics card
+sudo Xorg -configure
+backup the old xorg.conf and copy the one you just made and you should be good to go. 
+
+Unlock keyring on Nicolae (after enabling passphrase ssh)
+for some reason I couldn't unlock the keyring when I was given the prompt after tryin got connect to ReoveArch-Nicky. I could however when I cpied and pasted the sshfs command directly into the xterm. 
+
+MySQL bikelog & weightblood pressure from Purdue
+I would ssh into my home computer and log into the mysql server. I would scroll p into the history & modify the previous values with the values for the day
+insert into BloodPressurePulse(SystolicPressure,DiastolicPressure,PulseBPM,ReadingDate) values(128,70,58,20090711);
+insert ComputerLog (Odometer,TripDistance,AverageSpeed,TripTime,Temperature,CaloriesBurned,FatCaloriesBurned,TripDate) values (889.71,3.981,14.5,"00:16:31",32.4,150.0,16.70,20100223085300)
+mysql -u user -p 
+show databases; use databasename; show tables; describe tablename;
+
+mount audioCD
+mount -t iso9660 /dev/cdrom# /media/cdrom0 
+will fail on an audioCD. It will tell yo u
+mount: wrongfs type, bad option, bad superblock on  dev/{DRIVE}
+missing codepage or other error 
+.......
+as such audio CDs can't be mounted. They can be directly read:
+vlc cdda://
+
+Double Port FOrwarding:
+I attempted to get the router upstairs to poert forward (my old netgear rp???v2). I think I screwed things up when playing with the static route option on the Netgear. After a reset I would get an IP but I couldn't connect to the net or even log in to the Netgear webadmin page. I had to perform a hard rest to get access to the webadmin page and to see the net again. Hard rest= hold reset button in until the checkmark blinks at you 
+
+
+Display filesystem type 
+df -T
+
+SSHFS: connection reset by peer.
+try adding -o sshfs_debug
+try ssh. you may see hat thRSA key /known hosts needs to be recognized. sshfs doesn't query you for those credentials
+
+Arch running daemons:
+rc.d list
+
+Time execution of a command 
+preced the command with time
+e.g. time ls -ll 
+time bash jiggitybits.sh
+
+Turning on/off wireless radio on laptop
+If you turn the wifi off via Fn+F2 you can't turn it back on via the same method. YOu need to eneter the bios setup to turn it back on under wireless settings.
+
+display current kernel 
+uname -mrs
+
+list hostname 
+hostname
+also can be found in /etc/hostname (ubuntu)
+and /etc/hosts & /etc/rc.conf (arch)
+
+
+restart teh sssh daemon in Arch
+rc.d start/stop/restart sshd
+
+SSH login banner 
+edit /etc/ssh/sshd_config to enbale & point to a file w/a banner message
+the default banner message 'motd=message of the day' can be found at /etc/motd
+
+Vino server
+installing hte vinoserver allows easy reote desktop access. However,it needs to be secured (remmeber the hack attempt on the linux box I was on at Purdue). This is the server I had to use in Arch to get the ubuntu style shared desktop instead of getting its own separate desktop.
+
+Non resposive or dead laptop screen (dead backlight) + external monitor and BIOS
+Typically with an external monitor hooked up you will net get the BIOS screen to show up on the external monitor without some user intervention. At the bar minimum you'll need to know the keypress sequence to get into the BIOS screen. Alternatively you can just mash on the keyboard hoping you struck the required key. Or just google it.
+Once in the BIOS screen send the video output to the external display. On the Dell inspiron 2200 this is done by pressing FnF8. You will now see the BIOS screen on the external monitor.
+
+Dell Inspiron 2200
+On startup it beeps due to the battery not being recognized. Press F1 to skip or press F2 to enter setup (bios)
+During Normal BIOS F2 gets you to setup & F12
+
+Arch X fails - unable to init/compile kb layout
+its due to the HDD being full that root operates on. Login as root & clean up the package repostitoreies
+
+print to size
+lpr -o fit-to-page
+
+Mozilla profile transfer
+You can trsnfer mozilla profile files across users and they'll load w/o a problem.
+I did copy of ther key3.db & sigma.sqlite files which are used for automated logins.
+
+Mozilla Sessionstore files
+they are cross platform loadable. At least I copied a working sessionstore.js from nicolae(10.10) and loaded it on Windows
+
+Xargs
+find . -name '*.cb[zr]' -print0 | xargs -0 -I {} mv {} -n --target-directory=/home/nicolae/Comics
+the -I needed to tell it we are creating a variable for the argument list.
+otherwise the arguments are tacked onto the end. And this doesn't work (the args being put on the end ) for mv.
+
+find 
+find. -type f -size +0
+useful to look for story files still hanging around after a mv operation like the xargs one above.
+
+find
+find files between two dates
+find ~/some/dir -type f -newrmt 2010-10-29 ! -newermt 20120-10-31
+find files from 29th and  30th
+
+xorg update -> low resolution 
+after an update that involved xorg, the resolution was set low. I think some nvidia drivers were set to be the new drivers as examining the xorg log showed an error about no nvidia driver being found or unable to load. I simply copied an old archived xorg.conf file to xorg.conf. I wasn't sure if this would work as there currently wasn't an xorg.conf int he directory. however this did seem to solve the problem 
+
+Tab autocompletion adds trailing space
+this occurred after installing Adobe Acrobat Reader. The solution appeared to be teh suggested deletion of /etc/bash_completion.d/acroread.sh (yet I was looking in just bash_completion. It appears that my mistake was not installing acroread from the repos as this bug is corrected in the repos.) Anyway I solved the problem by editing /etc/bash_completion line 1587 from -o default to -o filenameas as suggested by a poster. Problem solved. bugs.launchpad.net/ubuntu/+source/acroread/+bug/769866
+
+SSH sshd -D
+I wasn't able to connect to Nicky or Nicolae via ssh after putting them on the wireless at home. I thougt it was a problem with the router and computers being wireless. Some links I foudn suggested that some special configuration was needed in the router besides port forwarding.
+The problem was that sshd was being started w/ the -D switch which doesn't start it as a daemon. I could connect but only while I started a loopback ssh session on the particular machine and left it running. I couldn't figure out where to go to prevent the -D switch from being invoked on startup. I looked in Startup applications and in the /etc/ssh/sshd_config file. 
+To get rid of it I just remvoed, purged,cleaned, & reinstalled openssh-server.
+To properly solve the problem edit /etc/init/ssh.conf
+In retrospect running ps aux | grep ssh and examining the options being passed would've helped to solve the problem. Well live and learn. 
+
+CUPS admin page
+http://localhost:631/admin i.e 192.168.0.1:631
+
+various printer utilities:
+lpinfo -v 
+hp-probe
+
+Printing from command line to HP 2015
+lpr -P HP-LaserJest-P2015-Series file
+ripe for an alias!
+
+Old Ipod 3g, Rockbox & linux
+Ubuntu10.10 recognized it but I think it helps significantly if when yo uplug the ipod in that it is in ipad firmware mode and not Rockbox firmware mode. To do this power up the ipod. While it is still showing the Apple icon flip the hold switch on the top. This will put it in apple firmware mode. 
+
+Mounting SMB shares
+If you can't connect to a smb share graphically then you can try to do it via command line
+sudo apt-get install smbfs smbclient
+smbclient -L 192.168.1.2 -U%
+this will list shares on that ip
+create a mount point just like sshfs
+sudo smbmount //192.168.1.2./folder /home/foo/mountpoint -o username=badass,password=foobar,uid=1000,mask=000
+sudo smbumount /hom/foo/mountpoint
+from ubuntuforms.org/showthres.ph?t=280473
+
+list currently installed packages
+dpkg -l (provides rev of pkg)
+dpkg --get-selections (just pkgname & if isntalled or deinstall)
+
+Remove files without an extension
+rm `ls | grep -v '\.'`
+
+Removing files that begin with a dash
+The problem arises from the fact that the rm command interprets the text following the dash as a switch which it isn't. To overcome this display teh path of the file. This problem applies to most cmd line programs 
+touch ./-shit.txt #this works whereas touch -shit.txt fails
+rm ./-shit.txt #this works rm -shit.txt fails
+
+count occurrences of a string in a file
+grep -o "string" infile | wc -w 
+
+Arch umount - unable to umount device is busy
+try a lazy unmount (-l) instead ofa  forced umount (-f)
+umount -l /path/to/mountpt
+
+Arch mounting usb memory
+from wiki.archlinux.org/index.php/USB_Storage_Devices
+search in /dev/disk/(by_id|by_label)
+make a mnt point
+sudo mount -o rw,noauto,async,user,umask=1000 /dev/sdb1 /mnt/point
