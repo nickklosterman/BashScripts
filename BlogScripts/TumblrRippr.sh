@@ -28,7 +28,7 @@ else
     tmpinstagram=/tmp/instagram
     url=$1
 #obtain the initial webpage 
-    wget "$url" -O index.html
+    wget "$url" -O index.html -U Firefox
     counter=1
 
     FileWebAddress=$( grep ">Older<" index.html )
@@ -42,8 +42,6 @@ else
 	FileWebAddress=$( grep ">Older<" $counter.html )
 	let 'counter+=10'
     done
-
-fi #end catching of num expected args
 
 #have to specify the files this way since can't use regexp . For why check out : man bash and skip down to Pathname Expansion
 #this will give an error if there are not 1,2, or 3 digit files.
@@ -63,3 +61,15 @@ grep .media.tumblr BLOG.html | grep src | sed 's/.*src="//;s/" alt.*//' > $tmptu
 wget -i $tmptumblr -nc
 fi
 
+
+fi #end catching of num expected args
+
+
+# Above was for skottie youngs tumblr that referenced his instagrams
+
+# For Creaturebox.tumblr.com:
+# I couldn't just grab the creaturebox.tumlbr.com page. It rejected wget without a useragent tag and then it handed back some split frames when I passed in a user agent string of Mozilla.  using a string of "Firefox" did get me what I wanted tho. this is a good resource : http://www.useragentstring.com/pages/useragentstring.php
+# grep '<a id="post_' archive | sed 's/.*href="//;s/" >//' > filelist.txt
+# wget -i filelist.txt
+# cat * BLOGGG.html
+# grep lightbox BLOGGG.html | sed 's/.*href="//;s/">.*//' > imagelist.txt; wget -i imagelist.txt

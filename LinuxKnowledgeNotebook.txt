@@ -1132,3 +1132,43 @@ from wiki.archlinux.org/index.php/USB_Storage_Devices
 search in /dev/disk/(by_id|by_label)
 make a mnt point
 sudo mount -o rw,noauto,async,user,umask=1000 /dev/sdb1 /mnt/point
+
+Kill running process in Emacs
+When a command is hanging and you want to kill it in Emacs
+C-g
+
+Thu Oct 25 11:14:46 EDT 2012
+25-10-2012
+
+file link exists
+ln: creating symbolic link `/foo/bar': File exists
+use 
+ln -si A B
+to prompt you to overwrite B
+
+
+Fri Oct 26 08:38:02 EDT 2012
+26-10-2012
+
+read random line from file
+shuf file.txt | head -n 1
+also see this file BashScripts/Sandbox/Randomfilelines.txt
+http://www.google.com/search?q=bash+get+random+line+of+file&aq=0&oq=bash+get+random+line+of+&sugexp=chrome,mod=0&sourceid=chrome&ie=UTF-8
+
+Mon Oct 29 17:03:58 EDT 2012
+29-10-2012
+
+grep within zipped/tarred files without extracting them
+zgrep "some text" file*.zip
+or use gzcat, zcat, zless
+
+Tue Oct 30 14:20:15 EDT 2012
+30-10-2012
+
+The preceding example redirects the standard output into a file by using the > operator. By default, if the
+file already exists, then it will be overwritten. If you want to change the default behavior, you can use
+the command set -o noclobber (or set -C), which sets the noclobber option to prevent a file from
+being overwritten using redirection. You can cancel this option using set +o noclobber.
+
+http://www.useragentstring.com/pages/useragentstring.php
+user agent strings for wget 
