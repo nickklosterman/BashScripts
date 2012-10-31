@@ -1172,3 +1172,100 @@ being overwritten using redirection. You can cancel this option using set +o noc
 
 http://www.useragentstring.com/pages/useragentstring.php
 user agent strings for wget 
+
+Unable to mount 2.0 TB Filesystem
+
+Error mounting: mount: wrong fs type, bad option, bad superblock on /dev/sdb4, missing codepage or helper program, or other error In some cases useful info is found in syslog -try dmesg | tail or so
+
+Stack Exchange
+log in chat meta about faq
+
+Ask Ubuntu
+
+    Questions
+    Tags
+    Users
+    Badges
+    Unanswered
+
+    Ask Question
+
+'Unable to mount Filesystem' Error
+up vote 3 down vote favorite
+1
+	
+
+Trying to extract data from a 'bricked' Western Digital MyBook Live 2tb drive.
+
+I came across a forum that advised to use Ubuntu (booted from a CD) on my Macbook. Managed to download and create a boot CD for Ubuntu (like this little operating system btw). Booted the machine with the CD and plugged the drive (which I had extracted from it's casing and placed into a external USB SATA case & plugged to the laptop). The drive is seen by Ubuntu but each time I click on the drive, it gives me the following error:
+
+Unable to mount 2.0 TB Filesystem
+
+Error mounting: mount: wrong fs type, bad option, bad superblock on /dev/sdb4, missing codepage or helper program, or other error In some cases useful info is found in syslog -try dmesg | tail or so
+
+dmesg | tail gives : 
+[  168.231059] EXT4-fs (sda2): ext4_check_descriptors: Checksum for group 0 failed (29853!=52284)
+[  168.231068] EXT4-fs (sda2): group descriptors corrupted!
+
+I followed these posts:
+http://askubuntu.com/questions/113861/unable-to-mount-filesystem-error
+http://www.linuxquestions.org/questions/linux-newbie-8/group-descriptors-corrupted-913837/
+http://linuxexpresso.wordpress.com/2010/03/31/repair-a-broken-ext4-superblock-in-ubuntu/
+http://ubuntuforums.org/showthread.php?p=9106100
+
+and entered these commands 
+
+sudo fdisk -l /dev/sdb1
+sudo fsck /dev/sdb1
+sudo fsck.ext4 -v /dev/sdb1
+sudo fsck.ext4 /dev/sdb1
+
+nicolae@nicolae-desktop:~$ sudo fdisk -l /dev/sdb1
+[sudo] password for nicolae: 
+
+Disk /dev/sdb1: 80.1 GB, 80056617984 bytes
+255 heads, 63 sectors/track, 9732 cylinders
+Units = cylinders of 16065 * 512 = 8225280 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x00000000
+
+Disk /dev/sdb1 doesn't contain a valid partition table
+
+nicolae@nicolae-desktop:~$ sudo fsck /dev/sdb1
+fsck from util-linux-ng 2.17.2
+e2fsck 1.41.12 (17-May-2010)
+Reavers: clean, 8101/4890624 files, 19342805/19545072 blocks
+
+nicolae@nicolae-desktop:~$ sudo fsck -v /dev/sdb1
+fsck from util-linux-ng 2.17.2
+e2fsck 1.41.12 (17-May-2010)
+Reavers: clean, 8101/4890624 files, 19342805/19545072 blocks
+nicolae@nicolae-desktop:~$ sudo fsck  /dev/sdb1
+fsck from util-linux-ng 2.17.2
+e2fsck 1.41.12 (17-May-2010)
+Reavers: clean, 8101/4890624 files, 19342805/19545072 blocks
+nicolae@nicolae-desktop:~$ sudo fsck.ext4 -v  /dev/sdb1
+e2fsck 1.41.12 (17-May-2010)
+Reavers: clean, 8101/4890624 files, 19342805/19545072 blocks
+nicolae@nicolae-desktop:~$ sudo fsck.ext4  /dev/sdb1
+e2fsck 1.41.12 (17-May-2010)
+One or more block group descriptor checksums are invalid.  Fix<y>? yes
+
+Group descriptor 207 checksum is invalid.  FIXED.
+Reavers contains a file system with errors, check forced.
+Pass 1: Checking inodes, blocks, and sizes
+Pass 2: Checking directory structure
+Pass 3: Checking directory connectivity
+Pass 4: Checking reference counts
+Pass 5: Checking group summary information
+Inode bitmap differences:  -1695753 -1695755 -1695757 -1695759 -1695761 -(1695763--1695765) -(1695767--1695770) -1695773 -1695776 -1695779 -(1695784--1695785) -(1695787--1695792) -(1695794--1695795) -1695798 -(1695802--1695805) -1695810 -(1695813--1695820) -1695822 -1695824 -1695828 -(1695832--1695835) -(1695838--1695840) -(1695842--1695843) -1695848 -(1695853--1695854) -(1695856--1695858) -(1695862--1695863) -(1695866--1695870) -(1695872--1695873) -1695875 -(1695878--1695882) -(1695884--1695885) -(1695887--1695890) -1695896 lots more output
+
+Fix<y>? yes
+
+
+Reavers: ***** FILE SYSTEM WAS MODIFIED *****
+Reavers: 8101/4890624 files (5.6% non-contiguous), 19342805/19545072 blocks
+nicolae@nicolae-desktop:~$ sudo fsck.ext4  /dev/sdb1
+e2fsck 1.41.12 (17-May-2010)
+Reavers: clean, 8101/4890624 files, 19342805/19545072 blocks
