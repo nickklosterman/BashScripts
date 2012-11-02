@@ -1269,3 +1269,12 @@ Reavers: 8101/4890624 files (5.6% non-contiguous), 19342805/19545072 blocks
 nicolae@nicolae-desktop:~$ sudo fsck.ext4  /dev/sdb1
 e2fsck 1.41.12 (17-May-2010)
 Reavers: clean, 8101/4890624 files, 19342805/19545072 blocks
+
+Thu Nov  1 10:32:31 EDT 2012
+01-10-2012
+
+have contents of shell command entered into buffer
+C-u M-! is an all purpose command to have the output of any shell command piped into the current buffer
+
+C-u M-! date +%d-%m-%Y
+ 
