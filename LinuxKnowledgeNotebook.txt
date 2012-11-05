@@ -1278,3 +1278,7 @@ C-u M-! is an all purpose command to have the output of any shell command piped 
 
 C-u M-! date +%d-%m-%Y
  
+Mon Nov  5 15:42:58 EST 2012
+05-11-2012
+In python you can add arguments to .strip() that allow you to specify what other characters to strip from a string
+also: The characters python considers whitespace are stored in string.whitespace
