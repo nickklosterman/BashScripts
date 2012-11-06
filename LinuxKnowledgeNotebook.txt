@@ -447,7 +447,7 @@ nick.klosterman@MAS002326-LAP ~/Sandbox/jsToTS
 $ bash ../JStoTS.sh
 ../JStoTS.sh: line 43: syntax error near unexpected token `$ts_file'
 ../JStoTS.sh: line 43: `CleanEndingParensBrackets() $ts_file'
---> this is because you need to remove the () on the function name when calling it. It is even optional when defining a function (although it adds to portability according to ans-guide.pdf). 
+--> this is because you need to remove the () on the function name when calling it. It is even optional when defining a function (although it adds to portability according to abs-guide.pdf). 
 
 http://alexjmackey.wordpress.com/2012/10/06/what-is-typescript/
 http://stackoverflow.com/questions/12845810/typescript-module-namespacing-in-multiple-files
