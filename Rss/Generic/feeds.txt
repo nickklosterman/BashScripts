@@ -10,5 +10,6 @@
 	#http://www.facebook.com/jakeparkerart?ref=tn_tnmn,~/.RSS/skottieyoungtumblr
 	#http://web.stagram.com/n/jakeparker/,~/.RSS/skottieyoungtumblr
 http://widget.stagram.com/rss/n/jakeparker/,~/.RSS/mrjakeparkerinstagram
+#http://widget.stagram.com/rss/n/jakeparker/,/home/arch-nicky/.RSS/mrjakeparkerinstagram
 #http://widget.stagram.com/n/jakeparker/,~/.RSS/mrjakeparkerinstagram
 

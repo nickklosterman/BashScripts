@@ -1176,25 +1176,6 @@ user agent strings for wget
 Unable to mount 2.0 TB Filesystem
 
 Error mounting: mount: wrong fs type, bad option, bad superblock on /dev/sdb4, missing codepage or helper program, or other error In some cases useful info is found in syslog -try dmesg | tail or so
-
-Stack Exchange
-log in chat meta about faq
-
-Ask Ubuntu
-
-    Questions
-    Tags
-    Users
-    Badges
-    Unanswered
-
-    Ask Question
-
-'Unable to mount Filesystem' Error
-up vote 3 down vote favorite
-1
-	
-
 Trying to extract data from a 'bricked' Western Digital MyBook Live 2tb drive.
 
 I came across a forum that advised to use Ubuntu (booted from a CD) on my Macbook. Managed to download and create a boot CD for Ubuntu (like this little operating system btw). Booted the machine with the CD and plugged the drive (which I had extracted from it's casing and placed into a external USB SATA case & plugged to the laptop). The drive is seen by Ubuntu but each time I click on the drive, it gives me the following error:
@@ -1282,3 +1263,7 @@ Mon Nov  5 15:42:58 EST 2012
 05-11-2012
 In python you can add arguments to .strip() that allow you to specify what other characters to strip from a string
 also: The characters python considers whitespace are stored in string.whitespace
+
+Wed Nov  7 18:14:10 EST 2012
+07-11-2012
+Python expand users relative path: file = os.path.expanduser(file) 

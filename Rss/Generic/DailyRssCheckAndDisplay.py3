@@ -62,6 +62,7 @@ def ObtainFeed(url):
     return atom
 
 def ObtainFeedFile(file): 
+    file=os.path.expanduser(file) #expand tilde's
     atom=feedparser.parse(file,'r')#(r'/tmp/JPrss') # using feedparser on a file http://packages.python.org/feedparser/introduction.html
 #    BuildFeedParserTree
     PrintFeed2(atom) #since some fields are missing I need to build a class and objects such that missing fields are filled with appropriate values etc. 
