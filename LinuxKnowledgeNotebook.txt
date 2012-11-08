@@ -963,6 +963,21 @@ mkinitcpio -p linux
 reboot
 This fixed the problem. I'm not sure if it was an update problem or new harddware or a problem caused by the caps blowing while the system was running.
 
+I re-encountered the above problem when trying to perform an update and encountering the problem with /lib moving to /usr/lib. I initially threw the nicky drive into the dell and it worked fine. I updated and it seemed that the update ran fine. I then rebooted to double check and got the above error. This gave the following error:
+error: failed to commit transaction (conflicting files)
+glibc: /lib exists in filesystem
+Errors occurred, no packages were upgraded.
+I followed the instructions here: https://wiki.archlinux.org/index.php/DeveloperWiki:usrlib
+The install was relatively new and the update took care of removing items unrelated to glibc in /lib. This : https://wiki.archlinux.org/index.php/Pacman#Q:_I_get_an_error_when_updating:_.22file_exists_in_filesystem.22.21 is related to the problems I was having. I nutted up and moved /lib to /usr/libold.  I then to pacman update and it returned "bash: /usr/pacman no such file or directory" so moving /lib was bad. It broke all commands. I fumbled blindly in the dark trying to get functionality back but many commands such as cp/ls etc were broken giving similar error results. I then rebooted and redid the mounting/mapping process. I attempted to chroot but that was broken still. I then moved /usr/libold/*.* back to /lib this then allowed me to perform chroot etc. By copying just *.* instead of all of it I think that resolved the issue. As the wiki told when you get the file exists in filesystem, you need to remove all instances in the /lib that are owned by other programs etc. running : grep '^lib/' /var/lib/pacman/local/*/files and  find /lib -exec pacman -Qo -- {} + didn't return anything owned by other programs. Everything was owned by glibc. There were a couple that those commands couldn't determine the owner.  The first time I mounted the drives and did the update I attempted to perform a "mkinitcpio -p linux" and it failed with an error about some modules. I believe that these modules were in their own directory in /lib and that they were the ones causing the update of glibc to fail. By only copying /usr/libold/*.* instead of a recursive copy I left the bad files out and prevented them from screwing stuff up. 
+After the copy I then did : 
+pacman -Syu 
+pacman -Su
+mkinitcpio -p linux
+This mkinit then ran fine. I rebooted and it all worked fine with the update and finding /sda1. 
+I did an update inside openbox and it worked ran without a hitch. There were no files to update but that was to be expected since I had just done that.
+At one point I had done pacman -U http://pkgbuild.com/~allan/glibc-2.16.0-1-<arch>.pkg.tar.xz with <arch> replaced by i686. The wiki stated that this would save a bit of trouble when updating if it hadn't been updated to that level of glibc yet. It ran without a hitch. I'm not sure if in the end that helped or hurt. My final update updated glibc to 2.16.0.5.
+
+
 FStab problem w/ bignicky HDD transfer to Dell
 the fstab had entries for automounting the 2nd HDD,dvd, and card reader
 The 2nd HDD was creating this error
@@ -1267,3 +1282,17 @@ also: The characters python considers whitespace are stored in string.whitespace
 Wed Nov  7 18:14:10 EST 2012
 07-11-2012
 Python expand users relative path: file = os.path.expanduser(file) 
+
+sudo pacman -R <PackageName>
+If you cannot figure out the exact name of the package (it is not the same as the name of archive you installed), use pacman -Qsq to provide a list of installed packages.
+
+I needed to install BeautifulSoup on arch linux. 
+I ran:
+sudo pacman -Syu python-beautifulsoup
+which defaults to getting the version for python2 (not 3)
+I then had to go through the rigamarole of removing it as shown above so that I could get BS4
+pacman -Syu python-beautifulsoup4
+The documentation is pretty awesome: http://www.crummy.com/software/BeautifulSoup/bs4/doc/
+
+http://stackoverflow.com/questions/9056932/rss-python-parsing-single-image-url?rq=1
+http://stackoverflow.com/questions/5221126/twitter-rss-or-otherwise-get-100-latest-tweets

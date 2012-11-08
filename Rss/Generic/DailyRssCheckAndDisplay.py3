@@ -1,38 +1,48 @@
 #!/usr/bin/python
 
+try:
+    import xml.etree.cElementTree as ET #this module is much faster and consumes less memory
+except ImportError:
+    import xml.etree.ElementTree as ET
+
 class FeedEntry:
     def __init__(self,entries):
-        self.summary=entries[i].summary
-        self.links=entries[i].links
-        self.link=entries[i].link
-        self.title=entries[i].title
-        self.title_detail=entries[i].title_detail
-        self.published=entries[i].published
-        self.summary_detail=entries[i].summary_detail
-        self.title=entries[i].title
+        self.summary=entries.summary
+        self.links=entries.links
+        self.link=entries.link
+        self.title=entries.title
+        self.title_detail=entries.title_detail
+        self.published=entries.published
+        self.summary_detail=entries.summary_detail
+        self.title=entries.title
         try:
-            self.id=entries[i].id
+            self.id=entries.id
         except AttributeError:
             self.id=None
         try:
-            self.guidslink=entries[i].guidislink
+            self.guidslink=entries.guidislink
         except AttributeError:
             self.guidslink=None
 #        print(("%s\n" % (atom.entries[i].published_parsed)))
 
+
 class FeedParserTreeURL:
     def __init__(self,url):
         self.FeedEntryList=[]
-        atom=ObtainFeed(url)
+        handle = urllib.request.urlopen(url)
+        atom=feedparser.parse( handle) 
+        print(atom.etag)
         for i in range(len(atom.entries)):
-            self.FeedEntryList.append(FeedEntry(atom.entries))
+            self.FeedEntryList.append(FeedEntry(atom.entries[i]))
 
 class FeedParserTreeFile:
     def __init__(self,file):
         self.FeedEntryList=[]
-        atom=ObtainFeedFile(file)
+        file=os.path.expanduser(file) #expand tilde's into user's path
+        atom=feedparser.parse(file,'r')#(r'/tmp/JPrss') # using feedparser on a file http://packages.python.org/feedparser/introduction.html
+        print(atom.etag)
         for i in range(len(atom.entries)):
-            self.FeedEntryList.append(FeedEntry(atom.entries))
+            self.FeedEntryList.append(FeedEntry(atom.entries[i]))
 
 class FeedParserCompareTree:
     def __init__(self,item):
@@ -41,18 +51,17 @@ class FeedParserCompareTree:
         self.Tree.append(FeedParserTreeFile(item[1]))
     def CompareTrees(self):
         uniqueList = []
-        uniqueListTempFiles = []
         duplicateList = []
-        for value in self.Tree[0]:
-            if value[1] not in uniqueListTempFiles:
-                uniqueList.append(value)
-                uniqueListTempFiles.append(value[1])
-            else:
-                duplicateList.append(value)
-        if len(duplicateList)>0:
-            print("You are using a temp file more than once. Here is a list of the second occurrence with its url.")
-            print(duplicateList)
-        return uniqueList #duplicateList
+        print(self.Tree[0],self.Tree[1])
+        # for value in self.Tree[0]:
+        #     if value[1] not in uniqueListTempFiles:
+        #         uniqueList.append(value)
+        #     else:
+        #         duplicateList.append(value)
+        # if len(duplicateList)>0:
+        #     print("You are using a temp file more than once. Here is a list of the second occurrence with its url.")
+        #     print(duplicateList)
+        # return uniqueList #duplicateList
         
         
     
@@ -64,8 +73,7 @@ def ObtainFeed(url):
 def ObtainFeedFile(file): 
     file=os.path.expanduser(file) #expand tilde's
     atom=feedparser.parse(file,'r')#(r'/tmp/JPrss') # using feedparser on a file http://packages.python.org/feedparser/introduction.html
-#    BuildFeedParserTree
-    PrintFeed2(atom) #since some fields are missing I need to build a class and objects such that missing fields are filled with appropriate values etc. 
+    #PrintFeed2(atom) #since some fields are missing I need to build a class and objects such that missing fields are filled with appropriate values etc. 
     return atom
 
 #from http://www.techniqal.com/blog/2008/07/31/python-file-read-write-with-urllib2/
@@ -187,19 +195,20 @@ if len(sys.argv)>1 and  sys.argv[1]!="":
     feedfile=sys.argv[1]
     feedandtempfilelist=ParseFeedFile(feedfile)
 #    SaveFeedFile()
-
     print(feedandtempfilelist)
     CheckFeedList(feedandtempfilelist)
     nonDupList=CheckFeedFileForDuplicates(feedandtempfilelist)
     print(nonDupList)
     for item in nonDupList:
-        print(item[0])
-        feedurl=ObtainFeed(item[0])
-        feedfromfile=ObtainFeedFile(item[1]) #I foudn that you had to compare the two parseed trees bc the file may have timestamps that change when you retrieve the xml/rss file. I found this out by grabbing http://widget.stagram.com/rss/n/jakeparker/ and grabbing it a bit later and performing a diff on the two and finding differences in the file. 
-        if feedurl==feedfromfile:
-            print("They are equal")
-        else:
-            print("they ain't equal")
+        Billy=FeedParserCompareTree(item)
+        Billy.CompareTrees()
+#        print(item[0])
+#        feedurl=ObtainFeed(item[0])
+#        feedfromfile=ObtainFeedFile(item[1]) #I foudn that you had to compare the two parseed trees bc the file may have timestamps that change when you retrieve the xml/rss file. I found this out by grabbing http://widget.stagram.com/rss/n/jakeparker/ and grabbing it a bit later and performing a diff on the two and finding differences in the file. 
+#        if feedurl==feedfromfile:
+#            print("They are equal")
+#        else:
+#            print("they ain't equal")
         #PrintFeed2(feedurl)
 else:
     print("No Login File Specified: gmailcheckparseconky.py loginfile.txt")

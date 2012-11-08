@@ -1,0 +1,9 @@
+#!/usr/bin/python
+import urllib.request
+request=urllib.request.Request('http://diveintomark.org/xml/atom.xml')
+opener=urllib.reqeust.build_opener()
+firstdatastream=opener.open(request)
+firstdatastream.headers.dict
+
+request.add_header('If-Modified-Since',firstdatastream.headers.get('Last-Modified')) 
+seconddatastream = opener.open(request)
