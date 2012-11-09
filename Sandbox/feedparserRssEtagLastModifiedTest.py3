@@ -40,13 +40,19 @@ import feedparser
 from bs4 import BeautifulSoup
 
 rsslist=[ "http://skottieyoung.tumblr.com/rss",
-"http://mrjakeparker.com/feed/",
-"http://mrjakeparker.tumblr.com/rss",
-#"http://mrjakeparker.com/blog/" ],#this feed doesn't work.  
- "https://twitter.com/mrjakeparker",
- "http://www.facebook.com/jakeparkerart?ref=tn_tnmn",
- "http://web.stagram.com/n/jakeparker/",
- "http://widget.stagram.com/rss/n/jakeparker/"]
+          "http://mrjakeparker.com/feed/",
+          "http://mrjakeparker.tumblr.com/rss",
+          #"http://mrjakeparker.com/blog/" ],#this feed doesn't work.  
+          # "https://twitter.com/mrjakeparker",
+          # "http://www.facebook.com/jakeparkerart?ref=tn_tnmn",
+          # "http://web.stagram.com/n/jakeparker/",
+          "http://widget.stagram.com/rss/n/jakeparker/"]
+
+filelist=["~/.Rss/skottieyoungtumblr",
+          "~/.Rss/mrjakeparker",
+          "~/.Rss/mrjakeparkertumblr",
+          "~/.Rss/jakeparkerinstagram"
+]
 for feed in rsslist:
     print('--------%s-------' % (feed))
     d=feedparser.parse(feed)
@@ -55,7 +61,6 @@ for feed in rsslist:
         etag=d.feed.get('etag',None)
         modified=d.get('modified',d.get('updated',d.entries[0].get('published','no modified,update or published fields present in rss')))
         modified = feed_modified_date(d)
-
 #        d2=feedparser.parse(feed,modified)
         d2 = feedparser.parse(feed, etag=etag, modified=modified)
         print('second feed length %i' % len(d2.entries))
@@ -77,14 +82,10 @@ for feed in rsslist:
 #            print(images)
             for item in images:
                 print(item.get("src"))
-            
 #            GetImageURL(rss_post_description)
-
-
         if (len(d2.entries) > 0):
             etag2=d2.feed.get('etag','')
             modified2=d2.get('updated',d.entries[0].get('published',''))
-            
         if (d2==d): #ideally we would never see this bc etags/last modified would prevent unnecessarily downloading what we all ready have.
             print("Arrg these are the same")
             

@@ -2,9 +2,9 @@
 # format: url, temp file path and name 
 #
 
-#http://skottieyoung.tumblr.com/rss,~/.RSS/skottieyoungtumblr
-#http://mrjakeparker.com/feed/,~/.RSS/mrjakeparker
-#http://mrjakeparker.tumblr.com/,~/.RSS/mrjakeparkertumblr
+http://skottieyoung.tumblr.com/rss,~/.RSS/skottieyoungtumblr
+http://mrjakeparker.com/feed/,~/.RSS/mrjakeparker
+http://mrjakeparker.tumblr.com/,~/.RSS/mrjakeparkertumblr
 #http://mrjakeparker.com/blog/,~/.RSS/mrjakeparkerblog
 #https://twitter.com/mrjakeparker,~/.RSS/mrjakeparkertwitter
 	#http://www.facebook.com/jakeparkerart?ref=tn_tnmn,~/.RSS/skottieyoungtumblr

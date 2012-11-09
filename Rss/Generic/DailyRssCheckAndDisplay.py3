@@ -28,13 +28,25 @@ class FeedEntry:
 
 class FeedParserTreeURL:
     def __init__(self,url):
+        self.ImageList=[]
         self.FeedEntryList=[]
         handle = urllib.request.urlopen(url)
         atom=feedparser.parse( handle) 
-        print(atom.etag)
+        #print(atom.etag)
         for i in range(len(atom.entries)):
             self.FeedEntryList.append(FeedEntry(atom.entries[i]))
-
+    def CreateImagelist(self):
+        for item in self.FeedEntryList:
+            soup = BeautifulSoup(item.get('description',None))
+            images=soup.find_all("img")
+            for imageitem in images:
+                self.ImageList.append(imageitem.get("src"))
+    def WriteImageListToFile(self,filename):
+        filehandle=open(filename,'w')
+        filehandle.write(self.ImageList)
+        filehandle.close()
+    
+    
 class FeedParserTreeFile:
     def __init__(self,file):
         self.FeedEntryList=[]
@@ -44,15 +56,29 @@ class FeedParserTreeFile:
         for i in range(len(atom.entries)):
             self.FeedEntryList.append(FeedEntry(atom.entries[i]))
 
+class ImageListFromFile:
+    def __init__(self,file):
+        self.ImageList=[]
+        if os.path.isfile(file):
+            filehandle=open(feedfile,'r')
+            for line in filehandle:
+                line_=line.strip(' \t\r\n') #strip whitespace
+                if len(line_)>1 and line_[0]!='#': #skip comment lines
+                    self.ImageList.append(line_) 
+
+        
+
 class FeedParserCompareTree:
     def __init__(self,item):
         self.Tree=[] # I think I really want dicts and not lists....esp of FeedParserTreeURL adn FeedParserTreeFile
         self.Tree.append(FeedParserTreeURL(item[0]))
-        self.Tree.append(FeedParserTreeFile(item[1]))
+#        self.Tree.append(FeedParserTreeFile(item[1]))
+        self.Tree.append(ImageListFromFile(item[1]))
     def CompareTrees(self):
         uniqueList = []
         duplicateList = []
-        print(self.Tree[0],self.Tree[1])
+        #print(self.Tree[0],self.Tree[1])
+        
         # for value in self.Tree[0]:
         #     if value[1] not in uniqueListTempFiles:
         #         uniqueList.append(value)

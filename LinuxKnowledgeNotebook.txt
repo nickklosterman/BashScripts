@@ -1296,3 +1296,17 @@ The documentation is pretty awesome: http://www.crummy.com/software/BeautifulSou
 
 http://stackoverflow.com/questions/9056932/rss-python-parsing-single-image-url?rq=1
 http://stackoverflow.com/questions/5221126/twitter-rss-or-otherwise-get-100-latest-tweets
+
+Fri Nov  9 11:22:14 EST 2012
+09-11-2012
+
+open something in X while logged in remotely (http://unix.stackexchange.com/questions/10121/open-a-window-on-a-remote-x-display-why-cannot-open-display )
+DISPLAY=:0.0 evince cmichae-resume.pdf
+
+PyGTK has been deprecated in favor of PyGI+GTK. Because of that, a version of PyGTK for Python 3 was never written.
+To use PyGI+GTK in Python 3, you need to install the python3-gobject package and do
+from gi.repository import Gtk
+For a quick introduction on porting PyGTK code to PyGI+GTK, see here:
+https://live.gnome.org/PyGObject/IntrospectionPorting
+For a full tutorial, see here:
+http://readthedocs.org/docs/python-gtk-3-tutorial/en/latest/index.html
