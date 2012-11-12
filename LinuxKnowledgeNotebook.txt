@@ -1304,9 +1304,26 @@ open something in X while logged in remotely (http://unix.stackexchange.com/ques
 DISPLAY=:0.0 evince cmichae-resume.pdf
 
 PyGTK has been deprecated in favor of PyGI+GTK. Because of that, a version of PyGTK for Python 3 was never written.
-To use PyGI+GTK in Python 3, you need to install the python3-gobject package and do
+To use PyGI+GTK in Python 3, you need to install the python-gobject and gtk3 packages and do
 from gi.repository import Gtk
 For a quick introduction on porting PyGTK code to PyGI+GTK, see here:
 https://live.gnome.org/PyGObject/IntrospectionPorting
 For a full tutorial, see here:
 http://readthedocs.org/docs/python-gtk-3-tutorial/en/latest/index.html
+
+
+Mon Nov 12 10:01:09 EST 2012
+12-11-2012
+so far I haven't been able to get Gtk to work. 
+I stumbled across needing to import pygobject-devel
+
+Get Python dirname,basename
+>>> import os
+>>> os.path.dirname('/root/dir/sub/file.ext')
+'/root/dir/sub'
+>>> os.path.splitext('/root/dir/sub/file.ext')
+('/root/dir/sub/file', '.ext')
+>>> os.path.splitext('/root/dir/sub/file.ext')[0]
+'/root/dir/sub/file'
+
+According to https://wiki.archlinux.org/index.php/GTK%2B I needed gtk3 and python-gobject to including Gtk from gi.repository.

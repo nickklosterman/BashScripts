@@ -6,14 +6,19 @@
 #compare two lists of images and output the newest images not in the older set(from file)
 # if imagelist=[ a b ] and imagelistfromfile = [b c d e] then outputlist=[a] , we use the break to prevent d,e from being in outputlist
 def CompareImageLists(imagelist,imagelistfromfile):
+#this method seems to break with long strings causing the "in" method to fail. 
     outputlist=[]
     if imagelist and imagelistfromfile:
+#        print("imagelist: %s ; imagelistfromfile: %s" % (imagelist,imagelistfromfile))
         for item in imagelist:
             if item not in imagelistfromfile:
+#                print("item:%s" % item)
                 outputlist.append(item)
             else:
-                break 
-    else:
+                print("%i new images" % len(outputlist)) 
+                break  #break out of for statement
+    else: # stuff
+        print("no new images")
         outputlist=imagelistfromfile
     return outputlist
 
@@ -25,7 +30,7 @@ def WriteImageListToFileFromDescription(descriptionfile,descriptionlist):
         print('Writing %s' % imagefile)
         filehandle=open(imagefile,"w")
         for item in descriptionlist:
-            soup = BeautifulSoup(item) #when I was passing the items to a function for the images to be stripped, things weren't working
+            soup = BeautifulSoup(item) #when I was passing the items to a function for the images to be stripped via BeautifulSoup, things weren't working
             images=soup.find_all("img")
             for image in images:
                 if image.get("src") not in imagelist: #prevent duplicates from being added to our list
@@ -50,13 +55,16 @@ def CompareDescriptionListFromFeedToDescriptionListFromFile(descriptionlist,desc
         filehandle=open(descriptionfile,'r')
         descriptionlistfromfile=[]
         for line in filehandle:
-            line_=line.strip(' \t\r\n') #strip whitespace
-            if len(line_)>1 and line_[0]!='#': #skip comment lines
-                descriptionlistfromfile.append(line_)
+            descriptionlistfromfile.append(line.strip('\n\t\r'))
         outputdescriptionlist=CompareImageLists(descriptionlist,descriptionlistfromfile)
-    #if there isn't a file to read we output the list from the rss feed 
+    else:
+        print("os.path.isfile(%s) is false" % descriptionfile)
+        print("Initial write of %s." % descriptionfile)
+
+   #if there isn't a file to read we output the list from the rss feed 
     if not outputdescriptionlist:
-        outputdescriptionlist=descriptionlist
+        outputdescriptionlist=descriptionlist #copy items from rss to output list
+ 
     WriteDescriptionListToFile(descriptionfile,outputdescriptionlist)
     WriteImageListToFileFromDescription(descriptionfile,outputdescriptionlist)
 
@@ -65,8 +73,16 @@ def GetDescriptionListFromFeed(feed):
     descriptionlist=[]
     if (len(d.entries) > 0):
         for index in range(len(d.entries)):
-            rss_post_description=d.entries[index].get('description','uh oh no descrip')
+            rss_post_description=d.entries[index].get('description','uh oh no descrip') # SEE Note 1:
+            rss_post_media_content=d.entries[index].get('media_content','') 
+            media_list=[]
+            for media in rss_post_media_content:
+                media_list.append(media.get('url',''))
             descriptionlist.append(rss_post_description)
+            if media_list: #make sure its not empty
+                for media_list_item in media_list: #append the individual items to our list, otherwise it seems we append a list to our list
+                    descriptionlist.append(media_list_item)
+                                  
     return descriptionlist
 
 # used to create a long string instead of newline separated images for input to feh
@@ -99,6 +115,11 @@ def CheckFeedFileForDuplicates(feedList):
         print("You are using a temp file more than once. Here is a list of the second occurrence with its url.")
         print(duplicateList)
     return uniqueList #duplicateList
+
+def CreateTempFileFromURL(url):
+    if url[0:7]=="http://":#check to see if the url starts with http://
+        url=url[7:] #lop off http://
+    print(url.replace('.','-').replace('/','_')) #replace periods and slashes with hyphens and underscores
 
 #read our rss feed file and create a list with the contents.
 def ParseFeedFile(feedfile):
@@ -138,3 +159,15 @@ if len(sys.argv)>1 and  sys.argv[1]!="":
 
 
 
+#Note 1:
+# it appears that jeremyfish uses a diff format. 
+#the <content:encoded> tag has more info than <description> and the images are specified in a <media:content> tag 
+#
+#<media:content url="http://2.gravatar.com/avatar/b5c680ae65ef8f86e2836149e5a9ca49?s=96&#38;d=identicon&#38;r=G" medium="image">
+#        <media:title type="html">jeremyfish</media:title>
+#</media:content>
+#
+#--> http://stackoverflow.com/questions/2461853/how-to-parse-the-mediagroup-using-feedparser
+
+#kahnehteh.blogspot.com: I need to prevent getting googleusercontent tracking images <img alt="" height="1" src="https://blogger.googleusercontent.com/tracker/17896366-6108934090819161882?l=kahnehteh.blogspot.com" width="1" /> These are in the footer
+# blogspot also seems to have a weird format due to google namespace
