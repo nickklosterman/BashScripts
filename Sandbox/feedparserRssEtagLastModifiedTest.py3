@@ -46,7 +46,10 @@ rsslist=[ "http://skottieyoung.tumblr.com/rss",
           # "https://twitter.com/mrjakeparker",
           # "http://www.facebook.com/jakeparkerart?ref=tn_tnmn",
           # "http://web.stagram.com/n/jakeparker/",
-          "http://widget.stagram.com/rss/n/jakeparker/"]
+          "http://widget.stagram.com/rss/n/jakeparker/",
+          "http://widget.stagram.com/rss/n/jakeparker/",
+          "http://jeremyfish.wordpress.com/feed/",
+          "http://kahnehteh.blogspot.com/feeds/posts/default"] #I need some type of method to get the full rss url from the main page.
 
 filelist=["~/.Rss/skottieyoungtumblr",
           "~/.Rss/mrjakeparker",

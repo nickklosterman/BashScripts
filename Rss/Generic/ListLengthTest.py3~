@@ -1,0 +1,42 @@
+#!/usr/bin/python
+
+#compare two lists of images and output the newest images not in the older set(from file)
+# if imagelist=[ a b ] and imagelistfromfile = [b c d e] then outputlist=[a] , we use the break to prevent d,e from being in outputlist
+def CompareImageLists(imagelist,imagelistfromfile):
+#this method seems to break with long strings causing the "in" method to fail. 
+    outputlist=[]
+    if imagelist and imagelistfromfile:
+        for item in imagelist:
+            temp_item=item
+            if temp_item not in imagelistfromfile:
+                print(" adding item:%s" % item)
+                outputlist.append(item)
+            else:
+                print("%i new images" % len(outputlist)) 
+                break  #break out of for statement
+    else: # stuff
+        print("no new listing")
+        outputlist=imagelistfromfile
+    return outputlist
+
+
+
+#Compare the description tags from the file and from the recently obtained feed.
+def CompareDescriptionListFromFeedToDescriptionListFromFile(descriptionlist,descriptionfile):
+    outputdescriptionlist=[]
+    if os.path.isfile(descriptionfile):
+        filehandle=open(descriptionfile,'r')
+        descriptionlistfromfile=[]
+        for line in filehandle:
+            descriptionlistfromfile.append(line.strip('\n\t\r'))
+        outputdescriptionlist=CompareImageLists(descriptionlistfromfile,descriptionlistfromfile)
+else:		
+	print("not a file")
+
+                      
+import os.path,sys
+import feedparser
+
+outputimagelist=CompareDescriptionListFromFeedToDescriptionListFromFile("",os.path.expanduser("~/.RSS/mrjakeparker"))
+
+

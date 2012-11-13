@@ -6,13 +6,13 @@
 #compare two lists of images and output the newest images not in the older set(from file)
 # if imagelist=[ a b ] and imagelistfromfile = [b c d e] then outputlist=[a] , we use the break to prevent d,e from being in outputlist
 def CompareImageLists(imagelist,imagelistfromfile):
-#this method seems to break with long strings causing the "in" method to fail. 
+#this method seems to break with long strings causing the "in" method to fail. Nope. it was a newline in a post that was being saved in my temp description file. so instead of keying off the whole description I am now keying off the title
     outputlist=[]
     if imagelist and imagelistfromfile:
 #        print("imagelist: %s ; imagelistfromfile: %s" % (imagelist,imagelistfromfile))
         for item in imagelist:
             if item not in imagelistfromfile:
-#                print("item:%s" % item)
+                print(" adding item:%s" % item)
                 outputlist.append(item)
             else:
                 print("%i new images" % len(outputlist)) 
@@ -45,7 +45,7 @@ def WriteDescriptionListToFile(file,list):
         print('Writing %s' % os.path.expanduser(file))
         filehandle=open(os.path.expanduser(file),"w")
         for item in list:
-            filehandle.write(item+'\n')
+            filehandle.write(item+'\n') # this causes problems when the 'item' has newlines in it
         filehandle.close
 
 #Compare the description tags from the file and from the recently obtained feed.
@@ -64,7 +64,6 @@ def CompareDescriptionListFromFeedToDescriptionListFromFile(descriptionlist,desc
    #if there isn't a file to read we output the list from the rss feed 
     if not outputdescriptionlist:
         outputdescriptionlist=descriptionlist #copy items from rss to output list
- 
     WriteDescriptionListToFile(descriptionfile,outputdescriptionlist)
     WriteImageListToFileFromDescription(descriptionfile,outputdescriptionlist)
 
@@ -73,17 +72,18 @@ def GetDescriptionListFromFeed(feed):
     descriptionlist=[]
     if (len(d.entries) > 0):
         for index in range(len(d.entries)):
-            rss_post_description=d.entries[index].get('description','uh oh no descrip') # SEE Note 1:
+            rss_post_title=d.entries[index].get('title','no title') #'description','uh oh no descrip') # SEE Note 1:
+            rss_post_description=d.entries[index].get('description','no description') #'description','uh oh no descrip') # SEE Note 1:
             rss_post_media_content=d.entries[index].get('media_content','') 
             media_list=[]
             for media in rss_post_media_content:
                 media_list.append(media.get('url',''))
-            descriptionlist.append(rss_post_description)
+            descriptionlist.append(rss_post_description.strip('\n\r'))
+            titlelist.append(rss_post_title)
             if media_list: #make sure its not empty
                 for media_list_item in media_list: #append the individual items to our list, otherwise it seems we append a list to our list
                     descriptionlist.append(media_list_item)
-                                  
-    return descriptionlist
+    return descriptionlist,titlelist
 
 # used to create a long string instead of newline separated images for input to feh
 def FileToString(imagefile):
