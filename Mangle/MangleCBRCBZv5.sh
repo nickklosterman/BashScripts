@@ -38,17 +38,17 @@ ScannerFileNames="zGGtagT.jpg zGGtag.jpg zzz_thanks_ScanDog_tag.png" #need for w
 
 function determineArchiveType()
 {
-flag=2 #0 for zip, 1 for rar, 2 for unknown
-filename="${1}"
-file_output=$(file -b "${filename}" | awk '{print $1}')
-if [ "${file_output}" == "Zip" ]
-then
-flag=0
-elif [ "${file_output}" == "RAR" ]
-then 
-flag=1
-fi
-echo $flag
+    flag=2 #0 for zip, 1 for rar, 2 for unknown
+    filename="${1}"
+    file_output=$(file -b "${filename}" | awk '{print $1}')
+    if [ "${file_output}" == "Zip" ]
+    then
+	flag=0
+    elif [ "${file_output}" == "RAR" ]
+    then 
+	flag=1
+    fi
+    echo $flag
 
 }
 
@@ -474,7 +474,7 @@ function decompressRARZIPArchivesIntoDirectory()
     else #assume that its cbz                                                                                                                
 	olddir=$( pwd )
 	echo "$pwd"
-	echo "ZIP file"
+	echo "ZIP file" #we need to check that unzip is actually installed. 
 	unzip "$1" -d /tmp/Comic 2>> /tmp/DecompressErrorLog.txt  #send stderr to log                                            
 	olddir=$( pwd )
 	echo "$olddir"
@@ -619,9 +619,9 @@ function createHtml()
 
 function cleanFilename()
 {
-input="${1}"
-output=${input//[()&\'*[:space:]]} #remove crazy punctuation. can't use :punct: bc that'll strip out the period that delineates the file extension
-echo "${output}"
+    input="${1}"
+    output=${input//[()&\'*[:space:]]} #remove crazy punctuation. can't use :punct: bc that'll strip out the period that delineates the file extension
+    echo "${output}"
 }
 
 function convertImages()
@@ -837,23 +837,39 @@ function Operations()
     fi
 }
 
+function CheckForInstalledPrograms()
+{
+#    programs=("fakeprogram", "unzip","unrar")
+#    for program in fakeprogram unzip unrar
+    for program in unzip unrar
+    do 
+	which $program &> /dev/null #have to throw the output out or it is thrown into the $result output stream.
+	result=$? #capture exit code, nonzero means it wasn't found
+	if [[ $result -gt 0 ]]
+	then 
+	    break 
+	fi
+    done
+    echo $result
+}
+
 function CatDisplayIfExists()
 {
-file="${1}"
-if [ -e $file   ]
-then
-cat $file
-fi 
+    file="${1}"
+    if [ -e $file   ]
+    then
+	cat $file
+    fi 
 }
 
 
 function LessDisplayIfExists()
 {
-file="${1}"
-if [ -e $file   ]
-then
-less $file
-fi 
+    file="${1}"
+    if [ -e $file   ]
+    then
+	less $file
+    fi 
 }
 
 function HelpMessage ()
@@ -946,9 +962,15 @@ then
 else
 
 #WritePermissionErrorsfile=$(FileMaintenance $WritePermissionErrorsfile  )
-FileMaintenanceSimple $WritePermissionErrorsfile  
+    FileMaintenanceSimple $WritePermissionErrorsfile  
 #Errorsfile=$(FileMaintenance $Errorsfile )
-FileMaintenanceSimple $Errorsfile 
+    FileMaintenanceSimple $Errorsfile 
+
+    ProgramCheck=$( CheckForInstalledPrograms )
+    echo "-p-$ProgramCheck-p-"
+    if [[ $ProgramCheck -eq 0 ]]
+    then 
+
 
 #echo $numberOfImagesPerPage
     shift $(($OPTIND - 1)) 
@@ -1006,20 +1028,20 @@ FileMaintenanceSimple $Errorsfile
 			    echo "$1 is not a directory file"
 			fi
 			if [ -c "${1}" ]
-		    then
-			echo "this is a char dev"
+			then
+			    echo "this is a char dev"
 			#Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchives $unsharp "${imagemagickarguments}" $noclobber
-		    else
-			echo "$1 is not a char dev"
-		    fi
-		    if [ -s "${1}" ]
-		    then
-			echo "file is zero size"
+			else
+			    echo "$1 is not a char dev"
+			fi
+			if [ -s "${1}" ]
+			then
+			    echo "file is zero size"
 			#Operations $numberOfImagesPerPage "${1}" $wideformat $deletearchives $unsharp "${imagemagickarguments}" $noclobber
-		    else
-			echo "$1 is not a zero size"
+			else
+			    echo "$1 is not a zero size"
+			fi
 		    fi
-fi
 		    shift
 		done
 	    fi
@@ -1028,8 +1050,12 @@ fi
 	fi    
     fi #end recurse check
 
-CatDisplayIfExists $WritePermissionErrorsfile 
-CatDisplayIfExists $Errorsfile
+    CatDisplayIfExists $WritePermissionErrorsfile 
+    CatDisplayIfExists $Errorsfile
+
+    else 
+	echo "One or more required programs aren't installed. Are unzip and unrar installed?"
+    fi
 
 fi #end help message 
 
