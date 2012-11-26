@@ -91,7 +91,7 @@ void CalcReturn(float yearly_investment,int startage,int stopage, int retirement
 	}
       
       //	  printf("Starting at age %d and continuing until age %d, investing $%f annualy with a annual interest rate of %f%%, you will have $%f at your retirement age of %d\n",startage,stopage,yearly_investment,rate,output,retirementage);
-      printf("Starting at age %d\n and continuing until age %d,\n investing $%0.2f annualy\n with a annual interest rate of %0.5f%%,\n you will have $%0.2f at your retirement age of %d\n and you will have invested a total of $%.2f.\n\n",startage,stopage,yearly_investment,rate,output,retirementage,total_investment);
+      printf("Starting at age %d\n and continuing until age %d,\n investing $%0.2f annually\n with a annual interest rate of %0.5f%%,\n you will have $%0.2f at your retirement age of %d\n and you will have invested a total of $%.2f.\n\n",startage,stopage,yearly_investment,rate,output,retirementage,total_investment);
     }
   
 }

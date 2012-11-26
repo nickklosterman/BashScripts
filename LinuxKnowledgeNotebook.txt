@@ -1327,3 +1327,12 @@ Get Python dirname,basename
 '/root/dir/sub/file'
 
 According to https://wiki.archlinux.org/index.php/GTK%2B I needed gtk3 and python-gobject to including Gtk from gi.repository.
+
+Mon Nov 19 10:29:33 EST 2012
+19-11-2012
+On Windows for the computer to recognize the rockboxed iPod you need to have it in iPod mode and not RockBox mode. Put it in iPod mode by shutting it down (Menu+Play/Pause) then when it is rebooting put the hold button to hold and it will go into iPod mode. 
+
+http://stackoverflow.com/questions/767486/how-do-you-check-if-a-variable-is-an-array-in-javascript
+http://api.jquery.com/jQuery.isArray/
+http://perfectionkills.com/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/
+
