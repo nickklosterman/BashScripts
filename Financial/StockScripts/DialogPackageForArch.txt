@@ -1,0 +1,1 @@
+gdialog can be found in the zenity package for Arch.

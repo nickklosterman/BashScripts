@@ -1336,3 +1336,47 @@ http://stackoverflow.com/questions/767486/how-do-you-check-if-a-variable-is-an-a
 http://api.jquery.com/jQuery.isArray/
 http://perfectionkills.com/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/
 
+
+Wed Nov 28 11:02:17 EST 2012
+28-11-2012
+http://serverfault.com/questions/183431/get-all-extensions-and-their-respective-file-count-in-a-directory
+sudo find ./ -type f | grep -E ".*\.[a-zA-Z0-9]*$" | sed -e 's/.*\(\.[a-zA-Z0-9]*\)$/\1/' | sort | uniq -c | sort -n
+or
+sudo find ./ -type f | sed -ne '/\.[^./]*$/s/.*\(\.[^.]*\)$/\1/p' | sort | uniq -c | sort -n 
+both of these work. The second is more compact and allows for non alpha characters in the filename, although a poster did complain that on their system it didn't work. 
+
+edit .xinitrc in Arch to setup auto boot into DM or WM
+
+Emacs GPG decryption failed.
+Received: emacs epa-file--find-file-not-found-function decryption failed
+This happened after I updated. I thought something changed during the update. I should know better that the updated is proly QCed pretty well so it was me and not the software.
+In the end I thought I had put in the passphrase with capslock on when it actually wasn't. 
+for a simple check instead of invoking emacs every time you can simply use gpg -d(ecrypt) file to check the decryption. 
+gpg doesn't use a GUI, it uses ncurses style prompt. It does create a plaintext file removing the .gpg from the filename. e.g. gpg -d bob.txt.gpg creates a bob.txt file. 
+
+Thu Nov 29 14:40:30 EST 2012
+29-11-2012
+The gdialog library can be found in the zenity package for Arch.
+
+Mon Dec  3 17:56:20 EST 2012
+3-12-2012
+python files using wx need to be run with python2 as python3 doesn't have a wxPython port working yet. 
+
+
+Thu Dec  6 09:25:08 EST 2012
+6-12-2012
+http://thenextweb.com/twitter/2011/06/23/how-to-find-the-rss-feed-for-any-twitter-user/
+Twitter in '11 blocked rss feeds. here is the workaround. no html style links tho :(
+http://api.twitter.com/1/statuses/user_timeline.rss?screen_name={USERNAME}
+
+I tried to open too many large images in Arch on Cameron and X crashed and took down icewm. 
+restart X with 
+startx
+this'll use your .xinitrc file. 
+It took down X but my screen instances were safe! screen to the rescue once again. 
+
+Fri Dec  7 17:10:11 EST 2012
+7-12-2012
+I ran into this error : http://stackoverflow.com/questions/5802426/git-error-src-refspec-master-does-not-match-any
+because I hadn't touched the readme file to add. 
+

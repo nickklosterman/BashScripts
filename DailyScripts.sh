@@ -22,6 +22,7 @@ else
 fi
 
 
+
 if [ $DEBUG -eq 0 ] 
 then
 bash ~/Git/BashScripts/DDdailyimagegetter.sh &
@@ -34,3 +35,5 @@ bash ~/Git/BashScripts/Weather/DaytonWeather.sh #& when backgrounding the stock 
 python ~/Git/PythonStockTracker/StockTracker.py ~/Git/PythonStockTracker/StockData.txt
 python ~/Git/PythonStockTracker/StockTracker.py ~/Git/PythonStockTracker/TRowePrice.txt
 fi
+
+echo "need to capture the output more elegantly and display it nicer. Stick in file sending appr bits to /dev/null and then when done, cat the files to gether and then use less to navigate the aggregate text output\n this would prevent the problem of havign wget output inside the sections of other readable output"

@@ -1,0 +1,9 @@
+XLB: Materials Select Sector SPDR
+XLE: SPDR Select Sector Fund - Energ
+XLF: SPDR Select Sector Fund - Finan
+XLI: SPDR Select Sector Fund - Indus
+XLK: SPDR Select Sector Fund - Techn
+XLP: SPDR Select Sector Fund - Consu
+XLU: SPDR Select Sector Fund - Utili
+XLV: SPDR Select Sector Fund - Healt
+XLY: SPDR Select Sector Fund - Consu
