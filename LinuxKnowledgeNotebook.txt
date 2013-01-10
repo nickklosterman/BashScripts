@@ -1380,3 +1380,120 @@ Fri Dec  7 17:10:11 EST 2012
 I ran into this error : http://stackoverflow.com/questions/5802426/git-error-src-refspec-master-does-not-match-any
 because I hadn't touched the readme file to add. 
 
+Mon Dec 10 14:05:23 EST 2012
+10-12-2012
+symlink: I was doing symbolic links incorrectly. I was assuming it goes  ' ln -s From To' when it goes ' ln -s To From'
+'ln -s  ~/Git/Fonts/ ~/.fonts' puts a link Fonts in /.fonts that links to the Git/Fronts directory
+to see the symlink and where it points you need to do a long listing of the directory/file
+
+Any time a new font is added (to ~/.fonts if single user or /usr/share/fonts for global use) you need to update the fontconfig cache:
+fc-cache -vf
+
+
+Thu Dec 13 15:05:45 EST 2012
+13-12-2012
+Dropbox is really just a ftp/rsync clone for the poor. I was thinking of doing something similar by running a daemon and then uploading files to djinnis.....but then thought wtf is the point? If you have net access just set up dyndns so that any data that you have at home is just as accessible without that middleware bloat of dropbox. 
+
+
+Tue Dec 18 11:34:15 EST 2012
+18-12-2012
+
+http://stackoverflow.com/questions/2627289/how-to-replace-a-region-in-emacs-with-yank-buffer-contents basically you have to edit your .emacs profile or you can use registers
+Add this to your .emacs:
+
+(delete-selection-mode 1)
+Anything that writes to the buffer while the region is active will overwrite it, including paste, but also simply typing something or hitting backspace
+
+|-----
+Setting delete-selection-mode, as Michael suggested, seems the most natural way to do it.
+
+However, that's not what I do :) Instead, I put the good stuff into a "register" -- for eample, register "a" -- with C-x r x a. Then I kill the other copy, and copy the register into the same spot with C-x r g a.
+
+This is convenient because killing doesn't affect the registers, so C-x r g a always inserts the good stuff.
+
+|-----
+The default way to do something like this is the not-entirely-elegant following:
+
+Get your desired replacement text into the kill ring somehow (e.g., M-w).
+Highlight the region to be replaced.
+Delete it (C-w).
+Replace it with the prior-copied region (C-y, M-y). This replaces the freshly deleted contents with the exact same text that you just deleted (C-y), and then re-replaces it with the next most-recently saved buffer in the buffer ring (M-y).
+This would get to be a real pain if you wanted to do this 10 times with the same text, as the desired replacement would get pushed farther back in the kill ring each time you deleted a region, so you'd have to call M-w an increasing number of times each time you wanted to yank it.
+
+Fri Jan  4 09:59:00 EST 2013
+4-1-2013
+I copied my thinkbank.gpg file from the cam laptop to big nicky and I could access the file using the key. I find this a bit strange since I thought the gpg key had to do with the key on the filesystem it was created with. I know the key I used to encrypt the file is diff than the system wide key I use. So I'm curious as to how gpg works since I thought the gpg agent needed to access the keys in the /etc/ssh directory to decrypt the file. This makes me scared since I feel like anyone could decrypt this file then. I am pretty sure that this isn't the case but it goes to show how little I understand of the gpg agent/encryption.
+
+Tue Jan  8 11:40:59 EST 2013
+8-1-2013
+http://stackoverflow.com/questions/7230005/bash-script-to-tar-folders-with-spaces
+tar.gz all directories in a folder: 
+#!/bin/bash
+for i in ./*
+do
+    echo tar -zcvf "$i.tar.gz" "$i"  #<--get rid of the echo command for real execution
+done
+http://www.cyberciti.biz/faq/how-do-i-compress-a-whole-linux-or-unix-directory/
+
+http://unix.stackexchange.com/questions/19804/compress-a-directory-using-tar-gz-over-ssh-to-local-computer
+I'd like to essentially tar/gz a directory on a remote machine and save the file to my local computer without having to connect back into my local machine from the remote one. Is there a way to do this over SSH? The tar file doesn't need to be stored on the remote machine, only on the local machine. Is this possible?
+-->You can do it with an ssh command, just tell tar to create the archive on its standard output:
+
+ssh remote.example.com 'cd /path/to/directory && tar -cf - foo | gzip -9' >foo.tgz
+Another approach, which is more convenient if you want to do a lot of file manipulations on the other machine but is overkill for a one-shot archive creation, is to mount the remote machine's filesystem with SSHFS (a FUSE filesystem). You should enable compression at the SSH level.
+
+mkdir ~/net/remote.example.com
+sshfs -C remote.example.com:/ ~/net/remote.example.com
+tar -czf foo.tgz -C ~/net/remote.example.com/path/to/directory foo
+
+
+snipplr.com code snippets, tagged for organization
+
+delete only directories and not files:
+http://www.unix.com/linux/60891-deleting-only-directory-not-files.html the answer: http://www.unix.com/302184842-post7.html
+rm -r */ #be careful rm -r /* will make you very VERY mad!
+
+semi-related and of interest.
+http://stackoverflow.com/questions/7714900/remove-only-files-in-directory-on-linux-not-directories
+You can use find with -type f for files only and -maxdepth 1 so find won't search for files in sub-directories of /path/to/directory. rm -i will prompt you on each delete so you can confirm or deny the delete. If you dont care about being asked for confirmation of each delete, change it to rm -fv (-f for force the delete). The -v flag makes it so that with each delete, a message is printed saying what file was just deleted.
+
+find /path/to/directory -type f -maxdepth 1 -exec rm -iv {} \;
+This should meet the criteria:
+
+NOT directories 
+NOT subdirectories 
+NOT files in these subdirectories.
+
+Wed Jan  9 10:49:18 EST 2013
+9-1-2013
+http://www.gnu.org/software/emacs/manual/html_node/emacs/Interlocking.html
+Emacs s, q, p
+s
+Steal the lock. Whoever was already changing the file loses the lock, and you gain the lock. 
+p
+Proceed. Go ahead and edit the file despite its being locked by someone else. 
+q
+Quit. This causes an error (file-locked), and the buffer contents remain unchanged.the modification you were trying to make does not actually take place.
+
+Searching for performing Diff on auto-recover-file vs current file : http://www.google.com/search?q=emacs+diff+auto+save+file&oq=emacs+diff+auto+save+file&sugexp=chrome,mod=10&sourceid=chrome&ie=UTF-8#hl=en&tbo=d&sclient=psy-ab&q=emacs+recover-this-file+run+diff&oq=emacs+recover-this-file+run+diff
+http://compgroups.net/comp.emacs/diff-option-on-recover-session-recover-file/492459
+Perform Diff on auto-recover-file
+
+assuming your original file is foo.el
+M-x ediff-files RET foo.el RET #foo.el# RET
+seems to work for me.
+You could also try M-x undo (or C-x u) on the recovered file.  It will
+switch between the old (unsaved) version and the autosave version
+
+M-x recover-this-file
+M-x recover-file
+offers:
+no, diff
+The diff is customizable via
+   recover-file-diff-arguments    - List of arguments (switches) to pass to `diff' by `recover-file'.
+   recover-file-diff-program      - Absolute or relative name of the `diff' program used by `recover-file'.
+
+Thu Jan 10 10:49:12 EST 2013
+10-1-2013
+Sublime Text autoformat autoindent
+select code to indent (ctrl-a) Edit-Line-Reindent
