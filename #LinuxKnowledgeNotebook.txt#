@@ -1,0 +1,1329 @@
+Sourcing .alias file: I was trying to source .alias by adding code to source it if it existed in .bash_profile but this wasn't being picked up. I then moved the code to .bashrc and it was executed. Here is a good explanation of how / when things are being sourced: http://stackoverflow.com/questions/415403/whats-the-difference-between-bashrc-bash-profile-and-environment
+a)
+The main difference with shell config files is that some are only read by "login" shells (eg. when you login from another host, or login at the text console of a local unix machine). these are the ones called, say, .login or .profile or .zlogin (depending on which shell you're using).
+Then you have config files that are read by "interactive" shells (as in, ones connected to a terminal (or pseudo-terminal in the case of, say, a terminal emulator running under a windowing system). these are the ones with names like .bashrc, .tcshrc, .zshrc, etc.
+bash complicates this in that .bashrc is not only read by interactive shells, but also non-login shells, so you'll find most people end up telling their .bash_profile to also read .bashrc with something like
+[[ -r ~/.bashrc ]] && . ~/.bashrc
+Other shells behave differently - eg with zsh, .zshrc is always read for an interactive shell, whether it's a login one or not.
+The manual page for bash explains the circumstances under which each file is read. Yes, behaviour is generally consistent between machines.
+.profile is simply the login script filename originally used by /bin/sh. bash, being generally backwards-compatible with /bin/sh, will read .profile if one exists.
+b)
+That's simple. It's explained in man bash:
+/bin/bash
+       The bash executable
+/etc/profile
+       The systemwide initialization file, executed for login shells
+~/.bash_profile
+       The personal initialization file, executed for login shells
+~/.bashrc
+       The individual per-interactive-shell startup file
+~/.bash_logout
+       The individual login shell cleanup file, executed when a login shell exits
+~/.inputrc
+       Individual readline initialization file
+Login shells are the ones that are read one you login (so, they are not executed when merely starting up xterm, for example). There are other ways to login. For example using an X display manager. Those have other ways to read and export environment variables at login time.
+Also read the INVOCATION chapter in the manual. It says "The following paragraphs describe how bash executes its startup files.", i think that's a spot-on :) It explains what an "interactive" shell is too.
+Bash does not know about .environment. I suspect that's a file of your distribution, to set environment variables independent of the shell that you drive.
+
+Cygwin Navigation outside of cygwin directory:
+http://superuser.com/questions/229870/how-to-access-different-directories-outside-cygwin-home-dir
+You can access the root of your C: drive, for example, from cygwin by specifying the directory /cygdrive/c, e.g.,
+$ cd /cygdrive/c
+Similarly, the path to any file on your C: drive can be constructed by prefixing the Windows path (without the "C:" and with \s changed to /s) with /cygdrive/c, so C:\Dropbox\myfile would be accessed from within Cygwin as /cygdrive/c/Dropbox/myfile.
+If you really wanted it available in Cygwin, besides getting it directly (as @garyjohn's correct answer) you can also try to use the mount command to map the path to your home dir. Something like this may work.
+mount C:\dropbox\cygwin /home/me/dropbox
+I say may, because though I'm pretty sure it will work, I have no Cygwin install to test it, and I'm not sure if Cygwin will refuse to create it because of filesystem loops (it should allow it)
+As @starcorn mentions above, ln works great for this.
+$ ln -sv /cygdrive/c/Users/JohnWagg/Dropbox/ ~/dropbox
+`/home/JohnWagg/dropbox' -> `/cygdrive/c/Users/JohnWagg/Dropbox/'
+
+Query Wikipedia via command line: http://www.commandlinefu.com/commands/view/2829/query-wikipedia-via-console-over-dns
+
+Git cloning a repo: git clone git://github.com/nickklosterman/something.git master
+
+Emacs: C-x C-v RET as a way to reload the file on disk this in the buffer that has been changed on disk.
+Alt-` -> this gives you a navigable menu via the keyboard similar to what the Alt typically gives you in a windowed app.
+M-x list-packages : gives a list of packages in the ELPA repository that can be selected via 'i' and when all done selecting press 'x' and it will install the appropriate packages. Pretty cool.
+Undo C-g C-_ this will redo what you just undid, the C-g seems to reverse which direction you are travelling on the undo/redo stack. So any subsequent C-_ redo what has been done. You don't need to repeatedly hit C-g C-_.  http://stackoverflow.com/questions/3527142/how-do-you-redo-changes-after-undo-with-emacs this shows the undo stack and how it all works. kinda cool.
+
+Use wget to save off the returned values of a php script. I've been having troubles with Chrome choking on scripts that send back large amounts of data. This method however has been bulletproof and doesn't puke.
+
+PHP & MySQL: need to alias the count(*) fields bc php barfs when trying to pares it: http://stackoverflow.com/questions/797335/mysql-count-into-php-variable
+// Changed the query - there's no need for DISTINCT
+// and aliased the count as "num"
+$data = mysql_query('SELECT COUNT(`users_id`) AS num FROM `users_table`') or die(mysql_error());
+// A COUNT query will always return 1 row
+// (unless it fails, in which case we die above)
+// Use fetch_assoc for a nice associative array - much easier to use
+$row = mysql_fetch_assoc($data);
+// Get the number of uses from the array
+// 'num' is what we aliased the column as above
+$numUsers = $row['num'];
+---> because $row['count(*)'] ; doesn't work.
+
+Embed images inline in html/css: use 'base64' to output the base63 text encoding. :
+http://en.wikipedia.org/wiki/Data:_URI_scheme
+http://www.websiteoptimization.com/speed/tweak/inline-images/
+
+Start/Stop/Restart services:
+sudo /etc/init.d/name_of_service start/stop/restart or
+sudo service name_of_service start/stop/restart
+
+Javascript date increment: http://stackoverflow.com/questions/3674539/javascript-date-increment-question
+var today = new Date();
+var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1); or var tomorrow = new Date(today.getTime() + (24 * 60 * 60 * 1000));
+
+Javascript Error due to mismatch in function names in data bind in html and function in js.
+TypeError: ((jQuery.event.special[handleObj.origType] || {}).handle || handleObj.handler).apply is not a function
+[Break On This Error]
+
+.apply( matched.elem, args );
+
+I brought in Cam's laptop and hooked it up to an external monitor. The screen image was showing up half way up the monitor. Other than that everything was copacetic. The mouse worked et etc. I waas at first going to blame X but it really was just that the vertical position on the monitor had been set way crazy.
+
+I then attempted to sync up Git items but I was getting an error where "ssh_exchange_identification: Connection closed by remote host\n fatal: Could not read from remote repository.\nPlease make sure you have the correct access rights\n and the repository exists." This was being caused by the ssh-agent not running. I am assuming that after the re-install I didn't have the ssh-agent automatically spawned like it was in the past or that somehow it changed.
+eval $(ssh-agent)
+and things are all ok.
+Look at wiki.archlinux.org/index.php/SSH_Keys
+
+Debugging PythonSheriffSales: I wasn't seeing the new Real Estate Sales Data. It was because I wasn't geocoding the data. I was glossing over that as I saw the php returning the records but I was missing that the Lat/Lon were blank.
+
+Strip trailing whitespace in place: sed -i 's/[ \t]*$//' file
+Convert tabs into 4 spaces: sed -i 's/\t/    /g' somefile.txt
+
+Python 2 to 3: use 2to3 tool to modify code and create valid python 3 code from python 2
+you'll need to make a backup of the file.
+use the -w switch to write the changes out to the file.
+
+CLI Expansions: (from http://lifehacker.com/5743814/become-a-command-line-ninja-with-these-time+saving-shortcuts)
+When you're working with variations of a fileœôòôlike backups or different file typesœôòôit can get tedious typing out the same commands with small tweaks. Using the brace symbols ({}), you can easily perform batch operations on multiple versions of a file.
+Say you want to rename just part of a filename. Instead of typing out mv /path/to/file.txt /path/to/file.xml, you could just run:
+    mv /path/to/file.{txt,xml}
+This runs the command with the same arguments, only with the parts inside the brace changedœôòôthe first part corresponding to the first argument, the second part corresponding to the second argument.
+The most common example of this is when you're backing up a file that you're making changes to. For example, if you are tweaking your rc.conf, you'll want to make a backup in case the new one doesn't work. So, to do so, you can just run:
+    sudo cp /etc/rc.conf{,-old}
+Putting nothing before the comma will just append -old to the filename after copying it with cp. If your new file doesn't work out and you want to restore the backed up file to its original location, you can just use:
+    sudo mv /etc/rc.conf{-old,}
+Moving the comma to the other end of the brace will remove -old from the end of the file and restore it to its original name.
+The braces can also work when moving or creating multiple files at once. For example, if you wanted to create three numbered directories, you could just run:
+    mkdir myfolder{1,2,3}
+This will create three folders: myfolder1, myfolder2, and myfolder3.
+
+mv: cannot move `./directory1' to `../directory2': Directory not empty (from http://desdecode.blogspot.com/2011/11/mv-cannot-move-directory1-to-directory2.html )
+I wanted to move all files from one directory structure to another, for me I had an updated version of a lot of website files and I wanted to update them all in one go so I tried:
+    mv ./directory1/* ./directory2/
+Because I have lots of files within sub-directories on both folders the mv command wouldn't play nice and kept throwing this "Directory not empty" error, even doing an "mv -f" to force overrides didn't work..
+After search around people have come up with elaborate bash scripts to do the task, and I like to throw a bash script together every now and again but in this situation it's really not necessary, we just need to use rsync:
+    rsync -avh ./directory2/ ./directory1/
+That rsync command will override all the files in directory1 with the files in directory2 and recurse through all sub-directories, it will override them regardless if they're older/newer/different sized etc so do a backup of your original directory before running the command
+more on brace expansion: http://www.softpanorama.info/Scripting/Shellorama/brace_expansion.shtml
+http://semicrazy.wordpress.com/category/programming/bash/
+
+svn restore older version of a file:
+to restore the version of file.ext from the latest commit: svn revert file.ext
+to get the version from release number 214: svn update -r 214 file.ext
+
+Facebook on Pidgin: used my username which is found when you click on your user name (nick.klosterman.1) instead of my email login.
+
+Emacs tabs and formatting: in your .emacs file use (setq-default indent-tabs-mode nil)
+If you all ready had a file that was tabified you will need to M-x untabify the file and then resave.
+http://www.dansanderson.com/blog/2007/07/indenting-source-code-in-emacs.html
+
+;
+; remove trailing whitespace
+;
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+or
+(add-hook œôòøc-mode-hook (lambda () (add-to-list œôòøwrite-file-functions œôòødelete-trailing-whitespace))) ; for a particular mode
+from: http://www.emacswiki.org/emacs/DeletingWhitespace
+
+Convert LF to DOS Format CRLF (-i inplace): sed -i 's/$/\r/' file
+This produces a file that file reports as :  ASCII text, with CRLF, CR line terminators
+there is a trailing ^M character at EOF that needs to be removed for the file to be reported as: ASCII text, with CRLF line terminators
+
+delete trailing whitespace
+sed 's/[ \t]*//'
+
+JSbeautifer emacs plugin:
+http://webfight.googlecode.com/git-history/f4c3cfe6ac1a5180602cb343a673dd10d204c723/core/extlib/jsbeautifier.py
+https://github.com/agata/jsreaders/blob/master/jsbeautifier.py
+http://sethmason.com/2011/04/28/jsbeautify-in-emacs.html gen'l setup directions
+
+to print a tab with echo you need to escape and use the -e switch: http://www.linuxquestions.org/questions/linux-newbie-8/tab-in-bash-script-242400/
+
+Used in script to show the count of file types in a certain directory
+http://www.commandlinefu.com/commands/view/6310/list-all-file-extensions-in-a-directory
+
+highlight keyword in grep: grep keyword --color=auto
+http://www.debian-administration.org/articles/460
+
+Emacs Mode for files not ending with '.py' : http://emacswiki.org/emacs/PythonProgrammingInEmacs#toc20
+You can set the mode for python files with file names not ending with ..py. by adding line
+# -*- python -*-
+or
+# -*- Mode: Python; tab-width: 4 -*-
+as second line in your file (the first usually being #!/usr/bin/env python).
+also http://www.gossamer-threads.com/lists/python/python/20112 states 
+M-x python-mode or M-x load-file
+may be needed first to load python-mode.el
+or
+I use this in my .emacs, which looks for the word "python" in
+the shebang line:
+------------------------------
+(setq interpreter-mode-alist
+(cons '("python" . python-mode) interpreter-mode-alist))
+------------------------------ 
+or
+Check out the Emacs Info system for the topic Local Variables.
+In short, at the *END* of the file you can have the following:
+### Local Variables:
+### mode:python
+### tab-width:4
+### End:
+The important bits are a line containing "Local Variables:" , a line
+containing "End: ", then any number variable names and values set
+between those two lines. The lines can start with a comment character
+appropriate for the contents of the file (e.g. "###" for Python).
+or
+You shouldn't need all that gunk. With most modern Emacsen, there's a
+variable called interpreter-mode-alist which (at least with XEmacs)
+has a default mapping for Python. Sticking
+#! /usr/bin/env python
+at the top of the file is enough to drop you in Python mode. This is
+covered in the Python Mode installation instructions at
+http://www.python.org/emacs/python-mode/installation.html
+or
+I bet there is someway to modify the python-mode.el file to accept other files types. 
+
+python try block urllib
+http://www.techniqal.com/blog/2011/01/18/python-3-file-read-write-with-urllib/
+can also be found in Git/IBD/Scripts/GetHistoricalPricesDual.py3
+looping and retrying in try/except:
+http://bytes.com/topic/python/answers/802708-returning-try-block-after-catching-exception2
+
+git ignore files: create a .gitignore file in the root of the git repo populate it with file extensions (*.o)  or filenames.
+https://help.github.com/articles/ignoring-files
+
+for some DBMS, "count(*)" is slower than "count(column_name)".  If your table  is wide, it might make a difference. 
+
+SQLite duplicate records:
+sqlite3 IBDdatabase.sqlite "delete from BC20StockData where id not in ( select min(id) from BC20StockData group by rank,stockticker,date ) "
+http://stackoverflow.com/questions/8190541/deleting-duplicate-rows-from-sqlite-database
+http://stackoverflow.com/questions/1173963/how-to-delete-duplicate-rows-with-sql
+For mysql,postgresql,oracle better way is SELF JOIN.
+Postgresql:
+DELETE FROM table t1 USING table t2 WHERE t1.date=t2.date AND t1.id<t2.id;
+MySQL        
+DELETE FROM table
+USING table, table as vtable
+WHERE (table.id < vtable.id)
+AND (table.date=vtable.date)
+SQL aggregate (max,group by) functions almost always are very slow.
+http://stackoverflow.com/questions/5381907/sqlite-remove-duplicate-rows-when-entire-row-is-not-unique
+the above post discusses using UNIQUE to prevent duplicate entries from being entered. UNIQUE dictates that any entry must not collide with a entry in the field specified as UNIQUE -->http://www.sqlite.org/lang_createtable.html#constraints
+http://stackoverflow.com/questions/6127338/sql-select-distinct-but-return-all-columns
+http://stackoverflow.com/questions/1641718/how-to-select-unique-records-by-sql
+https://groups.google.com/forum/?fromgroups=#!topic/web2py/_oUz6cy5PBs
+http://www.sqlite.org/lang_altertable.html
+
+http://www.sqlite.org/lang_update.html
+
+SQLite drop table: sqlite3 IBDdatabase.sqlite "drop table <if exists> BC20StockData "
+http://www.sqlite.org/lang_droptable.html
+
+check if a string is a number in python:http://stackoverflow.com/questions/354038/how-do-i-check-if-a-string-is-a-number-in-python
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+or f = float(s); return True, f
+
+Python length of list
+>>> stuff= [['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Adj Clos'], ['2011-07-06', '57.52', '59.70', '57.52', '59.12', '689600', '59.1']]
+>>> len(stuff)
+2
+>>> stuff2= [['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Adj Clos']]
+>>> len(stuff2)
+1
+>>> len(stuff2[0])
+7
+
+sqlite3 list tables in database:http://www.sqlite.org/sqlite.html or see below
+sqlite3 check if table exists: from http://stackoverflow.com/questions/1601151/how-do-i-check-in-sqlite-whether-a-table-exists and  http://sqlite.org/faq.html#q7
+From within a C/C++ program (or a script using Tcl/Ruby/Perl/Python bindings) you can get access to table and index names by doing a SELECT on a special table named "SQLITE_MASTER". Every SQLite database has an SQLITE_MASTER table that defines the schema for the database. The SQLITE_MASTER table looks like this:
+
+CREATE TABLE sqlite_master (
+  type TEXT,
+  name TEXT,
+  tbl_name TEXT,
+  rootpage INTEGER,
+  sql TEXT
+);
+For tables, the type field will always be 'table' and the name field will be the name of the table. So to get a list of all tables in the database, use the following SELECT command:
+SELECT name FROM sqlite_master
+WHERE type='table'
+ORDER BY name;
+e.g.:sqlite3 IBDdatabase.sqlite " select case when tbl_name ='BC20StockData' then 1 else 0 end  from sqlite_master where type='table' and name='BC20StockData' order by name" 
+-->returns 1 if it exists
+
+
+Git stash:http://git-scm.com/book/en/Git-Tools-Stashing
+Your local changes to the following files would be overwritten by merge:
+        IBDdatabase.sqlite
+Please, commit your changes or stash them before you can merge.
+git status
+git stash
+git pull git@github.com:nickklosterman/IBD.git master
+git stash list
+git stash apply
+-->you stash your changes to allow for the pull down, then you apply your changes and it merges over what you had.
+This is what git stash apply says:
+warning: Cannot merge binary files: IBDdatabase.sqlite (Updated upstream vs. Stashed changes)
+Removing IBDdatabase.sqlite-journal
+Auto-merging IBDdatabase.sqlite
+CONFLICT (content): Merge conflict in IBDdatabase.sqlite
+
+javascript js hex to decimal and vice versa
+http://javascript.about.com/library/blh2d.htm
+function d2h(d) {return d.toString(16);}
+function h2d(h) {return parseInt(h,16);}
+there are limitations for large numbers however!--> http://www.danvk.org/wp/2012-01-20/accurate-hexadecimal-to-decimal-conversion-in-javascript/
+http://stackoverflow.com/questions/57803/how-to-convert-decimal-to-hex-in-javascript
+
+git diff:
+just run git diff on repo and it'll show you what's diff. It only seemed to show what was diff 
+git log -p 
+will cycle through the differences :http://learn.github.com/p/diff.html
+git show 
+seems to be a shortcut for git log -p
+
+Visualizing SQL Joins
+http://www.codeproject.com/Articles/33052/Visual-Representation-of-SQL-Joins
+http://www.codinghorror.com/blog/2007/10/a-visual-explanation-of-sql-joins.html
+
+Inner/Outer Join on Multiple Fields
+http://www.bryantwebconsulting.com/blog/index.cfm/2005/3/14/outer_join_on_multiple_fields
+http://stackoverflow.com/questions/2366780/how-to-do-an-inner-join-on-multiple-columns
+http://stackoverflow.com/questions/9370437/multiple-inner-join-from-the-same-table
+
+SQL Indices and Triggers:
+http://www.indigorose.com/forums/threads/24472-SQLite-indexes-and-how-to-use-them
+
+Emacs modified buffer exists save?
+press 'd' to view a diff of the changes that you made.
+http://stackoverflow.com/questions/626492/emacs-highlight-buffer-modifications
+
+diff:
+http://www.unixtutorial.org/2008/02/compare-text-files-using-diff/
+Diff change notation includes 2 numbers and a character between them. Characters tell you what kind of change was discovered:
+d . a line was deleted
+c . a line was changed
+a . a line was added
+Number to the left of the character gives you the line number in the original (first) file, and the number to the right of the character tells you the line number in the second file used in comparison.
+
+
+Debugging Mozilla Firefox sessionstore files that don't load.
+http://stackoverflow.com/questions/352098/how-to-pretty-print-json-script
+dumping them into http://jsonlint.com/ doesn't turn anything up as they are validated fine. One possible hiccup is when the entire string is enclosed in (). Removing those makes the document validate fine.
+https://bugzilla.mozilla.org/show_bug.cgi?id=668359 comments here suggest that 
+If the file begin like this:
+{"windows":[],"selectedWindow":0,"_closedWindows":[{"tabs":[{"entries":[{"url":"https://
+Only delete:
+],"selectedWindow":0,"_closedWindows":[
+So you get:
+{"windows":[{"tabs":[{"entries":[{"url":"https://
+TADA!  All tabs are back!
+--this didn't work for me. I TRIED AGAIN AND IT WORKED. 
+http://forums.mozillazine.org/viewtopic.php?t=622036 this is a strong thread on the topic that I've hit upon back in the day.
+-changing the "index" node changes which tab  is used. uses 1 based indexing and not 0 based.
+I think this corresponds to the docIdentifier field.
+If the index is set to an invalid identifier it will open a blank 'new tab' if you set the index field to a negative value or it will open the tab with the highest index for an index that is greater than the greatest valid identifier/index.
+-use json_reformat and json_verify on the file. need to cat it in tho. or throw code into http://www.shell-tools.net/index.php?op=json_format or http://jsonlint.com/ to prettify the script and organize into a readable structure. Will need to run this 00> sed 's/,"children"/,\n"children"/g;s/{"url":/\n{"url":/g' to break up the single line entry into something that you can copy and paste into the online tool. 
+-I've been successful in parsing the individual entries using : sed 's/{"entries":/\n{"entries":/g' sessionstore-18.js > sessionstore-18_entries.js and then copying the 'entries' line I separated and adding it into a brand new sessionstore file that was generated after the crash. 
+-Even though most people don't have multiple windows there are also options/keywords in the xml/json for mutliple windows.
+It doesn't look like there is a simple way to load sessionstore data into the browser without renaming the suspect files sessionstore.js and then 'rebooting' FF.
+-The OP who started the bugzilla thread stated that using http://sessionmanager.mozdev.org stated that they installed sessionmanager.mozdev.org and hasn't had a repeat of the problem.
+As I stated above although for some reason the first time I attempted to simply remove the offending code and restart a subsequent try did work.
+Resources:
+http://dag.wieers.com/blog/what-if-firefox-loses-your-tabs
+http://jacaranda.org/firefox/fixstore.py code to extract the 'entries'
+http://computerforensics.parsonage.co.uk/downloads/WebBrowserSessionRestoreForensics.pdf decent overview
+http://learnpython.wordpress.com/2010/04/11/python-and-recovering-firefox-sessions/ after searching for "python json parser sessionstore" it has some code to pull ou the entries and place them in an html file. I tried it but it didn't work. worthwhile as a skeleton to make our own version.
+
+How to pretty print json : http://stackoverflow.com/questions/352098/how-to-pretty-print-json-script
+
+Emacs Matching brackets/braces/parens: C-M-f and C-M-b you can also do M-C-f and M-C-b 
+
+Emacs C-M-x and M-C-x commands: you can use the M-C as a substitute for C-M commands since C-M in windows is the default keybinding for the popping open the start menu.
+
+json.org json spec:http://tools.ietf.org/html/rfc4627
+Python & JSON. Once Python loads the JSON it is simply represented as a dictionary list.  http://docs.python.org/tutorial/datastructures.html
+You may opt to create a datatype to load the json into for easier parsing/traversing
+http://www.doughellmann.com/PyMOTW/json/
+
+List of realtime quotes on Google: http://www.google.com/intl/en/googlefinance/disclaimer/
+
+http://stackoverflow.com/questions/1480572/how-to-have-emacs-auto-refresh-all-buffers-when-files-have-changed-on-disk
+
+http://stackoverflow.com/questions/4177929/how-to-change-the-indentation-width-in-emacs-javascript-mode
+http://witnapatat.blogspot.com/2012/04/emacs-no-tab.html
+
+Emacs indent region: M-x h (select all) TAB
+This will indent the file.
+
+Pyton: alternating output from two lists
+http://stackoverflow.com/questions/3678869/pythonic-way-to-combine-two-lists-in-an-alternating-fashion
+>>> list1 = ['f', 'o', 'o']
+>>> list2 = ['hello', 'world']
+>>> result = [None]*(len(list1)+len(list2))
+>>> result[::2] = list1
+>>> result[1::2] = list2
+>>> result
+['f', 'hello', 'o', 'world', 'o']
+there is also mention of using itertools in that post. 
+alternative using chain and zip : http://stackoverflow.com/questions/2017895/alternating-between-iterators-in-python
+I used : zip http://stackoverflow.com/questions/7010060/writing-alternate-lists-elements-python
+understanding how zip works: http://stackoverflow.com/questions/2511300/why-does-x-y-zipzipa-b-work-in-python
+http://www.saltycrane.com/blog/2008/04/how-to-use-pythons-enumerate-and-zip-to/
+diong the reverse: http://stackoverflow.com/questions/1442782/python-program-to-split-a-list-into-two-lists-with-alternating-elements
+
+Python iterate list with indexes:http://stackoverflow.com/questions/126524/iterate-a-list-with-indexes-in-python
+>>> a = [3,4,5,6]
+>>> for i, val in enumerate(a):
+...     print i, val
+...
+0 3
+1 4
+2 5
+3 6
+
+
+emacs recenter screen on cursor
+C-l 
+thats an L
+
+Download Yahoo Finance Quotes
+download.finance.yahoo.com/d/quotes.csv?s=%40%5EDJI,GOOG&f=nsl1op&e=.csv	this doesn't actually get the DJIA it returns the components of it.
+http://finance.yahoo.com/q/hp?s=alxn gives a full html page of the historical data
+http://code.google.com/p/yahoo-finance-managed/wiki/csvQuotesDownload
+http://bytes.com/topic/python/answers/32921-script-download-yahoo-finance-data
+http://stackoverflow.com/questions/3679870/yahoo-finance-csv-file-will-not-return-dow-jones-dji discussion on DJIA disappearing yet way to get it.
+
+multi-line comment in emacs
+M-; works for python and gets rid of nasty 'IndentationError: unexpected indent' messages when using triple apostrophes etc
+http://www.gnu.org/software/emacs/manual/html_node/emacs/Comment-Commands.html
+
+Python:
+TypeError: GetTicker() takes no arguments (1 given)
+--> this means that you forgot to define the function with the argument self i.e. def GetTicker() ---> def GetTicker(self):
+
+Emacs
+elisp file names must all be lower case. Otherwise, you'll get an "emacs required feature Somepackage.el was not provided"
+
+Recursively make a copy of a file in the same directory with the extension changed.
+find . -name "*.js" -exec sh -c 'name={}; cp $name ${name%.js}.ts' \;
+--> this will recursively find *.js files and create *.ts copies in the same directory
+find . -name "*.js" -exec bash -c 'name="{}"; cp "$name" "${name%.js}.ts"' \;
+find allows you to execute a command directly on a file found using -exec; you don't need to pipe it through xargs. It takes the command name followed by arguments to the command, followed by a single argument ;, which you have to escape to avoid the shell interpreting it. find will replace any occurrence of {} in the command name or arguments with the file found.
+In order call a command with the appropriate ending substituted, there are multiple approaches you can take, but a simple one is to use Bash's parameter expansion. You need to define a shell parameter that contains the name (in this case, I creatively chose name={}), and then you can use parameter expansion on it. ${variable%suffix} strips off suffix from the value of $variable; I then add on .ts to the end, and have the name I'm looking for.
+http://stackoverflow.com/questions/12923341/linux-cygwin-recursively-copy-file-change-extension
+
+sed 's/).*//' TFLN.txt | sort | uniq -c
+uniq can do counts
+
+
+Notepad++ ; column mode selection ; Alt-Shift-Arrow keys or Alt + left mouse click column editor,
+
+Using a bash variable in a sed command
+basically you need to use double quotes instead of single quotes.
+I know that the first time I looked into this, doing this didn't solve my problem (Or at least I don't think it did)
+http://stackoverflow.com/questions/11146098/bash-use-a-variable-in-a-sed-command
+http://stackoverflow.com/questions/3204302/how-to-use-a-bash-script-variable-with-sed
+
+
+nick.klosterman@MAS002326-LAP ~/Sandbox/jsToTS
+$ bash ../JStoTS.sh
+../JStoTS.sh: line 43: syntax error near unexpected token `$ts_file'
+../JStoTS.sh: line 43: `CleanEndingParensBrackets() $ts_file'
+--> this is because you need to remove the () on the function name when calling it. It is even optional when defining a function (although it adds to portability according to abs-guide.pdf). 
+
+http://alexjmackey.wordpress.com/2012/10/06/what-is-typescript/
+http://stackoverflow.com/questions/12845810/typescript-module-namespacing-in-multiple-files
+
+http://www.emacswiki.org/emacs/RegularExpression#toc7 icicles interactive way to learn regexp
+
+http://superuser.com/questions/299938/linux-recursively-copy-file-by-file-extension-preserving-directory-structure  <--
+cd /top/level/to/copy
+find . -name '*.txt' | cpio -pdm /path/to/destdir
+
+http://www.linuxquestions.org/questions/programming-9/bash-script-executing-a-script-through-subdirectories-438205/
+
+
+emacs
+Display column number in the mode line:	M-x column-number-mode
+
+http://www.grymoire.com/Unix/Sed.html#uh-8
+
+Thu Oct 18 13:43:41 EDT 2012
+
+Trying to get emacs to auto enter date into my muddle for me.
+resources: 
+http://stackoverflow.com/questions/5019581/emacs-function-to-open-file-current-date-tex
+http://emacswiki.org/emacs/AutomaticFileHeaders
+http://www.emacswiki.org/emacs/AutoInsertMode
+google:emacs open file and enter date
+Emacs enter date into file
+C-u M-! date 
+M-! is the keyboard shortcut for the function shell-command. So M-! date will call the shell command date, and show it in the output area (the minibuffer, since the output is short enough to fit). The C-u is a prefix argument that makes M-! put its output in the current buffer instead.
+http://stackoverflow.com/questions/251908/how-can-i-insert-current-date-and-time-into-a-file-using-emacs
+Put in your .emacs file:
+
+;; ====================
+;; insert date and time
+
+(defvar current-date-time-format "%a %b %d %H:%M:%S %Z %Y"
+  "Format of date to insert with `insert-current-date-time' func
+See help of `format-time-string' for possible replacements")
+
+(defvar current-time-format "%a %H:%M:%S"
+  "Format of date to insert with `insert-current-time' func.
+Note the weekly scope of the command's precision.")
+
+(defun insert-current-date-time ()
+  "insert the current date and time into current buffer.
+Uses `current-date-time-format' for the formatting the date/time."
+       (interactive)
+       (insert "==========\n")
+;       (insert (let () (comment-start)))
+       (insert (format-time-string current-date-time-format (current-time)))
+       (insert "\n")
+       )
+
+(defun insert-current-time ()
+  "insert the current time (1-week scope) into the current buffer."
+       (interactive)
+       (insert (format-time-string current-time-format (current-time)))
+       (insert "\n")
+       )
+
+(global-set-key "\C-c\C-d" 'insert-current-date-time)
+(global-set-key "\C-c\C-t" 'insert-current-time)
+
+
+
+sed '/---/!s/--/\\(em/g'
+this script will only replace double dashes but not triple dashes
+It says, simply, "If you find a line containing three consecutive hyphens, don't apply the edit." On
+all other lines, the substitute command will be applied.
+
+from O'reilly sed & awk 2nd ed: sect 4.4.1
+s/\.  */.  /g
+This command replaces a period followed by any number of spaces with a period followed by two
+spaces. It should be noted that the previous command reduces multiple spaces to one, so that only one
+space will be found following a period.[4] Nonetheless, this pattern works regardless of how many
+spaces follow the period, as long as there is at least one. (It would not, for instance, affect a filename of
+the form test.ext if it appeared in the document.)
+
+sed:The N command reads another line into the pattern space without removing the current line, so you can test for patterns across multiple lines
+
+sed: unmatched parens:
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -n 's/^[ ]*Class\(/-::-/p'
+sed: -e expression #1, char 21: Unmatched ( or \(
+you can put the offending character into its own character class if you can't get it escaped
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -n 's/^[ ]*Class[(]"/-::-/p'
+-::-I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+http://dbaspot.com/shell/420232-huh-how-do-i-escape-left-paren-sed.html
+
+Sed: seems that you have to escape quite a bit of the quantifiers etc in sed for the regexp
+http://stackoverflow.com/questions/234797/regex-in-sed?rq=1
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -n 's/^[ ]*Class[(]"I((\.[A-Za-z]+)+)/-::-/p'
+nick.klosterman@MAS002326-LAP ~/Sandbox/jsToTS
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -n 's/^[ ]*Class[(]"I\(\(\.[A-Za-z]\+\)\+\)/-::-/p'
+-::-", I.ViewChassis.ComponentView, {
+
+http://stackoverflow.com/questions/2933474/escape-characters-contained-by-bash-variable-in-regex-pattern?rq=1
+
+http://sed.sourceforge.net/grabbag/tutorials/
+http://sed.sourceforge.net/sedfaq4.html
+http://sed.sourceforge.net/sedfaq3.html
+
+Fri Oct 19 08:46:00 EDT 2012
+19-10-2012
+
+windows button + tab -> 3d window rotation...
+
+http://www.zytrax.com/tech/web/regex.htm more regexp goodness
+
+it appears that sed doesn't support POSIX character classes.
+Also all seds aren'te equal Linux sed != Mac sed
+ed does allow use of POSIX character classes but it isn't stream/line oriented. it reads in the entire file.
+sed uses BRE (basic regular expressions). Look this up to find what exactly it supports/doesn't
+
+
+http://www.linuxtopia.org/online_books/linux_tool_guides/the_sed_faq/sedfaq3_010.html
+Though character classes don't generally conserve space on the line, they help make scripts portable for international use. The equivalent character sets for U.S. users follows:
+     [[:alnum:]]  - [A-Za-z0-9]     Alphanumeric characters
+     [[:alpha:]]  - [A-Za-z]        Alphabetic characters
+     [[:blank:]]  - [ \x09]         Space or tab characters only
+     [[:cntrl:]]  - [\x00-\x19\x7F] Control characters
+     [[:digit:]]  - [0-9]           Numeric characters
+     [[:graph:]]  - [!-~]           Printable and visible characters
+     [[:lower:]]  - [a-z]           Lower-case alphabetic characters
+     [[:print:]]  - [ -~]           Printable (non-Control) characters
+     [[:punct:]]  - [!-/:-@[-`{-~]  Punctuation characters
+     [[:space:]]  - [ \t\v\f]       All whitespace chars
+     [[:upper:]]  - [A-Z]           Upper-case alphabetic characters
+     [[:xdigit:]] - [0-9a-fA-F]     Hexadecimal digit characters
+
+------------------------------------Trying to understand regex and sed---------------------------------------------
+http://www.ibm.com/developerworks/linux/library/l-sed2/index.html
+$cat myfile.txt
+foo bar oni
+eeny meeny miny
+larry curly moe
+jimmy the weasel
+
+$ sed -e 's/\(.*\) \(.*\) \(.*\)/Victor \1-\2 Von \3/' myfile.txt
+Victor foo-bar Von oni
+Victor eeny-meeny Von miny
+Victor larry-curly Von moe
+Victor jimmy-the Von weasel
+
+Trying to get I.ViewChassis.DialogView and I.ViewChassis.ComponentView in separate patterns.
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -e 's/"\(I\(\.\([[:alpha:]]\+\)\+\)\)",[ ]*\(I\(\.\([[:alpha:]]\+\)\+\)\) /class \1 extends \2/'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+
+
+$ sed -e 's/\(.*\) \(.*\) \(.*\)/Victor \1-\2 Von \3/' myfile.txt
+Victor foo-bar Von oni
+Victor eeny-meeny Von miny
+Victor larry-curly Von moe
+Victor jimmy-the Von weasel
+
+
+$ sed -e 's/\([[:alpha:]]\+\) \(.*\) \(.*\)/Victor \1-\2 Von \3/' myfile.txt
+Victor foo-bar Von oni
+Victor eeny-meeny Von miny
+Victor larry-curly Von moe
+Victor jimmy-the Von weasel
+
+first pattern must match 4 or more alpha characters
+$ sed -e 's/\([[:alpha:]]\{4,\}\) \(.*\) \(.*\)/Victor \1-\2 Von \3/' myfile.txt
+foo bar oni
+Victor eeny-meeny Von miny
+Victor larry-curly Von moe
+Victor jimmy-the Von weasel
+
+Looking at sed and identifying/replacing duplicates
+http://stackoverflow.com/questions/7368636/remove-repeating-and-control-characters-in-sed
+$ echo HHEELLLLOO | sed 's/\(.\)\1/\1/g'
+HELLO
+$ echo HEEEOLLLLOOOSDFLKKKKKSDFJKLSDL | sed 's/([a-zA-Z])\1+/\1/g'
+sed: -e expression #1, char 20: Invalid back reference
+$ echo HEEEOLLLLOOOSDFLKKKKKSDFJKLSDL | sed 's/([[:alpha:]])\1+/\1/g'
+sed: -e expression #1, char 23: Invalid back reference
+does nothing..need to escape the + for anything to happen
+$ echo HEEEOLLLLOOOSDFLKKKKKSDFJKLSDL | sed 's/\([[:alpha:]]\)\1+/\1/g'
+HEEEOLLLLOOOSDFLKKKKKSDFJKLSDL
+
+This script marches through grabbing sets of two and spitting out only a single character. So if there isn't a set of two it simply outputs the character
+$ echo HEEEOLLLLOOOSDFLKKKKKSDFJKLSDL | sed 's/\([[:alpha:]]\)\1/\1/g'
+HEEOLLOOSDFLKKKSDFJKLSDL
+
+This script finds multiple repeats and spits out a single instance of the character
+$ echo HEEEOLLLLOOOSDFLKKKKKSDFJKLSDL | sed 's/\([[:alpha:]]\)\1\+/\1/g'
+HEOLOSDFLKSDFJKLSDL
+$ echo HHEELLLLLOO | sed 's/\(.\)\1/\1/g'
+HELLLO
+$ echo HHEELLLLLLOO | sed 's/\(.\)\1/\1/g'
+HELLLO
+$ echo " abccddefgh" | sed 's/(\\w)\\1+/9/'
+ abccddefgh
+$ echo " abccddefgh" | sed 's/\(\\w\)\\1+/9/'
+ abccddefgh
+$ echo " abccddefgh" | sed 's/.*[[:alpha:]]/9/'
+9
+$ echo " abccddefgh" | sed 's/.*[[:alpha:]]*/9/'
+9
+
+I think it's bitching bc I don't have a * after [[:alpha:]]
+$ echo " abccddefgh" | sed 's/.*[[:alpha:]]/--\1--/'
+sed: -e expression #1, char 23: invalid reference \1 on `s' command's RHS
+
+$ echo " abccddefgh" | sed -e 's/.*[[:alpha:]]/ --\1-- /'
+sed: -e expression #1, char 25: invalid reference \1 on `s' command's RHS
+
+$ sed -e 's/\([[:alpha::]]\+\) \(.*\) \(.*\)/Victor \1-\2 Von \3/' myfile.txt
+sed: -e expression #1, char 55: unterminated `s' command
+
+http://superuser.com/questions/336816/regex-find-and-replace-with-sed-matching-group-and-replacing-on-condition
+You can reference groups you just defined, but sed uses \n, not $n, for that. In addition, grouping with ( ) only works in "extended" mode (enable with the -r option):
+sed -r 's/^(.+) - \1/\1/'
+In "basic" mode, you'd use:
+sed 's/^\(.*\) - \1/\1/'
+AAaaaaaaaaaaaaahhhh the -r option
+It seems that the -r option allows you to use regexp the way most regexp editors show them without the escaped parens etc. 
+
+$ echo " abccddefgh" | sed 's/.*[[:alpha:]]\1\+/9/'
+sed: -e expression #1, char 22: Invalid back reference
+$ echo " abccddefgh" | sed 's/[[:alpha:]]\1\+/9/'
+sed: -e expression #1, char 20: Invalid back reference
+
+put the [[:alpha:]] in a group 
+$ echo " abccddefgh" | sed 's/\([[:alpha:]]\)\1\+/9/'
+ ab9ddefgh
+now make it global
+$ echo " abccddefgh" | sed 's/\([[:alpha:]]\)\1\+/9/g'
+ ab99efgh
+now try the r option 
+$ echo " abccddefgh" | sed -r 's/\([[:alpha:]]\)\1\+/9/g'
+sed: -e expression #1, char 25: Invalid back reference
+remove all the unnecessary escaping
+$ echo " abccddefgh" | sed -r 's/([[:alpha:]])\1+/9/g'
+ ab99efgh
+
+FAILURES
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e 's/"(I(\.([[:alpha:]]+)+))",[ ]*(I(\.([[:alpha:]]+)+)) /class \1 extends \2/'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e 's/"(I(\.([[:alpha:]]+)+))",[ ]*(I(\.([[:alpha:]]+)+)) /class \1 extends \2/'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e 's/"(I(\.([[:alpha:]]+)+))",[ ]*(I(\.([[:alpha:]]+)+)) /class \1 extends \2/g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e 's/"(I(.([[:alpha:]]+)+))",[ ]*(I(.([[:alpha:]]+)+)) /class \1 extends \2/g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e 's/"(I(.([[:alpha:]]+)+))",[ ]*(I(.([[:alpha:]]+)+)) /class  extends /g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r  's/"(I(.([[:alpha:]]+)+))",[ ]*(I(.([[:alpha:]]+)+)) /class  extends /g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r  's/"(I(.([[:alpha:]]+)+))",[ ]*(I(.([[:alpha:]]+)+)), /class  extends /g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r  's/"(I(.([[:alpha:]]+)+))"/class  extends /g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r  's/"I(.([[:alpha:]]+)+)"/class  extends /g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e  's/"I(.([[:alpha:]]+)+)"/class  extends /g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e  's/"I(.([[A-Za-z]]+)+)"/class  extends /g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e  's/"I.ViewChassis/class  extends /g'
+ Class(class  extends .DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e 's/"(I(.([[:alpha:]]+)+))",[ ]*(I(.([[:alpha:]]+)+)) /class \2 extends \1/g'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e 's/"(I(.([[:alpha:]]+)+))",[ ]*(I(.([[:alpha:]]+)+)) /class \2 extends \1/p'
+ Class("I.ViewChassis.DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -e  's/"I.ViewChassis/class  extends /p'
+ Class(class  extends .DialogView", I.ViewChassis.ComponentView, {
+ Class(class  extends .DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -n  's/"I.ViewChassis/class  extends /p'
+ Class(class  extends .DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -n  's/"I.[[:alpha:]]*/class  extends /p'
+ Class(class  extends .DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -n  's/"I.([[:alpha:]]+)/class  extends /p'
+ Class(class  extends .DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -n  's/"I(.([[:alpha:]]+)+)/class  extends /p'
+ Class(class  extends .DialogView", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -n  's/"I(.([[:alpha:]]+))+/class  extends /p'
+ Class(class  extends ", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r -n  's/"I(.([[:alpha:]]+))+/class  extends /g'
+
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r   's/"I(.([[:alpha:]]+))+/class  extends /g'
+ Class(class  extends ", I.ViewChassis.ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r   's/I(.([[:alpha:]]+))+/class  extends /g'
+ Class("class  extends ", class  extends , {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r   's/I(.([[:alpha:]]+))+/class \2 extends \1/g'
+ Class("class DialogView extends .DialogView", class ComponentView extends .ComponentView, {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r   's/(I(.([[:alpha:]]+))+)/class \2 extends \1 /g'
+ Class("class .DialogView extends I.ViewChassis.DialogView ", class .ComponentView extends I.ViewChassis.ComponentView , {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r   's/(I(.([[:alpha:]]+))+)/one \1 two \2 three \3 four \4 /g'
+sed: -e expression #1, char 57: invalid reference \4 on `s' command's RHS
+
+Starting to make progress
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r   's/(I(.([[:alpha:]]+))+)/one \1 two \2 three \3  /g'
+ Class("one I.ViewChassis.DialogView two .DialogView three DialogView  ", one I.ViewChassis.ComponentView two .ComponentView three ComponentView  , {
+$ echo " Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {"  | sed -r   's/(I(.([[:alpha:]]+))+)/class \3 extends  \1 two \2 three \3  /g'
+ Class("class DialogView extends  I.ViewChassis.DialogView two .DialogView three DialogView  ", class ComponentView extends  I.ViewChassis.ComponentView two .ComponentView three ComponentView  , {
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -n 's/^[ ]*Class[(]"I\(\(\.[A-Za-z]\+\)\+\)"[ ]*,[ ]*I\(\(.[A-z]\+\)\+\),[ ]*{/-::-/p'
+-::-
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r 's/^[ ]*Class[(]"I((.[A-Za-z]+)+)"[ ]*,[ ]*I((.[A-z]+)+),[ ]*{/v-::-v/p'
+sed: -e expression #1, char 70: Unmatched \{
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r 's/^[ ]*Class[(]"I((.[A-Za-z]+)+)"[ ]*,[ ]*I((.[A-z]+)+),[ ]*\{/v-::-v/p'
+v-::-v
+v-::-v
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"I((.[A-Za-z]+)+)"[ ]*,[ ]*I((.[A-z]+)+),[ ]*\{/v-::-v/p'
+v-::-v
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"I((.[A-Za-z]+)+)"[ ]*,[ ]*I((.[A-z]+)+),[ ]*\{/ \1 -=- \2 -=- \3 -=- \4/p'
+ .ViewChassis.DialogView -=- .DialogView -=- .ViewChassis.ComponentView -=- .ComponentView
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"(I((.[A-Za-z]+)+))"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{/ class \1 -=- \2 -=- \3 -=- extends \4 -=- \5 -=- \6/p'
+ class I.ViewChassis.DialogView -=- .ViewChassis.DialogView -=- .DialogView -=- extends I.ViewChassis.ComponentView -=- .ViewChassis.ComponentView -=- .ComponentView
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"(I((.[A-Za-z]+))+)"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{/ class \1 -=- \2 -=- \3 -=- extends \4 -=- \5 -=- \6/p'
+ class I.ViewChassis.DialogView -=- .DialogView -=- .DialogView -=- extends I.ViewChassis.ComponentView -=- .ViewChassis.ComponentView -=- .ComponentView
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"(I((.([A-Za-z])+))+)"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{/ class \1 -=- \2 -=- \3 -=- extends \4 -=- \5 -=- \6/p'
+ class I.ViewChassis.DialogView -=- .DialogView -=- .DialogView -=- extends w -=- I.ViewChassis.ComponentView -=- .ViewChassis.ComponentView
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"(I((.([A-Za-z]+)))+)"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{/ class \1 -=- \2 -=- \3 -=- extends \4 -=- \5 -=- \6/p'
+ class I.ViewChassis.DialogView -=- .DialogView -=- .DialogView -=- extends DialogView -=- I.ViewChassis.ComponentView -=- .ViewChassis.ComponentView
+
+Using backreferences : taken from http://www.regular-expressions.info/brackets.html
+To figure out the number of a particular backreference, scan the regular expression from left to right and count the opening round brackets. The first bracket starts backreference number one, the second number two, etc. Non-capturing parentheses are not counted. This fact means that non-capturing parentheses have another benefit: you can insert them into a regular expression without changing the numbers assigned to the backreferences. This can be very useful when modifying a complex regular expression
+
+SUCCESS
+$ echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"(I((.([A-Za-z]+)))+)"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{/ class \4 extends \5 {/p'  
+ class DialogView extends I.ViewChassis.ComponentView {
+------------------------------------END END END Trying to understand regex and sed---------------------------------------------
+
+Recursively copy files with a certain extension , recreating the same directory structure:
+find /path/to/dir/to/copy/from/ -name "*.ts" | cpio -pmd .
+as previously stated from http://superuser.com/questions/299938/linux-recursively-copy-file-by-file-extension-preserving-directory-structure
+
+
+http://stackoverflow.com/questions/3343642/shell-script-to-traverse-files-recursively
+http://stackoverflow.com/questions/3343642/shell-script-to-traverse-files-recursively
+http://serverfault.com/questions/44080/recursively-traverse-a-directory
+find . -type d -exec ls -ld {} \;
+This will enumerate all the directories under your base directory. 
+http://www.linuxquestions.org/questions/programming-9/bash-make-rename-script-traverse-directories-499744/
+find . -name "*.js" -exec sh -c 'name={}; cp $name ${name%.js}.ts' \;
+
+Mon Oct 22 08:47:01 EDT 2012
+
+newline in echo:
+The mixed history of echo means its default operation varies from shell to shell.
+It is more reliable to use printf (either as a built-in command or an external command) where the behavior is more well defined: the C-style backslash escapes and format specifiers are supported in the format string (the first argument).
+printf 'foo\nbar\n'
+
+http://www.shell-fu.org/lister.php?id=882 find last modified files on a filesystem
+To find the last modified files in a directory you can use ls -ltr. To find the last modified file on a file system it will not work, but the following command will work:
+comments for this post:
+find /etc -type f -printf "%T@ %T+ %p\n" | sort -n
+Yes, I also had to add '\n'.  I also piped through 'sort -rn|head' to limit the output.  It's also possible to speed things up by using the test '-cnewer' in 'find'.  Just picking any file in the directory your searching.  If you don't get any output you've managed to pick the most recent modified file.
+sudo find /etc -type f -printf "%T@ %T+ %p \n" | sort -n | less
+i simply use:find . -type f -mtime 0
+ 
+Tue Oct 23 08:34:23 EDT 2012
+23-10-2012
+
+http://stackoverflow.com/questions/13018918/sed-printing-pattern-space-when-there-isnt-a-match/13019239#13019239
+sed -i -r 's/^[ ]*Class[(]"(I((.([A-Za-z]+)))+)"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{/ class \4 extends \5 { /p
+/^[ ]*Class[(]"(I((.([A-Za-z]+)))+)"[ ]*,/ ! t done
+/^[ ]*Class[(]"(I((.([A-Za-z]+)))+)"[ ]*,/ {
+N
+s/ *\n/ /
+s/^[ ]*Class[(]"(I((.([A-Za-z]+)))+)"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{*/ class \4 extends \5 { \
+/p
+: done
+d
+}
+'
+
+http://stackoverflow.com/questions/11146098/bash-use-a-variable-in-a-sed-command
+http://stackoverflow.com/questions/3204302/how-to-use-a-bash-script-variable-with-sed
+sed "s/\${version.number}/$version/" template.txt > readme.txt
+Only double quotes do dollar-sign replacement. That also means single quotes don't require the dollar sign to be escaped.
+
+echo "                 Class(\"I.ViewChassis.DialogView\", I.ViewChassis.ComponentView, {" | sed -r -n 's/^[ ]*Class[(]"(I((.([A-Za-z]+)))+)"[ ]*,[ ]*(I((.[A-z]+)+)),[ ]*\{/ class \1 -=- \2 -=- \3 -=- extends \4 -=- \5 -=- \6/p'
+I was getting invalid range end. 
+This was caused by the [A-z]. It should actually be [a-Z].  The prev version works on windows but not on Linux. The corrected character class works on both.
+
+http://www.linuxquestions.org/questions/linux-general-1/bash-programming-append-single-line-to-end-of-file-265534/
+sed -i '$a\text to append to file' $filename #can't be used with the -r switch in this form.
+
+Wed Oct 24 08:19:15 EDT 2012
+24-10-2012
+
+Things I learned/used from playing around with typescript: 
+#goto root svn directory
+cd /cygdrive/c/Intelligrated
+#make a .ts copy of all .js files
+find . -name "*.js" -exec sh -c 'name={}; cp $name ${name%.js}.ts' \;
+#copy only ts files locally, mirroring directory structure
+find /cygdrive/c/Intelligrated/Branches/Intelligrated/Meerkat/Product/ -name "*.ts" | cpio -pmd .
+#run our bash script in each directory
+find . -type d -exec bash ../JStoTS.sh {} \;
+
+obtain ip address
+ip addr
+
+Open SSH Key Management:
+from the ssh key archwiki(https://wiki.archlinux.org/index.php/SSH_Keys) and the open ssh key management page on IBM developerworks http://www.ibm.com/developerworks/library/l-keyc/index.html http://www.ibm.com/developerworks/library/l-keyc2/ http://www.ibm.com/developerworks/linux/library/l-keyc3/
+1)generate ssh key
+ssh-keygen -b 521 -t ecdsa -C "$(id -un)@$(hostname)-$(date --rfc-3339=date)"
+or
+ssh-keygen -b 521 -t ecdsa -C "$(whoami)@$(hostname)-$(date -I)"
+2)copy key to remote machines
+use ssh-copy-id or scp -P portnumber ~/.ssh/keyyoumade.pub usera@host:
+you need th etrialing colot to specify which directory to place it in.
+the ':' places it in /home/user/
+3) on the REMOTE machine copy / append the key you just copied to 
+~/.ssh/authorized_keys
+cat nick.pub >> ~/.ssh/authorized_keys
+Note: at this point you have passphrase autnetication setup but will need to enter in the passpharase for every new connection and every new shell
+4)  make use of ssh variavles
+eval `ssh-agent`
+or
+eval $(ssh-agent)
+5) add your RSA private key to the ssh-agent cache
+ssh-add ~/.ssh/privatekey (not the .pub one)
+now that the passphrase is in the cache you can establish connections without supplying your passphrase
+6)download and install the keychain script written by Daniel Robbines.
+edit your .bash_profile to include;
+/usr/bin/keychain ~/.ssh/privatekey1 ~/.ssh/privatekey2 .....
+source ~/.ssh-agent > /dev/null
+source ~/.bashrc
+7) logout and login and enter your passphrase when prompted.
+8) tada! done
+
+image convert to pdf
+convert *.jpg output.pdf
+convert *.jpg -quality 100 output.pdf
+
+cut /merge PDFS
+1)pdfjoin foo.pdf bar.pdf --outfile foobar.pdf (requires padlatex)
+2) pdftk
+3) use pdflatex
+\usepackaage{pdfpages}
+\begin{document}
+   optional: \includepdfset{pages=-}
+\includepdf{1.pdf}
+\includepdf{2.pdf}
+\end{document}
+
+bash variable trick:
+if you are trying to pass an option etc to a command from a variable then try creating a string. Typically the variable will be expanded correctly. Then run 'eval' on the string that you constructed. Things shoud work beautifully. Useds trick i nMangle
+
+grep SSN
+grep '[0-9]\{3\}-[0-9]\{2\}-[0-9]\{4\}'
+this will only match the pattern and not the line containing the pattern.
+
+wget append to file
+wget url -O - >> file
+the - means to send the output to stdout
+
+View who last logged into PC and form where
+gnu 'last' command
+cat /var/log/lastlog and/or /var/log/wtmp (this is a binary file you read w/ last)
+may also want to check /var/log/auth.log, /var/spool, and /var/lib
+the last two would be more for usage. also checking the shell history would be useful
+also /var/log/messages can hold logs of successful ssh attempts
+
+grep recursively
+grep -r --include="*.sh" foo . # search from the curr diretory in bash files
+grep -r foo . #search all files from curr dir
+grep -r foo a* #search all files in dirs starting w/ a
+
+svn repository change of URL
+in an svn controlled directory type 'svn info' to view details that include the URL used to connect to the repository server.
+to change the URL use 
+svn switch --relocate oldprotocol:oldurl newprotocol:newurl
+e.g.
+svn switch --relocate svn+sshtunnel://192.168.0.3/home/nicola/svn/bash svn+sshtunnel://192.168.1.70/home/nicolae/svn/bash
+
+Git: files rm'ed wo git-rm
+git add -A (prev used 'git add -u')
+git ls-files --deleted | xargs git rm 
+
+Valggrind - memory usage/leak tool
+valgrind --tool=massif programname
+will perform memory usage/leak on program
+
+Bignicky HDD into Dell (HDD migration)
+https://wiki.archlinux.org/index.php/Pacman#Q:_After_updating_my_system.2C_I_get_a_.22unable_to_find_root_device.22_error_after_rebooting_and_my_system_will_no_longer_boot.
+After the bignicky motherboard died because of the blown caps I took the HDD out and placed it in the Dell. Upon boot I got "
+Waiting 10 seconds for /dev/sda1
+ERROR: Unable to find root device '/dev/sda1'
+You are being dropped to a recovery shell
+"
+I booted into the arch installation CD
+https://bbs.archlinux.org/viewtopic.php?pid=1062638
+ls /dev/s* 
+--> see what partitions there are on the HDD that wont' mount
+It showed four partitions so at the root prompt I created four directories.
+mkdir one two three four
+then ls /dev/sda
+actually I think the command was
+blkid -o list -c /dev/null 
+--> view device information from wiki.archlinux.org/index.php/Persistent_block_device_naming
+I then mounted the partitions onto the mount point directories that I made. you only really need to mount the partition that holds the OS and the boot partition.  I'm pretty sure I don't have a separate boot partition so I didn't need to worry about mounting that. It appeared that the partitions were OS, home,swap, and tmp. Now move into the folder where you mounted the OS. Here I mounted the OS on the "one" mountpoint.
+cd one
+at this point we are going to mount appropriate thinsg so that when we perform the update it is performed on the OS on the HDD and not the temporary OS afforded by the arch installation disc
+mount -t proc proc proc/
+mount -t sysfs sys sys/
+mount -o bind /dev/ dev/
+we need to use the change root command 
+chroot . /bin/bash
+-->that last step was a key step
+setup the wired network
+dhcpcd eth0
+now update the system
+pacman -Syy
+pacman -Syu 
+pacman -S udev
+pacman -S mkinitcpio
+mkinitcpio -p linux 
+reboot
+This fixed the problem. I'm not sure if it was an update problem or new harddware or a problem caused by the caps blowing while the system was running.
+
+I re-encountered the above problem when trying to perform an update and encountering the problem with /lib moving to /usr/lib. I initially threw the nicky drive into the dell and it worked fine. I updated and it seemed that the update ran fine. I then rebooted to double check and got the above error. This gave the following error:
+error: failed to commit transaction (conflicting files)
+glibc: /lib exists in filesystem
+Errors occurred, no packages were upgraded.
+I followed the instructions here: https://wiki.archlinux.org/index.php/DeveloperWiki:usrlib
+The install was relatively new and the update took care of removing items unrelated to glibc in /lib. This : https://wiki.archlinux.org/index.php/Pacman#Q:_I_get_an_error_when_updating:_.22file_exists_in_filesystem.22.21 is related to the problems I was having. I nutted up and moved /lib to /usr/libold.  I then to pacman update and it returned "bash: /usr/pacman no such file or directory" so moving /lib was bad. It broke all commands. I fumbled blindly in the dark trying to get functionality back but many commands such as cp/ls etc were broken giving similar error results. I then rebooted and redid the mounting/mapping process. I attempted to chroot but that was broken still. I then moved /usr/libold/*.* back to /lib this then allowed me to perform chroot etc. By copying just *.* instead of all of it I think that resolved the issue. As the wiki told when you get the file exists in filesystem, you need to remove all instances in the /lib that are owned by other programs etc. running : grep '^lib/' /var/lib/pacman/local/*/files and  find /lib -exec pacman -Qo -- {} + didn't return anything owned by other programs. Everything was owned by glibc. There were a couple that those commands couldn't determine the owner.  The first time I mounted the drives and did the update I attempted to perform a "mkinitcpio -p linux" and it failed with an error about some modules. I believe that these modules were in their own directory in /lib and that they were the ones causing the update of glibc to fail. By only copying /usr/libold/*.* instead of a recursive copy I left the bad files out and prevented them from screwing stuff up. 
+After the copy I then did : 
+pacman -Syu 
+pacman -Su
+mkinitcpio -p linux
+This mkinit then ran fine. I rebooted and it all worked fine with the update and finding /sda1. 
+I did an update inside openbox and it worked ran without a hitch. There were no files to update but that was to be expected since I had just done that.
+At one point I had done pacman -U http://pkgbuild.com/~allan/glibc-2.16.0-1-<arch>.pkg.tar.xz with <arch> replaced by i686. The wiki stated that this would save a bit of trouble when updating if it hadn't been updated to that level of glibc yet. It ran without a hitch. I'm not sure if in the end that helped or hurt. My final update updated glibc to 2.16.0.5.
+
+
+FStab problem w/ bignicky HDD transfer to Dell
+the fstab had entries for automounting the 2nd HDD,dvd, and card reader
+The 2nd HDD was creating this error
+"fsck.ext4:No such file or directory while trying to open /dev/sdb1
+Possibly non-existent device?"
+I could then reboot or perform maintenance as root.
+I had to log in as root, comment out hte offending line and reboot. I also had to remount the HDD as rw b/c by default it is mounted read only.
+
+Nicolae move to Dell from JDSU rackmount:
+X was broken due to using a new monitor and new graphics card
+sudo Xorg -configure
+backup the old xorg.conf and copy the one you just made and you should be good to go. 
+
+Unlock keyring on Nicolae (after enabling passphrase ssh)
+for some reason I couldn't unlock the keyring when I was given the prompt after tryin got connect to ReoveArch-Nicky. I could however when I cpied and pasted the sshfs command directly into the xterm. 
+
+MySQL bikelog & weightblood pressure from Purdue
+I would ssh into my home computer and log into the mysql server. I would scroll p into the history & modify the previous values with the values for the day
+insert into BloodPressurePulse(SystolicPressure,DiastolicPressure,PulseBPM,ReadingDate) values(128,70,58,20090711);
+insert ComputerLog (Odometer,TripDistance,AverageSpeed,TripTime,Temperature,CaloriesBurned,FatCaloriesBurned,TripDate) values (889.71,3.981,14.5,"00:16:31",32.4,150.0,16.70,20100223085300)
+mysql -u user -p 
+show databases; use databasename; show tables; describe tablename;
+
+mount audioCD
+mount -t iso9660 /dev/cdrom# /media/cdrom0 
+will fail on an audioCD. It will tell yo u
+mount: wrongfs type, bad option, bad superblock on  dev/{DRIVE}
+missing codepage or other error 
+.......
+as such audio CDs can't be mounted. They can be directly read:
+vlc cdda://
+
+Double Port FOrwarding:
+I attempted to get the router upstairs to poert forward (my old netgear rp???v2). I think I screwed things up when playing with the static route option on the Netgear. After a reset I would get an IP but I couldn't connect to the net or even log in to the Netgear webadmin page. I had to perform a hard rest to get access to the webadmin page and to see the net again. Hard rest= hold reset button in until the checkmark blinks at you 
+
+
+Display filesystem type 
+df -T
+
+SSHFS: connection reset by peer.
+try adding -o sshfs_debug
+try ssh. you may see hat thRSA key /known hosts needs to be recognized. sshfs doesn't query you for those credentials
+
+Arch running daemons:
+rc.d list
+
+Time execution of a command 
+preced the command with time
+e.g. time ls -ll 
+time bash jiggitybits.sh
+
+Turning on/off wireless radio on laptop
+If you turn the wifi off via Fn+F2 you can't turn it back on via the same method. YOu need to eneter the bios setup to turn it back on under wireless settings.
+
+display current kernel 
+uname -mrs
+
+list hostname 
+hostname
+also can be found in /etc/hostname (ubuntu)
+and /etc/hosts & /etc/rc.conf (arch)
+
+
+restart teh sssh daemon in Arch
+rc.d start/stop/restart sshd
+
+SSH login banner 
+edit /etc/ssh/sshd_config to enbale & point to a file w/a banner message
+the default banner message 'motd=message of the day' can be found at /etc/motd
+
+Vino server
+installing hte vinoserver allows easy reote desktop access. However,it needs to be secured (remmeber the hack attempt on the linux box I was on at Purdue). This is the server I had to use in Arch to get the ubuntu style shared desktop instead of getting its own separate desktop.
+
+Non resposive or dead laptop screen (dead backlight) + external monitor and BIOS
+Typically with an external monitor hooked up you will net get the BIOS screen to show up on the external monitor without some user intervention. At the bar minimum you'll need to know the keypress sequence to get into the BIOS screen. Alternatively you can just mash on the keyboard hoping you struck the required key. Or just google it.
+Once in the BIOS screen send the video output to the external display. On the Dell inspiron 2200 this is done by pressing FnF8. You will now see the BIOS screen on the external monitor.
+
+Dell Inspiron 2200
+On startup it beeps due to the battery not being recognized. Press F1 to skip or press F2 to enter setup (bios)
+During Normal BIOS F2 gets you to setup & F12
+
+Arch X fails - unable to init/compile kb layout
+its due to the HDD being full that root operates on. Login as root & clean up the package repostitoreies
+
+print to size
+lpr -o fit-to-page
+
+Mozilla profile transfer
+You can trsnfer mozilla profile files across users and they'll load w/o a problem.
+I did copy of ther key3.db & sigma.sqlite files which are used for automated logins.
+
+Mozilla Sessionstore files
+they are cross platform loadable. At least I copied a working sessionstore.js from nicolae(10.10) and loaded it on Windows
+
+Xargs
+find . -name '*.cb[zr]' -print0 | xargs -0 -I {} mv {} -n --target-directory=/home/nicolae/Comics
+the -I needed to tell it we are creating a variable for the argument list.
+otherwise the arguments are tacked onto the end. And this doesn't work (the args being put on the end ) for mv.
+
+find 
+find. -type f -size +0
+useful to look for story files still hanging around after a mv operation like the xargs one above.
+
+find
+find files between two dates
+find ~/some/dir -type f -newrmt 2010-10-29 ! -newermt 20120-10-31
+find files from 29th and  30th
+
+xorg update -> low resolution 
+after an update that involved xorg, the resolution was set low. I think some nvidia drivers were set to be the new drivers as examining the xorg log showed an error about no nvidia driver being found or unable to load. I simply copied an old archived xorg.conf file to xorg.conf. I wasn't sure if this would work as there currently wasn't an xorg.conf int he directory. however this did seem to solve the problem 
+
+Tab autocompletion adds trailing space
+this occurred after installing Adobe Acrobat Reader. The solution appeared to be teh suggested deletion of /etc/bash_completion.d/acroread.sh (yet I was looking in just bash_completion. It appears that my mistake was not installing acroread from the repos as this bug is corrected in the repos.) Anyway I solved the problem by editing /etc/bash_completion line 1587 from -o default to -o filenameas as suggested by a poster. Problem solved. bugs.launchpad.net/ubuntu/+source/acroread/+bug/769866
+
+SSH sshd -D
+I wasn't able to connect to Nicky or Nicolae via ssh after putting them on the wireless at home. I thougt it was a problem with the router and computers being wireless. Some links I foudn suggested that some special configuration was needed in the router besides port forwarding.
+The problem was that sshd was being started w/ the -D switch which doesn't start it as a daemon. I could connect but only while I started a loopback ssh session on the particular machine and left it running. I couldn't figure out where to go to prevent the -D switch from being invoked on startup. I looked in Startup applications and in the /etc/ssh/sshd_config file. 
+To get rid of it I just remvoed, purged,cleaned, & reinstalled openssh-server.
+To properly solve the problem edit /etc/init/ssh.conf
+In retrospect running ps aux | grep ssh and examining the options being passed would've helped to solve the problem. Well live and learn. 
+
+CUPS admin page
+http://localhost:631/admin i.e 192.168.0.1:631
+
+various printer utilities:
+lpinfo -v 
+hp-probe
+
+Printing from command line to HP 2015
+lpr -P HP-LaserJest-P2015-Series file
+ripe for an alias!
+
+Old Ipod 3g, Rockbox & linux
+Ubuntu10.10 recognized it but I think it helps significantly if when yo uplug the ipod in that it is in ipad firmware mode and not Rockbox firmware mode. To do this power up the ipod. While it is still showing the Apple icon flip the hold switch on the top. This will put it in apple firmware mode. 
+
+Mounting SMB shares
+If you can't connect to a smb share graphically then you can try to do it via command line
+sudo apt-get install smbfs smbclient
+smbclient -L 192.168.1.2 -U%
+this will list shares on that ip
+create a mount point just like sshfs
+sudo smbmount //192.168.1.2./folder /home/foo/mountpoint -o username=badass,password=foobar,uid=1000,mask=000
+sudo smbumount /hom/foo/mountpoint
+from ubuntuforms.org/showthres.ph?t=280473
+
+list currently installed packages
+dpkg -l (provides rev of pkg)
+dpkg --get-selections (just pkgname & if isntalled or deinstall)
+
+Remove files without an extension
+rm `ls | grep -v '\.'`
+
+Removing files that begin with a dash
+The problem arises from the fact that the rm command interprets the text following the dash as a switch which it isn't. To overcome this display teh path of the file. This problem applies to most cmd line programs 
+touch ./-shit.txt #this works whereas touch -shit.txt fails
+rm ./-shit.txt #this works rm -shit.txt fails
+
+count occurrences of a string in a file
+grep -o "string" infile | wc -w 
+
+Arch umount - unable to umount device is busy
+try a lazy unmount (-l) instead ofa  forced umount (-f)
+umount -l /path/to/mountpt
+
+Arch mounting usb memory
+from wiki.archlinux.org/index.php/USB_Storage_Devices
+search in /dev/disk/(by_id|by_label)
+make a mnt point
+sudo mount -o rw,noauto,async,user,umask=1000 /dev/sdb1 /mnt/point
+
+Kill running process in Emacs
+When a command is hanging and you want to kill it in Emacs
+C-g
+
+Thu Oct 25 11:14:46 EDT 2012
+25-10-2012
+
+file link exists
+ln: creating symbolic link `/foo/bar': File exists
+use 
+ln -si A B
+to prompt you to overwrite B
+
+
+Fri Oct 26 08:38:02 EDT 2012
+26-10-2012
+
+read random line from file
+shuf file.txt | head -n 1
+also see this file BashScripts/Sandbox/Randomfilelines.txt
+http://www.google.com/search?q=bash+get+random+line+of+file&aq=0&oq=bash+get+random+line+of+&sugexp=chrome,mod=0&sourceid=chrome&ie=UTF-8
+
+Mon Oct 29 17:03:58 EDT 2012
+29-10-2012
+
+grep within zipped/tarred files without extracting them
+zgrep "some text" file*.zip
+or use gzcat, zcat, zless
+
+Tue Oct 30 14:20:15 EDT 2012
+30-10-2012
+
+The preceding example redirects the standard output into a file by using the > operator. By default, if the
+file already exists, then it will be overwritten. If you want to change the default behavior, you can use
+the command set -o noclobber (or set -C), which sets the noclobber option to prevent a file from
+being overwritten using redirection. You can cancel this option using set +o noclobber.
+
+http://www.useragentstring.com/pages/useragentstring.php
+user agent strings for wget 
+
+Unable to mount 2.0 TB Filesystem
+
+Error mounting: mount: wrong fs type, bad option, bad superblock on /dev/sdb4, missing codepage or helper program, or other error In some cases useful info is found in syslog -try dmesg | tail or so
+Trying to extract data from a 'bricked' Western Digital MyBook Live 2tb drive.
+
+I came across a forum that advised to use Ubuntu (booted from a CD) on my Macbook. Managed to download and create a boot CD for Ubuntu (like this little operating system btw). Booted the machine with the CD and plugged the drive (which I had extracted from it's casing and placed into a external USB SATA case & plugged to the laptop). The drive is seen by Ubuntu but each time I click on the drive, it gives me the following error:
+
+Unable to mount 2.0 TB Filesystem
+
+Error mounting: mount: wrong fs type, bad option, bad superblock on /dev/sdb4, missing codepage or helper program, or other error In some cases useful info is found in syslog -try dmesg | tail or so
+
+dmesg | tail gives : 
+[  168.231059] EXT4-fs (sda2): ext4_check_descriptors: Checksum for group 0 failed (29853!=52284)
+[  168.231068] EXT4-fs (sda2): group descriptors corrupted!
+
+I followed these posts:
+http://askubuntu.com/questions/113861/unable-to-mount-filesystem-error
+http://www.linuxquestions.org/questions/linux-newbie-8/group-descriptors-corrupted-913837/
+http://linuxexpresso.wordpress.com/2010/03/31/repair-a-broken-ext4-superblock-in-ubuntu/
+http://ubuntuforums.org/showthread.php?p=9106100
+
+and entered these commands 
+
+sudo fdisk -l /dev/sdb1
+sudo fsck /dev/sdb1
+sudo fsck.ext4 -v /dev/sdb1
+sudo fsck.ext4 /dev/sdb1
+
+nicolae@nicolae-desktop:~$ sudo fdisk -l /dev/sdb1
+[sudo] password for nicolae: 
+
+Disk /dev/sdb1: 80.1 GB, 80056617984 bytes
+255 heads, 63 sectors/track, 9732 cylinders
+Units = cylinders of 16065 * 512 = 8225280 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x00000000
+
+Disk /dev/sdb1 doesn't contain a valid partition table
+
+nicolae@nicolae-desktop:~$ sudo fsck /dev/sdb1
+fsck from util-linux-ng 2.17.2
+xe2fsck 1.41.12 (17-May-2010)
+Reavers: clean, 8101/4890624 files, 19342805/19545072 blocks
+
+nicolae@nicolae-desktop:~$ sudo fsck -v /dev/sdb1
+fsck from util-linux-ng 2.17.2
+e2fsck 1.41.12 (17-May-2010)
+Reavers: clean, 8101/4890624 files, 19342805/19545072 blocks
+nicolae@nicolae-desktop:~$ sudo fsck  /dev/sdb1
+fsck from util-linux-ng 2.17.2
+e2fsck 1.41.12 (17-May-2010)
+Reavers: clean, 8101/4890624 files, 19342805/19545072 blocks
+nicolae@nicolae-desktop:~$ sudo fsck.ext4 -v  /dev/sdb1
+e2fsck 1.41.12 (17-May-2010)
+Reavers: clean, 8101/4890624 files, 19342805/19545072 blocks
+nicolae@nicolae-desktop:~$ sudo fsck.ext4  /dev/sdb1
+e2fsck 1.41.12 (17-May-2010)
+One or more block group descriptor checksums are invalid.  Fix<y>? yes
+
+Group descriptor 207 checksum is invalid.  FIXED.
+Reavers contains a file system with errors, check forced.
+Pass 1: Checking inodes, blocks, and sizes
+Pass 2: Checking directory structure
+Pass 3: Checking directory connectivity
+Pass 4: Checking reference counts
+Pass 5: Checking group summary information
+Inode bitmap differences:  -1695753 -1695755 -1695757 -1695759 -1695761 -(1695763--1695765) -(1695767--1695770) -1695773 -1695776 -1695779 -(1695784--1695785) -(1695787--1695792) -(1695794--1695795) -1695798 -(1695802--1695805) -1695810 -(1695813--1695820) -1695822 -1695824 -1695828 -(1695832--1695835) -(1695838--1695840) -(1695842--1695843) -1695848 -(1695853--1695854) -(1695856--1695858) -(1695862--1695863) -(1695866--1695870) -(1695872--1695873) -1695875 -(1695878--1695882) -(1695884--1695885) -(1695887--1695890) -1695896 lots more output
+
+Fix<y>? yes
+
+
+Reavers: ***** FILE SYSTEM WAS MODIFIED *****
+Reavers: 8101/4890624 files (5.6% non-contiguous), 19342805/19545072 blocks
+nicolae@nicolae-desktop:~$ sudo fsck.ext4  /dev/sdb1
+e2fsck 1.41.12 (17-May-2010)
+Reavers: clean, 8101/4890624 files, 19342805/19545072 blocks
+
+Thu Nov  1 10:32:31 EDT 2012
+01-10-2012
+
+have contents of shell command entered into buffer
+C-u M-! is an all purpose command to have the output of any shell command piped into the current buffer
+
+C-u M-! date +%d-%m-%Y
+ 
+Mon Nov  5 15:42:58 EST 2012
+05-11-2012
+In python you can add arguments to .strip() that allow you to specify what other characters to strip from a string
+also: The characters python considers whitespace are stored in string.whitespace
+
+Wed Nov  7 18:14:10 EST 2012
+07-11-2012
+Python expand users relative path: file = os.path.expanduser(file) 
+
+sudo pacman -R <PackageName>
+If you cannot figure out the exact name of the package (it is not the same as the name of archive you installed), use pacman -Qsq to provide a list of installed packages.
+
+I needed to install BeautifulSoup on arch linux. 
+I ran:
+sudo pacman -Syu python-beautifulsoup
+which defaults to getting the version for python2 (not 3)
+I then had to go through the rigamarole of removing it as shown above so that I could get BS4
+pacman -Syu python-beautifulsoup4
+The documentation is pretty awesome: http://www.crummy.com/software/BeautifulSoup/bs4/doc/
+
+http://stackoverflow.com/questions/9056932/rss-python-parsing-single-image-url?rq=1
+http://stackoverflow.com/questions/5221126/twitter-rss-or-otherwise-get-100-latest-tweets
+
+Fri Nov  9 11:22:14 EST 2012
+09-11-2012
+
+open something in X while logged in remotely (http://unix.stackexchange.com/questions/10121/open-a-window-on-a-remote-x-display-why-cannot-open-display )
+DISPLAY=:0.0 evince cmichae-resume.pdf
+
+PyGTK has been deprecated in favor of PyGI+GTK. Because of that, a version of PyGTK for Python 3 was never written.
+To use PyGI+GTK in Python 3, you need to install the python-gobject and gtk3 packages and do
+from gi.repository import Gtk
+For a quick introduction on porting PyGTK code to PyGI+GTK, see here:
+https://live.gnome.org/PyGObject/IntrospectionPorting
+For a full tutorial, see here:
+http://readthedocs.org/docs/python-gtk-3-tutorial/en/latest/index.html
+
+
+Mon Nov 12 10:01:09 EST 2012
+12-11-2012
+so far I haven't been able to get Gtk to work. 
+I stumbled across needing to import pygobject-devel
+
+Get Python dirname,basename
+>>> import os
+>>> os.path.dirname('/root/dir/sub/file.ext')
+'/root/dir/sub'
+>>> os.path.splitext('/root/dir/sub/file.ext')
+('/root/dir/sub/file', '.ext')
+>>> os.path.splitext('/root/dir/sub/file.ext')[0]
+'/root/dir/sub/file'
+
+According to https://wiki.archlinux.org/index.php/GTK%2B I needed gtk3 and python-gobject to including Gtk from gi.repository.
