@@ -11,7 +11,8 @@ from gi.repository.GdkPixbuf import Pixbuf
 class ImageViewer:
     def __init__(self,globber):
 #        self.files=glob.glob('/home/arch-nicky/Art/*.jpg') #this globs the file and includes the full path.
-        self.files=glob.glob(globber) #this globs the file and includes the full path.
+        self.files=glob.glob('/home/arch-nicky/Git/PhotoPrintPrep/*.jpg') #this globs the file and includes the full path.
+#        self.files=glob.glob(globber) #this globs the file and includes the full path.
 #        for image in files:
 #            print(image)
         self.filelistlength=len(self.files)
