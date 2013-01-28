@@ -1556,3 +1556,10 @@ this emacs didn't use the gui for password entry which was nice. It was using ss
 
 word on the street is if you remove gpg-agent it'll default to ssh-agent which will be run from the cli mini-buffer in emacs.
 
+Mon Jan 28 11:00:24 EST 2013
+28-01-2013
+Emacs EasyPg on Arch Linux and non-gui password entry 
+I found on http://www.emacswiki.org/emacs/EasyPG the hint to install gnugpg1 (via yaourt) and to add 
+(when (file-executable-p "/usr/bin/gpg1")
+(setq epg-gpg-program "/usr/bin/gpg1"))
+to the .emacs file to override the bug in gpg2 in Arch linux
