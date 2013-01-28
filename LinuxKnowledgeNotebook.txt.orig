@@ -96,10 +96,10 @@ you'll need to make a backup of the file.
 use the -w switch to write the changes out to the file.
 
 CLI Expansions: (from http://lifehacker.com/5743814/become-a-command-line-ninja-with-these-time+saving-shortcuts)
-When you're working with variations of a fileœôòôlike backups or different file typesœôòôit can get tedious typing out the same commands with small tweaks. Using the brace symbols ({}), you can easily perform batch operations on multiple versions of a file.
+When you're working with variations of a fileâ€”like backups or different file typesâ€”it can get tedious typing out the same commands with small tweaks. Using the brace symbols ({}), you can easily perform batch operations on multiple versions of a file.
 Say you want to rename just part of a filename. Instead of typing out mv /path/to/file.txt /path/to/file.xml, you could just run:
     mv /path/to/file.{txt,xml}
-This runs the command with the same arguments, only with the parts inside the brace changedœôòôthe first part corresponding to the first argument, the second part corresponding to the second argument.
+This runs the command with the same arguments, only with the parts inside the brace changedâ€”the first part corresponding to the first argument, the second part corresponding to the second argument.
 The most common example of this is when you're backing up a file that you're making changes to. For example, if you are tweaking your rc.conf, you'll want to make a backup in case the new one doesn't work. So, to do so, you can just run:
     sudo cp /etc/rc.conf{,-old}
 Putting nothing before the comma will just append -old to the filename after copying it with cp. If your new file doesn't work out and you want to restore the backed up file to its original location, you can just use:
@@ -134,7 +134,7 @@ http://www.dansanderson.com/blog/2007/07/indenting-source-code-in-emacs.html
 ;
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 or
-(add-hook œôòøc-mode-hook (lambda () (add-to-list œôòøwrite-file-functions œôòødelete-trailing-whitespace))) ; for a particular mode
+(add-hook â€˜c-mode-hook (lambda () (add-to-list â€˜write-file-functions â€˜delete-trailing-whitespace))) ; for a particular mode
 from: http://www.emacswiki.org/emacs/DeletingWhitespace
 
 Convert LF to DOS Format CRLF (-i inplace): sed -i 's/$/\r/' file
@@ -1230,7 +1230,7 @@ Disk /dev/sdb1 doesn't contain a valid partition table
 
 nicolae@nicolae-desktop:~$ sudo fsck /dev/sdb1
 fsck from util-linux-ng 2.17.2
-xe2fsck 1.41.12 (17-May-2010)
+e2fsck 1.41.12 (17-May-2010)
 Reavers: clean, 8101/4890624 files, 19342805/19545072 blocks
 
 nicolae@nicolae-desktop:~$ sudo fsck -v /dev/sdb1
@@ -1327,3 +1327,232 @@ Get Python dirname,basename
 '/root/dir/sub/file'
 
 According to https://wiki.archlinux.org/index.php/GTK%2B I needed gtk3 and python-gobject to including Gtk from gi.repository.
+
+Mon Nov 19 10:29:33 EST 2012
+19-11-2012
+On Windows for the computer to recognize the rockboxed iPod you need to have it in iPod mode and not RockBox mode. Put it in iPod mode by shutting it down (Menu+Play/Pause) then when it is rebooting put the hold button to hold and it will go into iPod mode. 
+
+http://stackoverflow.com/questions/767486/how-do-you-check-if-a-variable-is-an-array-in-javascript
+http://api.jquery.com/jQuery.isArray/
+http://perfectionkills.com/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/
+
+
+Wed Nov 28 11:02:17 EST 2012
+28-11-2012
+http://serverfault.com/questions/183431/get-all-extensions-and-their-respective-file-count-in-a-directory
+sudo find ./ -type f | grep -E ".*\.[a-zA-Z0-9]*$" | sed -e 's/.*\(\.[a-zA-Z0-9]*\)$/\1/' | sort | uniq -c | sort -n
+or
+sudo find ./ -type f | sed -ne '/\.[^./]*$/s/.*\(\.[^.]*\)$/\1/p' | sort | uniq -c | sort -n 
+both of these work. The second is more compact and allows for non alpha characters in the filename, although a poster did complain that on their system it didn't work. 
+
+edit .xinitrc in Arch to setup auto boot into DM or WM
+
+Emacs GPG decryption failed.
+Received: emacs epa-file--find-file-not-found-function decryption failed
+This happened after I updated. I thought something changed during the update. I should know better that the updated is proly QCed pretty well so it was me and not the software.
+In the end I thought I had put in the passphrase with capslock on when it actually wasn't. 
+for a simple check instead of invoking emacs every time you can simply use gpg -d(ecrypt) file to check the decryption. 
+gpg doesn't use a GUI, it uses ncurses style prompt. It does create a plaintext file removing the .gpg from the filename. e.g. gpg -d bob.txt.gpg creates a bob.txt file. 
+
+Thu Nov 29 14:40:30 EST 2012
+29-11-2012
+The gdialog library can be found in the zenity package for Arch.
+
+Mon Dec  3 17:56:20 EST 2012
+3-12-2012
+python files using wx need to be run with python2 as python3 doesn't have a wxPython port working yet. 
+
+
+Thu Dec  6 09:25:08 EST 2012
+6-12-2012
+http://thenextweb.com/twitter/2011/06/23/how-to-find-the-rss-feed-for-any-twitter-user/
+Twitter in '11 blocked rss feeds. here is the workaround. no html style links tho :(
+http://api.twitter.com/1/statuses/user_timeline.rss?screen_name={USERNAME}
+
+I tried to open too many large images in Arch on Cameron and X crashed and took down icewm. 
+restart X with 
+startx
+this'll use your .xinitrc file. 
+It took down X but my screen instances were safe! screen to the rescue once again. 
+
+Fri Dec  7 17:10:11 EST 2012
+7-12-2012
+I ran into this error : http://stackoverflow.com/questions/5802426/git-error-src-refspec-master-does-not-match-any
+because I hadn't touched the readme file to add. 
+
+Mon Dec 10 14:05:23 EST 2012
+10-12-2012
+symlink: I was doing symbolic links incorrectly. I was assuming it goes  ' ln -s From To' when it goes ' ln -s To From'
+'ln -s  ~/Git/Fonts/ ~/.fonts' puts a link Fonts in /.fonts that links to the Git/Fronts directory
+to see the symlink and where it points you need to do a long listing of the directory/file
+
+Any time a new font is added (to ~/.fonts if single user or /usr/share/fonts for global use) you need to update the fontconfig cache:
+fc-cache -vf
+
+
+Thu Dec 13 15:05:45 EST 2012
+13-12-2012
+Dropbox is really just a ftp/rsync clone for the poor. I was thinking of doing something similar by running a daemon and then uploading files to djinnis.....but then thought wtf is the point? If you have net access just set up dyndns so that any data that you have at home is just as accessible without that middleware bloat of dropbox. 
+
+
+Tue Dec 18 11:34:15 EST 2012
+18-12-2012
+
+http://stackoverflow.com/questions/2627289/how-to-replace-a-region-in-emacs-with-yank-buffer-contents basically you have to edit your .emacs profile or you can use registers
+Add this to your .emacs:
+
+(delete-selection-mode 1)
+Anything that writes to the buffer while the region is active will overwrite it, including paste, but also simply typing something or hitting backspace
+
+|-----
+Setting delete-selection-mode, as Michael suggested, seems the most natural way to do it.
+
+However, that's not what I do :) Instead, I put the good stuff into a "register" -- for eample, register "a" -- with C-x r x a. Then I kill the other copy, and copy the register into the same spot with C-x r g a.
+
+This is convenient because killing doesn't affect the registers, so C-x r g a always inserts the good stuff.
+
+|-----
+The default way to do something like this is the not-entirely-elegant following:
+
+Get your desired replacement text into the kill ring somehow (e.g., M-w).
+Highlight the region to be replaced.
+Delete it (C-w).
+Replace it with the prior-copied region (C-y, M-y). This replaces the freshly deleted contents with the exact same text that you just deleted (C-y), and then re-replaces it with the next most-recently saved buffer in the buffer ring (M-y).
+This would get to be a real pain if you wanted to do this 10 times with the same text, as the desired replacement would get pushed farther back in the kill ring each time you deleted a region, so you'd have to call M-w an increasing number of times each time you wanted to yank it.
+
+Fri Jan  4 09:59:00 EST 2013
+4-1-2013
+I copied my thinkbank.gpg file from the cam laptop to big nicky and I could access the file using the key. I find this a bit strange since I thought the gpg key had to do with the key on the filesystem it was created with. I know the key I used to encrypt the file is diff than the system wide key I use. So I'm curious as to how gpg works since I thought the gpg agent needed to access the keys in the /etc/ssh directory to decrypt the file. This makes me scared since I feel like anyone could decrypt this file then. I am pretty sure that this isn't the case but it goes to show how little I understand of the gpg agent/encryption.
+
+Tue Jan  8 11:40:59 EST 2013
+8-1-2013
+http://stackoverflow.com/questions/7230005/bash-script-to-tar-folders-with-spaces
+tar.gz all directories in a folder: 
+#!/bin/bash
+for i in ./*
+do
+    echo tar -zcvf "$i.tar.gz" "$i"  #<--get rid of the echo command for real execution
+done
+http://www.cyberciti.biz/faq/how-do-i-compress-a-whole-linux-or-unix-directory/
+
+http://unix.stackexchange.com/questions/19804/compress-a-directory-using-tar-gz-over-ssh-to-local-computer
+I'd like to essentially tar/gz a directory on a remote machine and save the file to my local computer without having to connect back into my local machine from the remote one. Is there a way to do this over SSH? The tar file doesn't need to be stored on the remote machine, only on the local machine. Is this possible?
+-->You can do it with an ssh command, just tell tar to create the archive on its standard output:
+
+ssh remote.example.com 'cd /path/to/directory && tar -cf - foo | gzip -9' >foo.tgz
+Another approach, which is more convenient if you want to do a lot of file manipulations on the other machine but is overkill for a one-shot archive creation, is to mount the remote machine's filesystem with SSHFS (a FUSE filesystem). You should enable compression at the SSH level.
+
+mkdir ~/net/remote.example.com
+sshfs -C remote.example.com:/ ~/net/remote.example.com
+tar -czf foo.tgz -C ~/net/remote.example.com/path/to/directory foo
+
+
+snipplr.com code snippets, tagged for organization
+
+delete only directories and not files:
+http://www.unix.com/linux/60891-deleting-only-directory-not-files.html the answer: http://www.unix.com/302184842-post7.html
+rm -r */ #be careful rm -r /* will make you very VERY mad!
+
+semi-related and of interest.
+http://stackoverflow.com/questions/7714900/remove-only-files-in-directory-on-linux-not-directories
+You can use find with -type f for files only and -maxdepth 1 so find won't search for files in sub-directories of /path/to/directory. rm -i will prompt you on each delete so you can confirm or deny the delete. If you dont care about being asked for confirmation of each delete, change it to rm -fv (-f for force the delete). The -v flag makes it so that with each delete, a message is printed saying what file was just deleted.
+
+find /path/to/directory -type f -maxdepth 1 -exec rm -iv {} \;
+This should meet the criteria:
+
+NOT directories 
+NOT subdirectories 
+NOT files in these subdirectories.
+
+Wed Jan  9 10:49:18 EST 2013
+9-1-2013
+http://www.gnu.org/software/emacs/manual/html_node/emacs/Interlocking.html
+Emacs s, q, p
+s
+Steal the lock. Whoever was already changing the file loses the lock, and you gain the lock. 
+p
+Proceed. Go ahead and edit the file despite its being locked by someone else. 
+q
+Quit. This causes an error (file-locked), and the buffer contents remain unchanged.the modification you were trying to make does not actually take place.
+
+Searching for performing Diff on auto-recover-file vs current file : http://www.google.com/search?q=emacs+diff+auto+save+file&oq=emacs+diff+auto+save+file&sugexp=chrome,mod=10&sourceid=chrome&ie=UTF-8#hl=en&tbo=d&sclient=psy-ab&q=emacs+recover-this-file+run+diff&oq=emacs+recover-this-file+run+diff
+http://compgroups.net/comp.emacs/diff-option-on-recover-session-recover-file/492459
+Perform Diff on auto-recover-file
+
+assuming your original file is foo.el
+M-x ediff-files RET foo.el RET #foo.el# RET
+seems to work for me.
+You could also try M-x undo (or C-x u) on the recovered file.  It will
+switch between the old (unsaved) version and the autosave version
+
+M-x recover-this-file
+M-x recover-file
+offers:
+no, diff
+The diff is customizable via
+   recover-file-diff-arguments    - List of arguments (switches) to pass to `diff' by `recover-file'.
+   recover-file-diff-program      - Absolute or relative name of the `diff' program used by `recover-file'.
+
+Thu Jan 10 10:49:12 EST 2013
+10-1-2013
+Sublime Text autoformat autoindent
+select code to indent (ctrl-a) Edit-Line-Reindent
+<<<<<<< Updated upstream
+
+Thu Jan 17 14:46:58 EST 2013
+17-01-2013
+arch/icewm:
+install xlockmore and edit .icewm/preferences to have a lock screen.
+edit the lock workstation command to run 
+"xlock -mode blank"
+http://www.icewm.org/FAQ/IceWM-FAQ-9.html
+
+
+Wed Jan 23 12:01:45 EST 2013
+23-12-2013
+I was trying to use my new UploadFileToDjinnius.sh with inkydinky as the user and I was getting permission denied. I believe this was due to the default directory set for inkydinky. I needed to switch to www/ and then Ithink it wouldve worke.d 
+
+
+Thu Jan 24 15:37:13 EST 2013
+24-01-2013
+conky
+I was trying to execute a bash script by calling python. this gave an error that threw me for a loop as I thought that there was some goofiness going on in conky's exec command that was goofing up my script. 
+My scripts were returning more text than the default buffer size. I upped that and got about what I needed. 
+=======
+ 
+Tue Jan 22 16:48:59 EST 2013
+22-01-2013
+I tried to update the bios inside linux on the dell d820 using these instructions http://linux.dell.com/wiki/index.php/Tech/libsmbios_dellBiosUpdate. I was in a livecd of crunchbang when I did it and it appeared to go off without a problem. When I rebooted the lights came on for a split second and then they went off with a weird click. No screen came up or anythign. Crap I fubared the bios.
+I then stumbled upon this for http://forums.mydigitallife.info/threads/13605-About-Dell-BIOS-recovery. It appears that the right terminology is bios recovery. I had been looking up bricked bios / flash bios which mostly led to traditional methods to flash the bios that relied on a working bios. I did need a windows machine to extract the hdr image (step 2).
+1. Download BIOS file from Dell: http://ftp.dell.com/bios;
+2. Extract HDR file from EXE: xxxxxx.exe -writehdrfile, a file xxxxxx.hdr will be there;
+3. Copy xxxxxx.hdr to a formatted floppy disk or USB disk (U disk is not fit for D410 / D610);
+4. Rename xxxxxx.hdr to the right file name according to below list;
+4. Unplug AC adapter and battery from the bricked laptop;
+5. Plug USB-Floppy with the disk prepared;
+6. Holding press "END" on the keyboard, plug AC Adapter;
+7. Then you will find that the battery light is on with red;
+8. Release "END" (when the battery light is on), you will find the power light is on and laptop power up; If you wait the battery light will go off and the system won't start the update and you'll have to restart by unplugging the ac adapter. You'll see the usb flash showing that it is reading. 
+9. Keep waiting... USB-Floppy will start to work. A continuous reading instead of a short seek action. Keep waiting...
+10. Finally, the lapop shutdown or restart.
+
+It didn't work without the file named BREW????.hdr. I initially just left it as D820_A10.hdr but it didn't recognize it.  The USB didn't need to be empty besides the hdr file. And I didn't have to try other usb ports to get it to work. It worked right off the bat on the ones on the side. 
+
+I suppose this could be used as an alternate method to flash the bios esp when the latest bios isn't available in the repos for linux.
+
+It appears that other keystrokes may be required to boot the usb on other systems. I know the dell mini 9 had a diff keystroke command. 
+
+http://ftp.dell.com/Pages/Drivers/latitude-d820.html
+http://ftp.dell.com/Pages/Drivers/latitude-d630.html
+http://linux.dell.com/repo/firmware/bios-hdrs/
+
+Sun Jan 27 22:19:51 EST 2013
+to get emacs and easy pg to work on ubuntu/nicolae
+I had to install easypg and add
+(require 'epa-file)
+(epa-file-enable)
+to my .emacs file which didn't exist yet.
+this emacs didn't use the gui for password entry which was nice. It was using ssh-agent I believe. It was a process present when running ps aux when I was being prompted for my pwd for a file that was being opened in emacs in gpg mode.
+
+word on the street is if you remove gpg-agent it'll default to ssh-agent which will be run from the cli mini-buffer in emacs.
+>>>>>>> Stashed changes

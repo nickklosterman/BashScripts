@@ -1497,6 +1497,7 @@ Thu Jan 10 10:49:12 EST 2013
 10-1-2013
 Sublime Text autoformat autoindent
 select code to indent (ctrl-a) Edit-Line-Reindent
+<<<<<<< Updated upstream
 
 Thu Jan 17 14:46:58 EST 2013
 17-01-2013
@@ -1506,6 +1507,33 @@ edit the lock workstation command to run
 "xlock -mode blank"
 http://www.icewm.org/FAQ/IceWM-FAQ-9.html
 
+
+ 
+Tue Jan 22 16:48:59 EST 2013
+22-01-2013
+I tried to update the bios inside linux on the dell d820 using these instructions http://linux.dell.com/wiki/index.php/Tech/libsmbios_dellBiosUpdate. I was in a livecd of crunchbang when I did it and it appeared to go off without a problem. When I rebooted the lights came on for a split second and then they went off with a weird click. No screen came up or anythign. Crap I fubared the bios.
+I then stumbled upon this for http://forums.mydigitallife.info/threads/13605-About-Dell-BIOS-recovery. It appears that the right terminology is bios recovery. I had been looking up bricked bios / flash bios which mostly led to traditional methods to flash the bios that relied on a working bios. I did need a windows machine to extract the hdr image (step 2).
+1. Download BIOS file from Dell: http://ftp.dell.com/bios;
+2. Extract HDR file from EXE: xxxxxx.exe -writehdrfile, a file xxxxxx.hdr will be there;
+3. Copy xxxxxx.hdr to a formatted floppy disk or USB disk (U disk is not fit for D410 / D610);
+4. Rename xxxxxx.hdr to the right file name according to below list;
+4. Unplug AC adapter and battery from the bricked laptop;
+5. Plug USB-Floppy with the disk prepared;
+6. Holding press "END" on the keyboard, plug AC Adapter;
+7. Then you will find that the battery light is on with red;
+8. Release "END" (when the battery light is on), you will find the power light is on and laptop power up; If you wait the battery light will go off and the system won't start the update and you'll have to restart by unplugging the ac adapter. You'll see the usb flash showing that it is reading. 
+9. Keep waiting... USB-Floppy will start to work. A continuous reading instead of a short seek action. Keep waiting...
+10. Finally, the lapop shutdown or restart.
+
+It didn't work without the file named BREW????.hdr. I initially just left it as D820_A10.hdr but it didn't recognize it.  The USB didn't need to be empty besides the hdr file. And I didn't have to try other usb ports to get it to work. It worked right off the bat on the ones on the side. 
+
+I suppose this could be used as an alternate method to flash the bios esp when the latest bios isn't available in the repos for linux.
+
+It appears that other keystrokes may be required to boot the usb on other systems. I know the dell mini 9 had a diff keystroke command. 
+
+http://ftp.dell.com/Pages/Drivers/latitude-d820.html
+http://ftp.dell.com/Pages/Drivers/latitude-d630.html
+http://linux.dell.com/repo/firmware/bios-hdrs/
 
 Wed Jan 23 12:01:45 EST 2013
 23-12-2013
@@ -1517,3 +1545,14 @@ Thu Jan 24 15:37:13 EST 2013
 conky
 I was trying to execute a bash script by calling python. this gave an error that threw me for a loop as I thought that there was some goofiness going on in conky's exec command that was goofing up my script. 
 My scripts were returning more text than the default buffer size. I upped that and got about what I needed. 
+
+Sun Jan 27 22:19:51 EST 2013
+to get emacs and easy pg to work on ubuntu/nicolae
+I had to install easypg and add
+(require 'epa-file)
+(epa-file-enable)
+to my .emacs file which didn't exist yet.
+this emacs didn't use the gui for password entry which was nice. It was using ssh-agent I believe. It was a process present when running ps aux when I was being prompted for my pwd for a file that was being opened in emacs in gpg mode.
+
+word on the street is if you remove gpg-agent it'll default to ssh-agent which will be run from the cli mini-buffer in emacs.
+
