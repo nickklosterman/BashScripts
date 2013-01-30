@@ -7,3 +7,4 @@ XLP: SPDR Select Sector Fund - Consu
 XLU: SPDR Select Sector Fund - Utili
 XLV: SPDR Select Sector Fund - Healt
 XLY: SPDR Select Sector Fund - Consu
+THOR: Thoratec Corporation

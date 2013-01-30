@@ -1556,6 +1556,7 @@ this emacs didn't use the gui for password entry which was nice. It was using ss
 
 word on the street is if you remove gpg-agent it'll default to ssh-agent which will be run from the cli mini-buffer in emacs.
 
+
 Mon Jan 28 11:00:24 EST 2013
 28-01-2013
 Emacs EasyPg on Arch Linux and non-gui password entry 
@@ -1563,3 +1564,14 @@ I found on http://www.emacswiki.org/emacs/EasyPG the hint to install gnugpg1 (vi
 (when (file-executable-p "/usr/bin/gpg1")
 (setq epg-gpg-program "/usr/bin/gpg1"))
 to the .emacs file to override the bug in gpg2 in Arch linux
+
+Tue Jan 29 20:01:08 EST 2013
+29-01-2013
+BigNicky Arch wasn't booting consitently. It was complaining that there wasn't a primary HDD to boot off of. I opened the case and pushed the cables in and things seem to be going much better.
+I updated and it appears like there was some type of pulseaudio error when I would start openbox. It would flood the screen with kernel panic errors etc. I thought it was crashing the entire system but I could switch ttys around and make it back to tty7 and the openbox session was up and running. 
+However inside openbox firefox kept crashing when I was browsing. I was browsing on imgur when it would crash but nto sure if it was solely imgur or other stuff.
+
+I have been trying to clear out Djinnius and it was over disk quota. One culprit was spam on my wordpress blog. So I turned commenting off as I hadn't posted anything there for a coon's age. At first I didn't go all the way to the bottom and save the setting. Regardless the spam was still taking up 80mb of space in the database even though I was expecting it to be gone. 
+I didn't reclaim the space until I went into phpmyadmin and clicked on the wp_comments table in _wordpress. I then clicked on the Structure tab at the top.
+This opened a new view. In that view at the bottom there was a section entitled 'space usage' on the left. The overhead of the table was atrocious. Underneath it there as a button that said 'optimize table' it then simply ran the query "optimize table `wp_comments`" and it reclaimed the space getting rid of the overhead.
+

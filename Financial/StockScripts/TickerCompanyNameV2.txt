@@ -1,4 +1,0 @@
-T: AT&T Inc.
-A: Agilent Technologies, Inc. Comm
-B: Barnes Group, Inc. Common Stock
-F: Ford Motor Company Common Stock
