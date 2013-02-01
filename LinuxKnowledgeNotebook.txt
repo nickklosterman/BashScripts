@@ -1575,3 +1575,22 @@ I have been trying to clear out Djinnius and it was over disk quota. One culprit
 I didn't reclaim the space until I went into phpmyadmin and clicked on the wp_comments table in _wordpress. I then clicked on the Structure tab at the top.
 This opened a new view. In that view at the bottom there was a section entitled 'space usage' on the left. The overhead of the table was atrocious. Underneath it there as a button that said 'optimize table' it then simply ran the query "optimize table `wp_comments`" and it reclaimed the space getting rid of the overhead.
 
+Wed Jan 30 18:28:58 EST 2013
+30-01-2013
+
+It appears that the lock screen is interfering with the keybindings for emacs.
+I posted my question on ubuntu forums :http://ubuntuforums.org/showthread.php?p=12483663#post12483663
+
+Thu Jan 31 14:04:42 EST 2013
+31-01-2013
+
+Imagemagick screenshot:
+import screenshot.png
+this will provide you with a crosshair of the window to capture.
+from https://wiki.archlinux.org/index.php/Taking_a_Screenshot
+$ import -window root screenshot.jpg
+Running import without the -window option allows selecting a window or an arbitrary region interactively. 
+
+Use wget to obtain external ip.
+wget -qO- icanhazip.com
+
