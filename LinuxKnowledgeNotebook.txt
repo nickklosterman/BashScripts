@@ -1594,3 +1594,16 @@ Running import without the -window option allows selecting a window or an arbitr
 Use wget to obtain external ip.
 wget -qO- icanhazip.com
 
+Fri Feb 15 09:48:15 EST 2013
+15-02-2013
+Arch Linux : Blank Screen Login
+The Hampel laptop was booting fine with the display showing various messages while booting but then right before the login page, the screen would clear and go blank. I could then type in my username and password blindly and blindly run X and proceed find. To solve this I had to initiate an early KMS start as outlined here:  https://wiki.archlinux.org/index.php/Kernel_Mode_Setting
+/etc/mkinitcpio.conf
+MODULES="i915"  <-- for the intel gfx card.
+then
+mkinitcpio -p linux
+
+On the hampel laptop, I could run the speaker-test outlined in the Arch wiki. However, when I would run icewm via xinit the audio wouldn't work. 
+The answer is apparently to use startx to start icewm. 
+https://bbs.archlinux.org/viewtopic.php?id=157947
+I added myself to the audio group despite the arch wiki stating that this shouldnt' be necessary. 
