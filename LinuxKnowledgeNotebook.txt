@@ -1607,3 +1607,11 @@ On the hampel laptop, I could run the speaker-test outlined in the Arch wiki. Ho
 The answer is apparently to use startx to start icewm. 
 https://bbs.archlinux.org/viewtopic.php?id=157947
 I added myself to the audio group despite the arch wiki stating that this shouldnt' be necessary. 
+
+Tue Feb 19 13:01:41 EST 2013
+list symlinks in current directory 
+find . -maxdepth 1 -type l  // that 2nd guy is a lower case "L"
+
+This will recursively list all the symlink files. Also, it shows the actual files it points to.
+find . -type l -printf '%p -> %l\n'
+
