@@ -1615,6 +1615,12 @@ find . -maxdepth 1 -type l  // that 2nd guy is a lower case "L"
 This will recursively list all the symlink files. Also, it shows the actual files it points to.
 find . -type l -printf '%p -> %l\n'
 
+Wed Feb 20 19:04:27 EST 2013
+Recursively search and replace in files
+find . -name "*.php" -print | xargs sed -i 's/foo/bar/g'
+find . -type f -print | xargs sed -i 's/josh.hays/nick.klosterman/g'
+
+
 Wed Feb 20 22:09:40 EST 2013
 sed command in script " unterminated s command "
 try enclosing the command in double quotes instead of single quotes "" vs ''
@@ -1653,3 +1659,7 @@ Unary unary operator in bash:
 unary = one. its expecting one argument to test like the [ $filename -e ] to test if it exists.
 So if you're getting a unary op error its bc you're not using the right operand. you're giving more than one but the test is expecting just one. 
 http://www.ibm.com/developerworks/library/l-bash-test/index.html
+
+
+
+
