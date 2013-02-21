@@ -1615,3 +1615,41 @@ find . -maxdepth 1 -type l  // that 2nd guy is a lower case "L"
 This will recursively list all the symlink files. Also, it shows the actual files it points to.
 find . -type l -printf '%p -> %l\n'
 
+Wed Feb 20 22:09:40 EST 2013
+sed command in script " unterminated s command "
+try enclosing the command in double quotes instead of single quotes "" vs ''
+also to use the sed command in a script use the 'exec' command 
+
+
+http://www.linuxquestions.org/questions/programming-9/bash-search-for-a-pattern-within-a-string-variable-448022/
+Actually 'case' is much much faster than even simple matching using 'if', and
+can even do pattern and glob matching:
+Code:
+
+#!/bin/sh
+
+thisString="1 2 3 4 5"
+searchString="1 2"
+# if you single quote your input, you could do this
+# searchString=$1
+
+case $thisString in
+  # match exact string
+  "$searchString") echo yep, it matches exactly;;
+  
+  # match start of string
+  "$searchString"*) echo yep, it matches at the start ;;
+
+  # match end of string
+  *"$searchString") echo yep, it matches at the end ;;
+
+  # searchString can be anywhere in thisString
+  *"$searchString"*) echo yep, it matches in the middle somewhere ;;
+  
+  *) echo nope ;;
+esac
+
+Unary unary operator in bash: 
+unary = one. its expecting one argument to test like the [ $filename -e ] to test if it exists.
+So if you're getting a unary op error its bc you're not using the right operand. you're giving more than one but the test is expecting just one. 
+http://www.ibm.com/developerworks/library/l-bash-test/index.html
