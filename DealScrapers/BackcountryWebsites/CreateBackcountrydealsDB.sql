@@ -5,6 +5,7 @@ inminutes int, timeEnter DATE);"
     sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('WhiskeyMilitia', 1);"
     sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('Bonktown', 2);"
     sqlite3 test.db "insert into WebsiteCodes (website, websiteCode) values ('Chainlove', 3);"
+#NTOE---------> you now need to run the trigger as such : sqlite3 test.db < trigger.txt otherwise timeEnter won't be populated automatically
 
 create table ProductImages( image_id serial, filename varchar(255) not null, number_of_times_seen int not null default 1, last_seen timestamp default current_timestamp on update current_timestamp,  primary key (image_id), index (filename));
 

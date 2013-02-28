@@ -1660,6 +1660,9 @@ unary = one. its expecting one argument to test like the [ $filename -e ] to tes
 So if you're getting a unary op error its bc you're not using the right operand. you're giving more than one but the test is expecting just one. 
 http://www.ibm.com/developerworks/library/l-bash-test/index.html
 
+Wed Feb 27 22:22:53 EST 2013
+M-x comment-region
+M-x uncomment-region
 
 
 

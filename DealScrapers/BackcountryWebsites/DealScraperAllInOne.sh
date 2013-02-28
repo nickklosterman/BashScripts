@@ -231,7 +231,6 @@ function EnterProductDataIntoDatabase()
 }
 function GiveDatabaseTablenameDataEnterIntoDatabase()
 {
-
     sqlite3 ${1} "insert into ${2} (websiteCode, product, price, percentOffMSRP, quantity, dealdurationinminutes) values ( '${3}', '${4}', '${5}', '${6}', '${7}', '${8}' );"
 }
 function GenericMySQLDatabaseQuery()
@@ -665,7 +664,7 @@ function GivePageReturnProductDescriptionV2WM()
 {
 #Version 2 removes the <title> html tags
 #it appears that mysql doesn't care about the single quotes problem that sqlite has
-    OutputText=`grep "<title>" ${1} | sed 's/ - \$.*//' `
+    OutputText=`grep "</title>" ${1} | sed 's/ - \$.*//' `
 #Explanation: replace text from " - $" to EOL with nothing
     echo ${OutputText}
 }
@@ -750,8 +749,8 @@ function GiveProductProductImageEnterIntoDatabase()
 		UploadImageFileToDjinniusDeals "${Filename}"
 		rm "${Filename}"
 	    else 
-		echo "filename:${Filename}: no existo"
-	    fi
+		echo "filename:${Filename}: no existo"	
+    fi
 	    
 	else
 	    echo "Umm ${ImageFile} doesn't exist to copy!!"
@@ -1181,17 +1180,13 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 
 	WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${WhiskeyMilitiaPage})
 
-
 	if [ "${WhiskeyMilitia}" != "${WhiskeyMilitiaTemp}" ]
 	then
 	    echo ${WhiskeyMilitia}
 	    WhiskeyMilitiaImage=$(GivePageAndWebsiteReturnImage ${WhiskeyMilitiaPage} http://www.whiskeymilitia.com )
 	    GiveProductKeywordDatabaseTablethenNotify  "${WhiskeyMilitiaText}"  ${WhiskeyMilitiaImage}
 	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase "test.db" "Backcountrydeals"  ${WhiskeyMilitiaPage} 1
-echo "---------PROBLEMS ARE HERE---------"
-echo "---------PROBLEMS ARE HERE---------"
-echo "---------PROBLEMS ARE HERE---------"
-#	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${WhiskeyMilitiaPage} 1
+	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${WhiskeyMilitiaPage} 1
 	    GiveProductProductImageEnterIntoDatabase "${WhiskeyMilitia}" "${WhiskeyMilitiaImage}"
 	    UpdateWebpage 1 "${WhiskeyMilitiaText}" "${WhiskeyMilitiaImage}"   "${WebpageIndex}"
             #notify-send  "$WhiskeyMilitiaText" -i ${WhiskeyMilitiaImage} -t 3
@@ -1203,31 +1198,6 @@ echo "---------PROBLEMS ARE HERE---------"
 	WMTimeLeftSeconds=120
     fi
 
-#    echo "------------------------------------BT------------------------------------"
-#    BonktownPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.bonktown.com 2 )
-#    if [ "$BonktownPage" != "Error" ]
-#    then 
-#	BonktownText=$(GivePageReturnText ${BonktownPage} )
-#	Bonktown=$(GivePageReturnProductDescriptionV2  ${BonktownPage} )
-#	BTTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${BonktownPage})
-
-#	if [ "${Bonktown}" != "${BonktownTemp}" ]
-#	then
-#	    echo ${Bonktown}
-#	    BonktownImage=$(GivePageAndWebsiteReturnImage ${BonktownPage} http://www.bonktown.com )
-#	    GiveProductKeywordDatabaseTablethenNotify "${BonktownText}" ${BonktownImage}
-#	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db "Backcountrydeals"  ${BonktownPage} 2
-#	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${BonktownPage} 2
-#	    GiveProductProductImageEnterIntoDatabase "${Bonktown}" "${BonktownImage}"
-#	    UpdateWebpage 2 "${BonktownText}" "${BonktownImage}"  "${WebpageIndex}"
-#            notify-send  "$BonktownText" -i ${BonktownImage} -t 3
-
-#	    BonktownTemp=`echo ${Bonktown}`
-#	fi
-#    else
-#	echo "Wget didn't return a 200 OK response when getting the Bonktown webpage"
-#	BTTimeLeftSeconds=120
-#    fi
     echo "------------------------------------CL------------------------------------"
     ChainlovePage=$(GiveWebsiteCodeGetWebpageTempFile http://www.chainlove.com 3 )
     if [ "$ChainlovePage" != "Error" ]  
@@ -1259,11 +1229,6 @@ echo "---------PROBLEMS ARE HERE---------"
 	SleepTime=${WMTimeLeftSeconds}
 	NextDeal="WhiskeyMilitia"
     fi
-#    if [ ${BTTimeLeftSeconds} -lt ${SleepTime} ] 
-#    then
-#	SleepTime=${BTTimeLeftSeconds}
-#	NextDeal="Bonktown"
-#    fi
     if [ ${CLTimeLeftSeconds} -lt ${SleepTime} ]
     then
 	SleepTime=${CLTimeLeftSeconds} 
@@ -1280,7 +1245,8 @@ echo "---------PROBLEMS ARE HERE---------"
     DealEndTime=$( GiveTimeInSecondsReturnDealEndTime ${SleepTime} )
     echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes from" `date +%T ` "which occurs at ${DealEndTime}"
 #    echo "SnC:${SnCTimeLeftSeconds} (${SnCQuantityRemaining}/${SnCTotalQuantity})  WM:${WMTimeLeftSeconds} (${WMQuantityRemaining}/${WMTotalQuantity}) BT:${BTTimeLeftSeconds} (${BTQuantityRemaining}/${BTTotalQuantity}) CL:${CLTimeLeftSeconds} (${CLQuantityRemaining}/${CLTotalQuantity})"
-    echo "SnC:${SCTimeLeftSeconds} WM:${WMTimeLeftSeconds}  BT:${BTTimeLeftSeconds}  CL:${CLTimeLeftSeconds} "
+#    echo "SnC:${SCTimeLeftSeconds} WM:${WMTimeLeftSeconds}  BT:${BTTimeLeftSeconds}  CL:${CLTimeLeftSeconds} "
+    echo "SnC:${SCTimeLeftSeconds} WM:${WMTimeLeftSeconds} CL:${CLTimeLeftSeconds} "
     sleep ${SleepTime}s
     TmpDiskSpaceStatus=$(checktmpdiskspace )
     HomeDiskSpaceStatus=$(checkhomediskspace )
