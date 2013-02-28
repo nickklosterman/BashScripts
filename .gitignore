@@ -1,3 +1,5 @@
 *.gif
 #*.*#
 *.*~
+test.db
+index.html

@@ -276,6 +276,14 @@ function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2()
     TAB=$(echo -e "\t")
 
     ProductDescription=$(GivePageReturnProductDescriptionV2 ${Webpage} ) #for teh mysql database we don't need teh double apostrophe escape sequence
+    if [ ${WebsiteCode} -eq 1 ] #whiskeymilitia 
+    then 
+	echo "mysql WM----"
+	ProductDescription=$(GivePageReturnProductDescriptionV2WM ${Webpage} ) #for teh mysql database we don't need teh double apostrophe escape sequence
+    else
+	echo "mysql NOOOOTTTT   WM----"
+    fi
+
     Price=$(GivePageReturnPrice ${Webpage} )
     PercentOffMSRP=$(GivePageReturnPercentOffMSRP ${Webpage} )
     TotalQuantity=$(GivePageReturnTotalQuantity ${Webpage} )
@@ -401,8 +409,16 @@ function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase()
     Table=${2}
     Webpage=${3}
     WebsiteCode=${4}
-#enter data into database                                                                                                                                    
-    ProductDescription=$(GivePageReturnProductDescription ${Webpage} )
+#enter data into database
+    echo "Why are we using not V2 here??"
+    ProductDescription=$(GivePageReturnProductDescription ${Webpage} ) 
+    if [ ${WebsiteCode} -eq 1 ] #whiskeymilitia 
+    then 
+	echo "sqlite db WM----"
+	ProductDescription=$(GivePageReturnProductDescriptionV2WM ${Webpage} ) 
+    else
+	echo "sqlit db NOOOOTTTT   WM----"
+    fi    
     Price=$(GivePageReturnPrice ${Webpage} )
     PercentOffMSRP=$(GivePageReturnPercentOffMSRP ${Webpage} )
     TotalQuantity=$(GivePageReturnTotalQuantity ${Webpage} )
@@ -619,6 +635,13 @@ function GivePageReturnText()
     OutputText=`grep "<title>" ${1} | sed 's/<title>//' | sed 's/<\/title>//' `
     echo ${OutputText}
 }
+function GivePageReturnTextWM()
+{
+#27.02.2013 WhiskeyMilita has changed such that the description inside the title tags is on the second line which has the </title> on it. 
+#changing to key off the </title> instead
+    OutputText=`grep "</title>" ${1} | sed 's/<title>//' | sed 's/<\/title>//' `
+    echo ${OutputText}
+}
 function GivePageReturnProductDescription()
 {
 #for the possessive form I need to replace the single quote with double single quotes                                                                       
@@ -631,8 +654,19 @@ function GivePageReturnProductDescriptionV2()
 {
 #Version 2 removes the <title> html tags
 #it appears that mysql doesn't care about the single quotes problem that sqlite has
-    OutputText=`grep "<title>" ${1} |  sed -n 's/[^:]*://p' |sed 's/ - \$.*//;s/<title>//;s/<\/title>//' `
+#27.02.2013 the first sed statement remvoes the <title> tag so no need to have that in there.
+#    OutputText=`grep "<title>" ${1} |  sed -n 's/[^:]*://p' |sed 's/ - \$.*//;s/<title>//;s/<\/title>//' `
+    OutputText=`grep "<title>" ${1} |  sed -n 's/[^:]*://p' |sed 's/ - \$.*//;s/<\/title>//' `
 #Explanation: replace everything up to the colon that isn't a colon with nothing, print the rest
+    echo ${OutputText}
+}
+
+function GivePageReturnProductDescriptionV2WM()
+{
+#Version 2 removes the <title> html tags
+#it appears that mysql doesn't care about the single quotes problem that sqlite has
+    OutputText=`grep "<title>" ${1} | sed 's/ - \$.*//' `
+#Explanation: replace text from " - $" to EOL with nothing
     echo ${OutputText}
 }
 
@@ -765,22 +799,14 @@ function GivePageReturnQuantityRemaining()
     echo ${RemainingQuantity}
 }
 
-function GivePageReturnQuantityRemainingOfTotalQuantity()
-{   
-    QuantityRemainingOfTotalQuantity=`grep total_qty_bar.set_data\( ${1} | sed 's/.*(//' | sed 's/).*/ left/' | sed 's/,/ of /'  `
-    echo ${QuantityRemainingOfTotalQuantity}
-}
-function GivePageReturnTimeRemainingOfTotalTime()
-{   
-    TimeRemainingOfTotalTime=`grep setupWMTimerBar ${1} | sed 's/.*(//' | sed 's/).*/ total/' | sed 's/,/ seconds left of /'  `
-    echo ${TimeRemainingOfTotalTime}
-}
 
 
 function GivePageReturnTimeRemainingInSeconds()
 {
 #two forms setupTimerBar or setupWMTimerBar
-    TimeRemainingInSeconds=`grep "TimerBar" ${1} | sed 's/.*(//' | sed 's/,.*//'   `
+#    TimeRemainingInSeconds=`grep "TimerBar" ${1} | sed 's/.*(//' | sed 's/,.*//'   `
+#27.02.2013 merged two seds into one.
+    TimeRemainingInSeconds=`grep "TimerBar" ${1} | sed 's/.*(//;s/,.*//'   `
 #if the value somehow comes out negative then we'll just wait X more seconds and hit it again
     Quantity=$(GivePageReturnTotalQuantity ${1})
     Price=$(GivePageReturnPrice  ${1})
@@ -1150,8 +1176,8 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
     if [ "$WhiskeyMilitiaPage" != "Error" ]
     then 
 
-	WhiskeyMilitiaText=$(GivePageReturnText ${WhiskeyMilitiaPage} )
-	WhiskeyMilitia=$(GivePageReturnProductDescriptionV2 ${WhiskeyMilitiaPage} )
+	WhiskeyMilitiaText=$(GivePageReturnTextWM ${WhiskeyMilitiaPage} )
+	WhiskeyMilitia=$(GivePageReturnProductDescriptionV2WM ${WhiskeyMilitiaPage} )
 
 	WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${WhiskeyMilitiaPage})
 
@@ -1162,7 +1188,10 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	    WhiskeyMilitiaImage=$(GivePageAndWebsiteReturnImage ${WhiskeyMilitiaPage} http://www.whiskeymilitia.com )
 	    GiveProductKeywordDatabaseTablethenNotify  "${WhiskeyMilitiaText}"  ${WhiskeyMilitiaImage}
 	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase "test.db" "Backcountrydeals"  ${WhiskeyMilitiaPage} 1
-	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${WhiskeyMilitiaPage} 1
+echo "---------PROBLEMS ARE HERE---------"
+echo "---------PROBLEMS ARE HERE---------"
+echo "---------PROBLEMS ARE HERE---------"
+#	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${WhiskeyMilitiaPage} 1
 	    GiveProductProductImageEnterIntoDatabase "${WhiskeyMilitia}" "${WhiskeyMilitiaImage}"
 	    UpdateWebpage 1 "${WhiskeyMilitiaText}" "${WhiskeyMilitiaImage}"   "${WebpageIndex}"
             #notify-send  "$WhiskeyMilitiaText" -i ${WhiskeyMilitiaImage} -t 3
@@ -1173,6 +1202,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	echo "Wget didn't return a 200 OK response when getting the Whiskey Militia webpage"
 	WMTimeLeftSeconds=120
     fi
+
 #    echo "------------------------------------BT------------------------------------"
 #    BonktownPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.bonktown.com 2 )
 #    if [ "$BonktownPage" != "Error" ]
@@ -1270,3 +1300,18 @@ if [ "$NetStatus" -ne 1 ]
 then
     echo "The internet is unreachable. Exiting"
 fi
+
+
+#--------------------------------
+#NOT USED
+#--------------------------------
+function GivePageReturnQuantityRemainingOfTotalQuantity()
+{
+    QuantityRemainingOfTotalQuantity=`grep total_qty_bar.set_data\( ${1} | sed 's/.*(//' | sed 's/).*/ left/' | sed 's/,/ of /'  `
+    echo ${QuantityRemainingOfTotalQuantity}
+}
+function GivePageReturnTimeRemainingOfTotalTime()
+{
+    TimeRemainingOfTotalTime=`grep setupWMTimerBar ${1} | sed 's/.*(//' | sed 's/).*/ total/' | sed 's/,/ seconds left of /'  `
+    echo ${TimeRemainingOfTotalTime}
+}
