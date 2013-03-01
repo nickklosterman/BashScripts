@@ -216,7 +216,7 @@ function CompareDateToNow
         echo "1"
     fi
 }
-function EnterProductDataIntoDatabase()
+function EnterProductDataIntoMySQLDatabase()
 {
     MySQLHost="mysql.server272.com"
     MySQLPort="3306"
@@ -274,23 +274,27 @@ function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2()
 
     TAB=$(echo -e "\t")
 
-    ProductDescription=$(GivePageReturnProductDescriptionV2 ${Webpage} ) #for teh mysql database we don't need teh double apostrophe escape sequence
+
     if [ ${WebsiteCode} -eq 1 ] #whiskeymilitia 
     then 
 	echo "mysql WM----"
-	ProductDescription=$(GivePageReturnProductDescriptionV2WM ${Webpage} ) #for teh mysql database we don't need teh double apostrophe escape sequence
+	ProductDescription=$(GivePageReturnProductDescriptionV2WM ${Webpage} ) 
+	Price=$(GivePageReturnPriceWM ${Webpage} )
+	PercentOffMSRP=$(GivePageReturnPercentOffMSRPWM ${Webpage} )
+
     else
+	ProductDescription=$(GivePageReturnProductDescriptionV2 ${Webpage} ) 
+	Price=$(GivePageReturnPrice ${Webpage} )
+	PercentOffMSRP=$(GivePageReturnPercentOffMSRP ${Webpage} )
 	echo "mysql NOOOOTTTT   WM----"
     fi
-
-    Price=$(GivePageReturnPrice ${Webpage} )
-    PercentOffMSRP=$(GivePageReturnPercentOffMSRP ${Webpage} )
     TotalQuantity=$(GivePageReturnTotalQuantity ${Webpage} )
     if [ "${TotalQuantity}" == "" ]
     then
 	echo "Total Quantity is empty!!! ${WebsiteCode}"
     fi
     DurationInMinutes=$(GivePageReturnDurationOfDealInMinutes ${Webpage} )
+#    PreviousProductDescription=${PreviousProduct/\'/\'\'} #this doubles the single quotes for entry into the sqlite database
 
     NumberOfRecordsToDisplay=1
     MySQLQuery="SELECT product FROM BackcountryProducts WHERE websitecode=${WebsiteCode} ORDER BY ProductEntrykey DESC LIMIT ${NumberOfRecordsToDisplay}"
@@ -410,16 +414,21 @@ function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase()
     WebsiteCode=${4}
 #enter data into database
     echo "Why are we using not V2 here??"
-    ProductDescription=$(GivePageReturnProductDescription ${Webpage} ) 
+
     if [ ${WebsiteCode} -eq 1 ] #whiskeymilitia 
     then 
 	echo "sqlite db WM----"
 	ProductDescription=$(GivePageReturnProductDescriptionV2WM ${Webpage} ) 
+	#ProductDescription=${ProductDescription/\'/\'\'}
+	Price=$(GivePageReturnPriceWM ${Webpage} )
+	PercentOffMSRP=$(GivePageReturnPercentOffMSRPWM ${Webpage} )
     else
 	echo "sqlit db NOOOOTTTT   WM----"
+	ProductDescription=$(GivePageReturnProductDescription ${Webpage} ) 
+	Price=$(GivePageReturnPrice ${Webpage} )
+	PercentOffMSRP=$(GivePageReturnPercentOffMSRP ${Webpage} )
     fi    
-    Price=$(GivePageReturnPrice ${Webpage} )
-    PercentOffMSRP=$(GivePageReturnPercentOffMSRP ${Webpage} )
+
     TotalQuantity=$(GivePageReturnTotalQuantity ${Webpage} )
     if [ "${TotalQuantity}" == "" ]
     then
@@ -439,19 +448,19 @@ function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase()
 #so for some reason the string != comparison no longer works, but the = does.
     if [ "${PreviousProductDescription}" = "${ProductDescription}" ]
     then 
-	echo "EQUAL"
+	echo "sqlite EQUAL"
     fi
     if [ "${PreviousProductDescription}" != "${ProductDescription}" ]
     then 
-	echo "NOT EQUAL"
+	echo "sqlite NOT EQUAL"
     else
-	echo "NOT EQUAL Fail"
+	echo "sqlite NOT EQUAL Fail"
     fi
 
     if [ "${PreviousProductDescription}" != "${ProductDescription}" ]
     then
         echo "Entering new product info into database. reason:products not the same"
-	EnterProductDataIntoDatabase ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
+	EnterProductDataIntoMySQLDatabase ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
         GiveDatabaseTablenameDataEnterIntoDatabase  ${Database} ${Table} ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
     else
 #prevent duplicate entries sequentially but allow duplicates if a certain period has passed therefore giving a check saying that we are pretty sure that this is just a repeat that day/week/whatever
@@ -464,7 +473,7 @@ function GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase()
         then
             echo "Entering new product info into database.reason:products the same but meets time diff criteria"
 	    echo "TODO : WE NEED TO TYPECHECK THAT WE ARE ENTERING VALID DATA HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	    EnterProductDataIntoDatabase ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
+	    EnterProductDataIntoMySQLDatabase ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
             GiveDatabaseTablenameDataEnterIntoDatabase  ${Database} ${Table} ${WebsiteCode} "${ProductDescription}" ${Price} ${PercentOffMSRP} ${TotalQuantity} ${DurationInMinutes}
         else
             echo "Product the same, but time difference too little from previous entry."
@@ -682,6 +691,19 @@ function GivePageReturnPercentOffMSRP()
     echo ${OutputText}
 }
 
+function GivePageReturnPriceWM()
+{
+    OutputText=`grep "</title>" ${1} | sed 's/.*[\$]//;s/- .*//' `
+    echo ${OutputText}
+}
+
+function GivePageReturnPercentOffMSRPWM()
+{
+    OutputText=`grep "</title>" ${1} |  sed 's/.* - //;s/%.*//' `
+# or could use the tag stripping command of sed 's/<[^>]*>//g'
+    echo ${OutputText}
+}
+
 
 function ConvertForwardSlashToBackSlash()
 {
@@ -808,7 +830,7 @@ function GivePageReturnTimeRemainingInSeconds()
     TimeRemainingInSeconds=`grep "TimerBar" ${1} | sed 's/.*(//;s/,.*//'   `
 #if the value somehow comes out negative then we'll just wait X more seconds and hit it again
     Quantity=$(GivePageReturnTotalQuantity ${1})
-    Price=$(GivePageReturnPrice  ${1})
+    Price=$(GivePageReturnPrice  ${1}) 
 #since price is floating point value we need to use bc to perform the math comparison
 #alternatively, since we don't require any great precision, we could use printf and only have the digits before the decimal point used.
     if [ $Quantity -lt 5 ] && [ $(echo "$Price < 300" | bc ) -eq 1 ] 
@@ -1186,6 +1208,7 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 	    WhiskeyMilitiaImage=$(GivePageAndWebsiteReturnImage ${WhiskeyMilitiaPage} http://www.whiskeymilitia.com )
 	    GiveProductKeywordDatabaseTablethenNotify  "${WhiskeyMilitiaText}"  ${WhiskeyMilitiaImage}
 	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase "test.db" "Backcountrydeals"  ${WhiskeyMilitiaPage} 1
+#PROBLEMs here ...having prob with apostrophe escaping in sqlite. did it change to match that of mysql? such that it needs to be escaped?
 	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${WhiskeyMilitiaPage} 1
 	    GiveProductProductImageEnterIntoDatabase "${WhiskeyMilitia}" "${WhiskeyMilitiaImage}"
 	    UpdateWebpage 1 "${WhiskeyMilitiaText}" "${WhiskeyMilitiaImage}"   "${WebpageIndex}"
@@ -1202,24 +1225,24 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
     ChainlovePage=$(GiveWebsiteCodeGetWebpageTempFile http://www.chainlove.com 3 )
     if [ "$ChainlovePage" != "Error" ]  
     then 
-	ChainloveText=$(GivePageReturnText ${ChainlovePage} )
-	Chainlove=$(GivePageReturnProductDescriptionV2  ${ChainlovePage} )
-	CLTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${ChainlovePage})
-	if [ "${Chainlove}" != "${ChainloveTemp}" ]
-	then
-	    echo ${Chainlove}
-	    ChainloveImage=$(GivePageAndWebsiteReturnImage ${ChainlovePage} http://www.chainlove.com )
-	    GiveProductKeywordDatabaseTablethenNotify "${ChainloveText}" ${ChainloveImage}
-	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db Backcountrydeals  ${ChainlovePage} 3
-	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2  ${ChainlovePage} 3
-	    GiveProductProductImageEnterIntoDatabase "${Chainlove}" "${ChainloveImage}"
-	    UpdateWebpage 3 "${ChainloveText}" "${ChainloveImage}" "${WebpageIndex}"
+    	ChainloveText=$(GivePageReturnText ${ChainlovePage} )
+    	Chainlove=$(GivePageReturnProductDescriptionV2  ${ChainlovePage} )
+    	CLTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${ChainlovePage})
+    	if [ "${Chainlove}" != "${ChainloveTemp}" ]
+    	then
+    	    echo ${Chainlove}
+    	    ChainloveImage=$(GivePageAndWebsiteReturnImage ${ChainlovePage} http://www.chainlove.com )
+    	    GiveProductKeywordDatabaseTablethenNotify "${ChainloveText}" ${ChainloveImage}
+    	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase test.db Backcountrydeals  ${ChainlovePage} 3
+    	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2  ${ChainlovePage} 3
+    	    GiveProductProductImageEnterIntoDatabase "${Chainlove}" "${ChainloveImage}"
+    	    UpdateWebpage 3 "${ChainloveText}" "${ChainloveImage}" "${WebpageIndex}"
             #notify-send  "$ChainloveText" -i ${ChainloveImage} -t 3
-	    ChainloveTemp=`echo ${Chainlove}`
-	fi
+    	    ChainloveTemp=`echo ${Chainlove}`
+    	fi
     else
-	echo "Wget didn't return a 200 OK response when getting the Chainlove webpage"
-	CLTimeLeftSeconds=120
+    	echo "Wget didn't return a 200 OK response when getting the Chainlove webpage"
+    	CLTimeLeftSeconds=120
     fi
 
     SleepTime=${SCTimeLeftSeconds}
