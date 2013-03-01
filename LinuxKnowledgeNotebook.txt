@@ -1664,5 +1664,37 @@ Wed Feb 27 22:22:53 EST 2013
 M-x comment-region
 M-x uncomment-region
 
+Fri Mar  1 09:51:55 EST 2013
+I was setting up a new git repo for bitbucket.
+I had done:
+VehicleRecords]$ git remote add origin https://kklostermanoglu@bitbucket.org/kklostermanogluvehiclerecords.git
+which is missing the / between my name and the name of the repo
+the git add and commit went off successfully
+[arch-nicky@arch-nicky VehicleRecords]$ git add Saab2003_93Arc.txt ; git commit -m "first commit"
+[master (root-commit) 91e7452] first commit
+ 1 file changed, 3 insertions(+)
+ create mode 100644 Saab2003_93Arc.txt
+but then I got this error message
+[arch-nicky@arch-nicky VehicleRecords]$ git push -u origin master
+fatal: https://kklostermanoglu@bitbucket.org/kklostermanogluvehiclerecords.git/info/refs?service=git-receive-pack not found: did you run git update-server-info on the server?
+I couldn't just overwrite and be on my way.
+[arch-nicky@arch-nicky VehicleRecords]$ git remote add origin https://kklostermanoglu@bitbucket.org/kklostermanoglu/vehiclerecords.git
+fatal: remote origin already exists.
+first rm the origin
+[arch-nicky@arch-nicky VehicleRecords]$ git remote rm origin
+check and see if there is one.
+[arch-nicky@arch-nicky VehicleRecords]$ git remote
+add the correct one. :)
+[arch-nicky@arch-nicky VehicleRecords]$ git remote add origin https://kklostermanoglu@bitbucket.org/kklostermanoglu/vehiclerecords.git
+[arch-nicky@arch-nicky VehicleRecords]$ git push -u origin master
+Password for 'https://kklostermanoglu@bitbucket.org':
+Counting objects: 3, done.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 414 bytes, done.
+Total 3 (delta 0), reused 0 (delta 0)
+remote: bb/acl: kklostermanoglu is allowed. accepted payload.
+To https://kklostermanoglu@bitbucket.org/kklostermanoglu/vehiclerecords.git
+ * [new branch]      master -> master
+Branch master set up to track remote branch master from origin.
 
 
