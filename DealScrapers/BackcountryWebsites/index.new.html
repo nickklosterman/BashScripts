@@ -620,6 +620,15 @@ http://www.my-html-codes.com/javascript-tabs-html-5-css3
 http://speckyboy.com/2010/09/08/30-css-and-javascript-tabs-solutions/
 http://www.google.com/search?q=javascript+tab&aq=f&oq=javascript+tab&sourceid=chrome&ie=UTF-8
 
+
+http://stackoverflow.com/questions/8437352/jquery-append-html-string-as-html
+http://api.jquery.com/append/
+http://stackoverflow.com/questions/3015335/jquery-html-vs-append
+http://www.isummation.com/blog/decode-html-code-with-jquery1/
+https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/replace
+http://stackoverflow.com/questions/4566771/how-to-globally-replace-a-forward-slash-in-a-javascript-string
+http://stackoverflow.com/questions/4338963/convert-html-character-entities-back-to-regular-text-using-javascript
+http://www.tutorialspoint.com/jquery/attr-text-val.htm
 <p>test paragraph</p>
 used:
 http://stackoverflow.com/questions/10863658/load-image-with-jquery-and-append-it-to-the-dom
@@ -645,27 +654,62 @@ $("p").on("click",function() { alert("bob"); this.text("some more text"); });
 var pp=$("p").text();
 //alert(pp);
 
+//this will auto add the description tag to the 1st table data element of every table row. 
 $("table tr td:first-child").addClass("description");
+
+jQuery.fn.center = function() {
+    var container = $(window);
+    var top = -this.height() / 2;
+    var left = -this.width() * 2/3;
+ //   return this.css('position', 'absolute').css({ 'margin-left': left + 'px', 'margin-top': top + 'px', 'left': '50%', 'top': '50%' });
+return this.css('position', 'absolute').css({ 'margin-left': left + 'px', 'margin-top': top + 'px' });
+}
+
+jQuery.fn.center2 = function(height) {
+//how to grab height of div? use this?
+var windowdim = $(window);
+var topp = this.height+windowmdim.height;
+var bottomm = this.height;
+if (this.height){}
+return this.css('position','fixed').css({'top': "100px"});
+}
 
 $(".description").on({
 mouseover: function(event) {
-//var ken = $(this).text();
-//alert(ken);
-//I need to translate the html escaped characters back to normal charactesr to get the image.
-var filename="<img src='http://www.djinnius.com/Deals/ProductImages/"+$(this).text()+".jpg'>";
+//for a valid string it must be inside ", so I had to use ' to enclose the url. but when the url has a ' in it this breaks things so I had to translate the " into its hex code
+var filename="<img src=\x22http://www.djinnius.com/Deals/ProductImages/"+$(this).text().replace(/\//g,"\x5C")+".jpg\x22>";
+//needed to convert the / to \ since that is the trick i used in the image name. the html wouldn't work by straight replacing it. I had to use the hex code for the slash. 
+//var filename="<img src=\x22http://www.djinnius.com/Deals/ProductImages/Volkl Tierra Ski w\x5C Attiva eMotion 11.0 TC Binding - Women's.jpg\x22>";
 $("#aboveput").text(event.pageY+" "+event.pageX);
-$("#output").css({'position': "absolute", 'top': event.pageY, 'left': event.pageX });
-$(filename).load(function() {$(this).appendTo('#output');});
-//var filename="ProductImages/"+ken+".jpg";
-//var filename=$(this).text();//innerHTML();
-//alert(filename);
-$("#output").text(filename);
+//$("#output").css({'position': "absolute", 'top': event.pageY, 'left': event.pageX, 'background-color': "purple" });
+//$("#output").css({'position': "absolute", 'left': event.pageX, 'background-color': "purple" });
+//$("#output").css({ 'left': event.pageX, 'background-color': "purple" });
+$(this).addClass("selected");
+//$(".selected").css({ 'background-color': "blue" });
+$(filename).load(function() {$(this).appendTo('#output').fadeIn('slow');});
+$("#output").text("");//.center2();
+//$("#output").text(filename);
+
+//$("#output").append("some bewbs"); //having the append prior to the text meant the .text() was blowing away the append.
 },
 mouseleave: function(){
-$("#output").text("empty").fadeIn();}
+$("#output").css({ 'background-color': "red" });
+$(".selected").removeClass("selected"); //if you added css to a class via jquery, when you remove the class the css stays.
+//$(".selected").css({ 'background-color': "red" });
+$("#output").text("empty").fadeIn();
+$("#output").append("stuff");}
 
 //need to instantiate hovering image
 });
+
+//stolen from  http://www.wduffy.co.uk/blog/keep-element-in-view-while-scrolling-using-jquery/    
+var $scrollingDiv = $("#output1");
+$(window).scroll(function(){
+       $scrollingDiv
+              .stop()
+              .animate({"marginTop": ($(window).scrollTop() + 0) + "px"}, "slow" );
+});
+
 </script>
 <style>
 
@@ -675,17 +719,22 @@ $("#output").text("empty").fadeIn();}
 -webkit-box-shadow: 10px 10px 5px #888;
 box-shadow: 10px 10px 5px #888;
 }
-
+.selected {
+background-color: blue;
+}
 /*img border */
 .img {
 display: block;
 position: relative;
 background-color: #fff;
-border: 1px solid $666;
+border: 1px solid #666;
 }
 #output {
 background-color: #abc;
-}
+border: 1px solid green;
+position: fixed;
+top: 100px;
+left: 60%;}
 #aboveput {
 background-color: #cab;
 }

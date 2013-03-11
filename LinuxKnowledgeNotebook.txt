@@ -1698,3 +1698,5 @@ To https://kklostermanoglu@bitbucket.org/kklostermanoglu/vehiclerecords.git
 Branch master set up to track remote branch master from origin.
 
 
+Sun Mar 10 22:52:35 EDT 2013
+mv [a-Z0-9][a-Z0-9][a-Z0-9][a-Z0-9][a-Z0-9][a-Z0-9][a-Z0-9].* Imgur/
