@@ -1700,3 +1700,36 @@ Branch master set up to track remote branch master from origin.
 
 Sun Mar 10 22:52:35 EDT 2013
 mv [a-Z0-9][a-Z0-9][a-Z0-9][a-Z0-9][a-Z0-9][a-Z0-9][a-Z0-9].* Imgur/
+
+Fri Mar 15 17:15:50 EDT 2013
+Bignicky:
+I was trying to print off a registration page and cups was complaining along the lines that "foomatic-rip-hplip"
+   googled and didn't really find what I was looking for. So I reverted to https://wiki.archlinux.org/index.php/Cups#Troubleshooting which has always been good. 
+I tried printing via CLI instead of thru firefox: printHP ../ArchNotes.txt
+I tried to use the hp-setup tool to add the printer but was failing at the final part when the tool was trying to finish the install. It was coming up with a message that was shown in the console as : Failed to get D-Bus connection: No connection to service manager.
+I don't know why but I stumbled upon just reinstalling all the cups libs. 
+I did this as outlined in the wiki.  sudo pacman -Syu hplip cups cups-filters ghostscript gsfonts
+HP's ppd file was included so I didn't need to do anything there.
+This still didn't solve the problem.
+It ended up being that somehow the migration to systemd was causing dbus to not be started. Regardless I think the reinstall of the cups etc was worthwhile. 
+Just to close the printing thread, once I got the dbus/systemd stuff sorted out it printed fine. 
+
+My googling for the above problem enlightened me to the fact that I now needed to migrate to systemd to get things working properly.  There wasn't any specific problem that was exactly the same but there were hints that led me to systemd. 
+As it was dbus wasn't running and systemd wasn't migrated too despite having been installed. 
+I therefore had to change things so that systemd was properly installed. 
+The install takes you through migrating from initscripts to systemd.
+I'm not sure if going through that install got the dbus printing working.
+https://wiki.archlinux.org/index.php/Systemd
+After that i had to enable networking as that wasn't coming up at boot. 
+https://wiki.archlinux.org/index.php/Configuring_Network#Manual_connection_at_boot_using_systemd
+At this point I didn't do much configuration with systemd so some other daemon services may need to be started.
+Systemd doesn't rely so much on an init/config file. 
+You use systemctl and that sets up the service to be started at every boot.
+
+I had some problems with sshd as well.
+I ps aux'ed it and saw that the -D option was there.
+In the past that prevents it from getting daemonized , so despite it running it isn't allowing connections.
+There is a previous entry where I ran into that problem before and the real solution is to edit /etc/init/ssh.conf
+Well in the current version of arch there is no such file and I couldn't find a similar looking file.
+I then went to the fallback of reinstalling as I couldn't see mention on the arch ssh wiki as to how to configure those command line options on startup. It only talked about ssh{d}_config files. 
+Despite the -D switch still being there I could finally ssh into the box. 
