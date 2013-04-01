@@ -1733,3 +1733,86 @@ There is a previous entry where I ran into that problem before and the real solu
 Well in the current version of arch there is no such file and I couldn't find a similar looking file.
 I then went to the fallback of reinstalling as I couldn't see mention on the arch ssh wiki as to how to configure those command line options on startup. It only talked about ssh{d}_config files. 
 Despite the -D switch still being there I could finally ssh into the box. 
+
+Mon Apr  1 00:01:21 EDT 2013
+Merge binary files in git:
+I had staged a commit of a gpg/binary file which then gave a merge conflict when trying to push it. I then stupidly tried to mv the file and pull so I could manually merge the files. This failed as the staged commit prevented me from doing that. So then I git rm'd the file which is no good bc then that prevents tracking of the file. I don't know how I got out of having the file removed. I guess bc I couldn't push the commit so the git rm never took effect. I made a copy of the .gpg file so I had my local changes. I then did a "git checkout <sha1> thinkbank.gpg" which gave me the proper binary file so I could properly append the new data to.  http://lostechies.com/joshuaflanagan/2010/01/29/how-to-resolve-a-binary-file-conflict-with-git/ see the "resolve using theirs section"
+I got the sha1 of the proper commit via looking on my BitBucket account.  
+failing steps:
+[puffjay@archd820 configfiles]$ ls
+ls  README.md  thinkbank.gpg  thinkbank.gpg.merge
+[puffjay@archd820 configfiles]$ git checkout --theirs -- thinkbank.gpg
+error: pathspec 'thinkbank.gpg' did not match any file(s) known to git.
+[puffjay@archd820 configfiles]$ git pull
+You have not concluded your merge (MERGE_HEAD exists).
+Please, commit your changes before you can merge.
+[puffjay@archd820 configfiles]$ git add thinkbank.gpg
+[puffjay@archd820 configfiles]$ git pull
+You have not concluded your merge (MERGE_HEAD exists).
+Please, commit your changes before you can merge.
+[puffjay@archd820 configfiles]$ git add thinkbank.gpg ; git commit -m "added sitepoint forums login"
+[master 87f070d] added sitepoint forums login
+[puffjay@archd820 configfiles]$ git pull
+Password for 'https://kklostermanoglu@bitbucket.org':
+Already up-to-date.
+[puffjay@archd820 configfiles]$ git push
+warning: push.default is unset; its implicit value is changing in
+Git 2.0 from 'matching' to 'simple'. To squelch this message
+and maintain the current behavior after the default changes, use:
+
+  git config --global push.default matching
+
+To squelch this message and adopt the new behavior now, use:
+
+  git config --global push.default simple
+
+See 'git help config' and search for 'push.default' for further information.
+(the 'simple' mode was introduced in Git 1.7.11. Use the similar mode
+'current' instead of 'simple' if you sometimes use older versions of Git)
+
+Password for 'https://kklostermanoglu@bitbucket.org':
+Counting objects: 11, done.
+Delta compression using up to 2 threads.
+Compressing objects: 100% (7/7), done.
+Writing objects: 100% (7/7), 5.68 KiB, done.
+Total 7 (delta 3), reused 0 (delta 0)
+remote: bb/acl: kklostermanoglu is allowed. accepted payload.
+To https://kklostermanoglu@bitbucket.org/kklostermanoglu/configfiles.git
+   163cc45..87f070d  master -> master
+
+although I'm not sure why it accepted the payload...oh I think that was where I git rm'd and then committed. So bc I rm'ed the conflicting file it didn't care about the conflict. Bc in the log on BBucket it showed 3 commits all at the same time. So I'm guessing this was all me screwing it all up. 
+
+And here are the steps that worked:
+[puffjay@archd820 configfiles]$ git checkout  163cc45 thinkbank.gpg
+[puffjay@archd820 configfiles]$ emacs thinkbank.gpg
+[puffjay@archd820 configfiles]$ ls
+README.md  thinkbank.gpg  thinkbank.gpg.merge
+[puffjay@archd820 configfiles]$ rm thinkbank.gpg.merge
+[puffjay@archd820 configfiles]$ git add thinkbank.gpg ; git commit -m "fixed screwed up merge, now has jsbin and sitepoint details"
+[master 2945018] fixed screwed up merge, now has jsbin and sitepoint details
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ rewrite thinkbank.gpg (100%)
+[puffjay@archd820 configfiles]$ git push
+warning: push.default is unset; its implicit value is changing in
+Git 2.0 from 'matching' to 'simple'. To squelch this message
+and maintain the current behavior after the default changes, use:
+
+  git config --global push.default matching
+
+To squelch this message and adopt the new behavior now, use:
+
+  git config --global push.default simple
+
+See 'git help config' and search for 'push.default' for further information.
+(the 'simple' mode was introduced in Git 1.7.11. Use the similar mode
+'current' instead of 'simple' if you sometimes use older versions of Git)
+
+Password for 'https://kklostermanoglu@bitbucket.org':
+Counting objects: 5, done.
+Delta compression using up to 2 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 2.88 KiB, done.
+Total 3 (delta 1), reused 0 (delta 0)
+remote: bb/acl: kklostermanoglu is allowed. accepted payload.
+To https://kklostermanoglu@bitbucket.org/kklostermanoglu/configfiles.git
+   87f070d..2945018  master -> master
