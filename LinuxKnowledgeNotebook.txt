@@ -1736,7 +1736,7 @@ Despite the -D switch still being there I could finally ssh into the box.
 
 Mon Apr  1 00:01:21 EDT 2013
 Merge binary files in git:
-I had staged a commit of a gpg/binary file which then gave a merge conflict when trying to push it. I then stupidly tried to mv the file and pull so I could manually merge the files. This failed as the staged commit prevented me from doing that. So then I git rm'd the file which is no good bc then that prevents tracking of the file. I don't know how I got out of having the file removed. I guess bc I couldn't push the commit so the git rm never took effect. I made a copy of the .gpg file so I had my local changes. I then did a "git checkout <sha1> thinkbank.gpg" which gave me the proper binary file so I could properly append the new data to.  http://lostechies.com/joshuaflanagan/2010/01/29/how-to-resolve-a-binary-file-conflict-with-git/ see the "resolve using theirs section"
+I had staged a commit of a gpg/binary file which then gave a merge conflict when trying to push it. I then stupidly tried to mv the file and pull so I could manually merge the files. This failed as the staged commit prevented me from doing that. So then I git rm'd the file which is no good bc then that prevents tracking of the file. I don't know how I got out of having the file removed. I guess bc I couldn't push the commit so the git rm never took effect. I made a copy of the .gpg file so I had my local changes. I then did a "git checkout <sha1> thinkbank.gpg" which gave me the proper binary file so I could properly append the new data to. also "git checkout HEAD thinkbank.gpg" came in handy when I tried to merge the local and remote the next day when I had to add in some stuff from work that wasn't added.  http://lostechies.com/joshuaflanagan/2010/01/29/how-to-resolve-a-binary-file-conflict-with-git/ see the "resolve using theirs section"
 I got the sha1 of the proper commit via looking on my BitBucket account.  
 failing steps:
 [puffjay@archd820 configfiles]$ ls
@@ -1816,3 +1816,82 @@ Total 3 (delta 1), reused 0 (delta 0)
 remote: bb/acl: kklostermanoglu is allowed. accepted payload.
 To https://kklostermanoglu@bitbucket.org/kklostermanoglu/configfiles.git
    87f070d..2945018  master -> master
+
+Mon Apr  1 12:30:23 EDT 2013
+Git binary merge:
+I am not sure why I had to pull before the push due to the conflicted files.
+I guess some day it'll make sense, altho from the article referenced above I'm not sure why:
+-UUU:----F1  thinkbank.gpg   Bot L96   Git:master  (Org) ----------------------------------------------------------------
+[arch-nicky@arch-nicky ConfigFiles]$ ls
+README.md  thinkbank.gpg  thinkbank.tmp.gpg
+[arch-nicky@arch-nicky ConfigFiles]$ rm thinkbank.tmp.gpg
+[arch-nicky@arch-nicky ConfigFiles]$ git add thinkbank.gpg ; git commit -m " merged from cam-arch-nicky so has ragbrai items"
+[master 1cd88db]  merged from cam-arch-nicky so has ragbrai items
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ rewrite thinkbank.gpg (100%)
+[arch-nicky@arch-nicky ConfigFiles]$ git push
+warning: push.default is unset; its implicit value is changing in
+Git 2.0 from 'matching' to 'simple'. To squelch this message
+and maintain the current behavior after the default changes, use:
+
+  git config --global push.default matching
+
+To squelch this message and adopt the new behavior now, use:
+
+  git config --global push.default simple
+
+See 'git help config' and search for 'push.default' for further information.
+(the 'simple' mode was introduced in Git 1.7.11. Use the similar mode
+'current' instead of 'simple' if you sometimes use older versions of Git)
+
+Password for 'https://kklostermanoglu@bitbucket.org':
+To https://kklostermanoglu@bitbucket.org/kklostermanoglu/configfiles.git
+ ! [rejected]        master -> master (non-fast-forward)
+error: failed to push some refs to 'https://kklostermanoglu@bitbucket.org/kklostermanoglu/configfiles.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Merge the remote changes (e.g. 'git pull')
+hint: before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+[arch-nicky@arch-nicky ConfigFiles]$ git status
+# On branch master
+# Your branch and 'origin/master' have diverged,
+# and have 1 and 4 different commits each, respectively.
+#   (use "git pull" to merge the remote branch into yours)
+#
+nothing to commit, working directory clean
+[arch-nicky@arch-nicky ConfigFiles]$ git pull
+Password for 'https://kklostermanoglu@bitbucket.org':
+warning: Cannot merge binary files: thinkbank.gpg (HEAD vs. 294501851b7f034df0c32cfa9727d0cfc56bc2b4)
+Auto-merging thinkbank.gpg
+CONFLICT (content): Merge conflict in thinkbank.gpg
+Automatic merge failed; fix conflicts and then commit the result.
+[arch-nicky@arch-nicky ConfigFiles]$ git add thinkbank.gpg ; git commit -m " merged from cam-arch-nicky so has ragbrai items"
+[master f9fc36f]  merged from cam-arch-nicky so has ragbrai items
+[arch-nicky@arch-nicky ConfigFiles]$ git push                                                                            warning: push.default is unset; its implicit value is changing in
+Git 2.0 from 'matching' to 'simple'. To squelch this message
+and maintain the current behavior after the default changes, use:
+
+  git config --global push.default matching
+
+To squelch this message and adopt the new behavior now, use:
+
+  git config --global push.default simple
+
+See 'git help config' and search for 'push.default' for further information.
+(the 'simple' mode was introduced in Git 1.7.11. Use the similar mode
+'current' instead of 'simple' if you sometimes use older versions of Git)
+
+Password for 'https://kklostermanoglu@bitbucket.org':
+Counting objects: 8, done.
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (4/4), 3.03 KiB, done.
+Total 4 (delta 2), reused 0 (delta 0)
+remote: bb/acl: kklostermanoglu is allowed. accepted payload.
+To https://kklostermanoglu@bitbucket.org/kklostermanoglu/configfiles.git
+   2945018..f9fc36f  master -> master
+
+And that worked. 
+
+To get a list of the sha1 from the cli, use : git log --oneline --decorate
+This will show a log of the commits with the sha1 at the front of the line. 
+
