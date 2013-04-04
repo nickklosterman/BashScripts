@@ -1895,3 +1895,8 @@ And that worked.
 To get a list of the sha1 from the cli, use : git log --oneline --decorate
 This will show a log of the commits with the sha1 at the front of the line. 
 
+Thu Apr  4 14:01:51 EDT 2013
+Emacs Org mode 
+this mode is part of the std emacs distribution according to https://wiki.archlinux.org/index.php/Emacs yet I had to use M-x list-packages to go through and then install it on Cam Laptop. Then it finally worked in my gpg files. 
+http://orgmode.org/
+http://emacs.wordpress.com/2008/07/18/keeping-your-secrets-secret/
