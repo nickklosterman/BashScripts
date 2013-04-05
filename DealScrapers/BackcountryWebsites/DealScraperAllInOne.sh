@@ -1266,10 +1266,15 @@ while [[ $TmpDiskSpaceStatus -eq 1 && $HomeDiskSpaceStatus -eq 1 && $NetStatus -
 
     SleepTimeMinutesSeconds=$(GiveSecondsReturnMinutesAndSeconds ${SleepTime})
     DealEndTime=$( GiveTimeInSecondsReturnDealEndTime ${SleepTime} )
+    echo "- - - - - - - - - - - - - - - - - - - - -"
     echo "Next deal at ${NextDeal} in ${SleepTimeMinutesSeconds} minutes from" `date +%T ` "which occurs at ${DealEndTime}"
 #    echo "SnC:${SnCTimeLeftSeconds} (${SnCQuantityRemaining}/${SnCTotalQuantity})  WM:${WMTimeLeftSeconds} (${WMQuantityRemaining}/${WMTotalQuantity}) BT:${BTTimeLeftSeconds} (${BTQuantityRemaining}/${BTTotalQuantity}) CL:${CLTimeLeftSeconds} (${CLQuantityRemaining}/${CLTotalQuantity})"
 #    echo "SnC:${SCTimeLeftSeconds} WM:${WMTimeLeftSeconds}  BT:${BTTimeLeftSeconds}  CL:${CLTimeLeftSeconds} "
+    echo "Snc:${SteepAndCheap} 
+WM:${WhiskeyMilitia}  
+CL:${Chainlove}"
     echo "SnC:${SCTimeLeftSeconds} WM:${WMTimeLeftSeconds} CL:${CLTimeLeftSeconds} "
+    echo "- - - - - - - - - - - - - - - - - - - - -"
     sleep ${SleepTime}s
     TmpDiskSpaceStatus=$(checktmpdiskspace )
     HomeDiskSpaceStatus=$(checkhomediskspace )
