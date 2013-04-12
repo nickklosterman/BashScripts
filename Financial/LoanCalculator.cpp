@@ -248,7 +248,7 @@ void AmortizedLoan::set_AmortizedLoan2(  double int_rate_, double loan_amount_, 
   insurance_yearly=insurance_yearly_;
   taxes_yearly=taxes_yearly_;
   penalty_periods=penalty_periods_;
-  printf("%i %i",  penalty_periods,penalty_periods_);
+  //  printf("penalt periods:%i %i\n",  penalty_periods,penalty_periods_);
   calc_periodicmortgagepayment();//int_rate_pct, num_pmnts, principal,freq);
   association_fees=association_fees_;
 
@@ -479,7 +479,7 @@ double AmortizedLoan::ComputeLoanAmountAsIfMortgagePaymentPlusAssociationFeesWas
   double principal_no_condo_fees = 0;
   
   principal_no_condo_fees=(periodicmortgagepayment+association_fees)*(1-(pow(1+rr,-num_pmnts)))/rr;
-  printf("A %0.2f monthly mortgage payment with %0.2f in condo and association fees for a %0.2f loan would be akin to a %0.2f monthly mortgage payment on a %0.2f loan.\n", periodicmortgagepayment,association_fees,principal, periodicmortgagepayment+association_fees, principal_no_condo_fees);
+  printf("A $%0.2f monthly mortgage payment with $%0.2f in monthly condo and association fees for a $%0.2f loan would be akin to a $%0.2f monthly mortgage payment on a $%0.2f loan.\n", periodicmortgagepayment,association_fees,principal, periodicmortgagepayment+association_fees, principal_no_condo_fees);
   return principal_no_condo_fees ;
    
 
@@ -705,6 +705,12 @@ I totally forgot about using capital letters for optargs
   }
 
   //I need to check and make sure that enough information is being supplied to actually compute a calculation
+  printf(" Check void AmortizedLoan::calc_periodicmortgagepayment() for the 4 min arguments needed to compute, pass in house price or down payment pct so that you can back calculate how the equiv house without condos fees");
+  if (downpaymentPct!=0 && houseprice==0 && loanAmount > 0)
+    {
+      printf("You specified a down payment percentage but not a house price.\nSubstituting loan amount for house price.\n");// Would you like to substitute the loan amount as the house price? (Y/n)\n")
+      houseprice = loanAmount;
+    }
 
 
   if (houseprice!=0 && downpaymentPct!=0) //should I use > instead of !=??
@@ -712,6 +718,8 @@ I totally forgot about using capital letters for optargs
   //interest_rate, numberOfPayments, paymentsPerYear
   //loanAmount or houseprice & downpaymentPct
   //extraPayments or monthlyPayments
+  //  std::cout<<"loan amount is:"<<loanAmount<<"\n";
+
 
     AmortizedLoan NormalLoan;
   NormalLoan.set_AmortizedLoan2(interest_rate,loanAmount,0,numberOfPayments,paymentsPerYear,0,taxes,insurance,penalty_periods,association_fee);//rate,amount,0,terminmonths,paymentsperyear,0,taxes, insurance,penalty_periods);

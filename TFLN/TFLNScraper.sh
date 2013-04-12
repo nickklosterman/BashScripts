@@ -23,3 +23,11 @@ then
 fi
 
 # http://feeds.feedburner.com/tfln http://www.textsfromlastnight.com/texts/page:3
+
+# I need to stop the download after I've encountered the text from the first line of an input file. Ideally the input file would be the output from the previous run of TFLN.
+# on the command line we'd specify the previous TFLN output file, the program would grab the first line (head -n 1 file.txt) and compare the incoming stream of data. 
+# It would then stop the download once the search text was encountered.
+# It would then remove all lines after the found line from the output stream. ( awk '/^SearchString/{exit}1' tempfile.txt from http://stackoverflow.com/questions/1946363/how-do-i-display-data-from-the-beginning-of-a-file-until-the-first-occurence-of  there are also solutions using sed in there as well. )
+# The tempfile would then be cated with the previous input file to produce the updated output file without any duplicate lines. 
+# I had been looking into 'comm' to solve the problem but the above pseudo code is more elegant and less hackish
+ 
