@@ -727,6 +727,7 @@ I totally forgot about using capital letters for optargs
   
     NormalLoan.ComputeLoanAmountAsIfMortgagePaymentPlusAssociationFeesWasTheMortgagePayment();
     NormalLoan.PrintPeriodicMortgagePayment();
+    NormalLoan.PrintPeriodicMortgagePaymentWithTaxesAndInsurance();
   //double AmortizedLoan::ComputeLoanAmountAsIfMortgagePaymentPlusAssociationFeesWasTheMortgagePayment()
   if (false)
     {    
