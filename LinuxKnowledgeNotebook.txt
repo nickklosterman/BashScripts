@@ -1928,5 +1928,44 @@ When editing and running scripts/programs its is pretty easy to just background 
 
 Would having my password.gpg file split into logins and passwords such that the user would have to decode both, be safer?
 
+Fri May  3 18:07:22 EDT 2013
+http://www.sitepoint.com/forums/showthread.php?1017116-Sample-code-form-Chapter-5-on-up-doesn-t-work-Can-t-set-headers&s=096a950313e1933c2a8176275d1504a9
+Sample code form Chapter 5 on up doesn't work: Can't set headers
+I have worked my way successfully all the way to Chapter 5 without any problems. 
+However, now I can't get the Chapter 5 code to run. I at first was looking for something wrong in my transcription of the code from book to editor but when I attempted to run the code I downloaded from the website I failed as well.
+To be specific I get:
+Code:
+info  - socket.io started
 
+http.js:708
+    throw new Error('Can\'t set headers after they are sent.');
+          ^
+Error: Can't set headers after they are sent.
+    at ServerResponse.OutgoingMessage.setHeader (http.js:708:11)
+    at ServerResponse.res.setHeader (/home/puffjay/Sandbox/Node/chapter05/node_modules/express/node_modules/connect/lib/patch.js:62:20)
+    at next (/home/puffjay/Sandbox/Node/chapter05/node_modules/express/node_modules/connect/lib/http.js:171:13)  
+    at /home/puffjay/Sandbox/Node/chapter05/node_modules/express/node_modules/connect/lib/middleware/static.js:150:11
+    at Object.oncomplete (fs.js:107:15)
+The error occurs and crashes the page right away.
+From googling, it appears that this error is a bit of a tricky one to pin down.
+Can anyone else confirm that they are getting the error?
 
+When I run the demo code, I run "npm install" in the base chapter05 directory and after that completes, I run "node nockmarket.js" with my local mongodb instance running. I do receive some warnings during the npm install but most are simple complaints about a missing README.md file with these others: 
+Code:
+npm WARN engine hawk@0.10.2: wanted: {"node":"0.8.x"} (current: {"node":"v0.10.2","npm":"1.2.15"})
+npm WARN engine hoek@0.7.3: wanted: {"node":"0.8.x"} (current: {"node":"v0.10.2","npm":"1.2.15"})
+npm WARN engine sntp@0.1.4: wanted: {"node":"0.8.x"} (current: {"node":"v0.10.2","npm":"1.2.15"})
+npm WARN engine cryptiles@0.1.3: wanted: {"node":"0.8.x"} (current: {"node":"v0.10.2","npm":"1.2.15"})
+npm WARN engine boom@0.3.8: wanted: {"node":"0.8.x"} (current: {"node":"v0.10.2","npm":"1.2.15"})
+npm WARN engine formidable@1.0.13: wanted: {"node":"<0.9.0"} (current: {"node":"v0.10.2","npm":"1.2.15"})
+OS: Arch Linux
+
+Are there any other details that may help get to the bottom of this mystery?
+
+ANSWER: 
+I found the answer to the problem.
+There have been several breaking changes to node that broke the sockets.io portion of the code.
+I needed to use an older version of node. I therefore installed nvm, the node version manager and installed v0.8.22.
+I then needed to delete my node_modules directory and reperform the node install.
+However, my system's python points to python3 and not python2. This was a problem for node-gyp. 
+I therefore had to run "node install --python=/usr/bin/python2". After the install all worked nicely.
