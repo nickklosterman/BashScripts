@@ -1969,3 +1969,9 @@ I needed to use an older version of node. I therefore installed nvm, the node ve
 I then needed to delete my node_modules directory and reperform the node install.
 However, my system's python points to python3 and not python2. This was a problem for node-gyp. 
 I therefore had to run "node install --python=/usr/bin/python2". After the install all worked nicely.
+
+Fri May 10 15:16:41 EDT 2013
+Revert a git file if you accidentally make mistakes to an uncommitted change:
+git checkout filename
+this will checkout the file from HEAD, overwriting your change. 
+http://www.norbauer.com/notebooks/notes/git-revert-reset-a-single-file.html
