@@ -42,6 +42,8 @@ public:
   Investment( double periodicContribution, double annualReturn, double expenseRatio, int years, int periodsPerYear, bool details);
   void calculation();
   void calculation2();
+  void calculation3();
+  void calculation4();
   void totalContribution();
 private:
   double periodicContribution,  annualReturn,  expenseRatio;
@@ -97,6 +99,10 @@ void Investment::calculation()
 }
 void Investment::calculation2()
 {
+  /*
+I don't think that I'm doing the calculation correctly.
+
+*/
   int totalPeriods = periodsPerYear*years;
   double returnRate = (annualReturn - expenseRatio)/100;
   double annualReturn0 = annualReturn/100;
@@ -118,8 +124,76 @@ void Investment::calculation2()
     }
   std::cout<<"Your final invested amount is:"<<finalAmount<<".\n";
   std::cout<<"Your final invested amount would've been :"<<finalAmountWithNoExpenseRatio<<" if there was no expense ratio.\n";
+  double differenceDueToExpenseRatio = finalAmountWithNoExpenseRatio-finalAmount;
+  double amountInvested = periodicContribution*years*periodsPerYear;
+  double percentageEatenAwayByExpenseRatio = (  finalAmountWithNoExpenseRatio - finalAmount ) / ( finalAmount - amountInvested); //this should be the 
+    //  double percentageLeftAfterExpenseRatio = ( finalAmountWithNoExpenseRatio - amountInvested ) / ( finalAmount - amountInvested)
+  double percentageLeftAfterExpenseRatio = ( finalAmountWithNoExpenseRatio - amountInvested ) / ( finalAmount - amountInvested);
   std::cout<<"For a net difference of :"<<finalAmountWithNoExpenseRatio-finalAmount<<".\n";
+  std::cout<<"For a net difference of :"<<percentageEatenAwayByExpenseRatio<<" "<<percentageLeftAfterExpenseRatio<<".\n";
 }
+
+void Investment::calculation3()
+{
+  /*
+a single lump sum invested, eaten away by the E.R.
+
+*/
+  double returnRate = (annualReturn - expenseRatio)/100;
+  double annualReturn0 = annualReturn/100;
+  double finalAmount = 0.0;
+  double finalAmountWithNoExpenseRatio = 0.0;
+
+  finalAmount = periodicContribution*pow(1+returnRate,years);
+  double   finalAmountVanguard = periodicContribution*pow( (1+annualReturn/100)/(1+expenseRatio/100),years);
+  finalAmountWithNoExpenseRatio = periodicContribution*pow(1+annualReturn0,years);
+
+  std::cout<<"Amount invested:$"<<periodicContribution<<".\n";
+
+  std::cout<<"Your final invested amount is:"<<finalAmount<<".\n";
+  std::cout<<"Your final invested amount V is:"<<finalAmountVanguard<<".\n";
+  std::cout<<"Your final invested amount would've been :"<<finalAmountWithNoExpenseRatio<<" if there was no expense ratio.\n";
+  double differenceDueToExpenseRatio = finalAmountWithNoExpenseRatio-finalAmount;
+  double amountInvested = periodicContribution;
+  double percentageEatenAwayByExpenseRatio = (  differenceDueToExpenseRatio ) / ( finalAmountWithNoExpenseRatio - amountInvested); 
+
+
+    double percentageLeftAfterExpenseRatio = ( finalAmount - amountInvested  ) / ( finalAmountWithNoExpenseRatio - amountInvested);
+  std::cout<<"For a net difference of :"<<differenceDueToExpenseRatio<<".\n";
+  std::cout<<"For a net difference of :"<<percentageEatenAwayByExpenseRatio<<" "<<percentageLeftAfterExpenseRatio<<".\n";
+}
+
+
+
+void Investment::calculation4()
+{
+  /*
+a single lump sum invested, eaten away by the E.R.
+
+Vanguard calculation
+*/
+  double returnRate = (1+annualReturn/100)/(1+ expenseRatio/100); //why is return this way?
+  double annualReturn0 = annualReturn/100;
+  double finalAmount = 0.0;
+  double finalAmountWithNoExpenseRatio = 0.0;
+
+  finalAmount = periodicContribution*pow(returnRate,years);
+  finalAmountWithNoExpenseRatio = periodicContribution*pow(1+annualReturn0,years);
+
+  std::cout<<"Amount invested:$"<<periodicContribution<<".\n";
+
+  std::cout<<"Your final invested amount is:"<<finalAmount<<".\n";
+  std::cout<<"Your final invested amount would've been :"<<finalAmountWithNoExpenseRatio<<" if there was no expense ratio.\n";
+  double differenceDueToExpenseRatio = finalAmountWithNoExpenseRatio-finalAmount;
+  double amountInvested = periodicContribution;
+  double percentageEatenAwayByExpenseRatio = (  differenceDueToExpenseRatio ) / ( finalAmountWithNoExpenseRatio - amountInvested); 
+
+
+    double percentageLeftAfterExpenseRatio = ( finalAmount - amountInvested  ) / ( finalAmountWithNoExpenseRatio - amountInvested);
+  std::cout<<"For a net difference of :"<<differenceDueToExpenseRatio<<".\n";
+  std::cout<<"For a net difference of :"<<percentageEatenAwayByExpenseRatio<<" "<<percentageLeftAfterExpenseRatio<<".\n";
+}
+
 //-------------------------------------------------------------------------------------
 
 void usage()
@@ -217,7 +291,9 @@ int main(int argc, char *argv[])
   Investment inv(periodicContribution,annualReturn,expenseRatio,years,periodsPerYear,details);
   inv.totalContribution();
   //  inv.calculation();
-  inv.calculation2();
+  //  inv.calculation2();
+  inv.calculation3();
+  inv.calculation4();
 
 }
 
