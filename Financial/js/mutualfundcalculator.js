@@ -1,63 +1,63 @@
 //I was failing to trigger the function bc the ng-click was outside of the controller scope in teh html
 // I also was trying ot iterate over years which is a dom object insted of iterating over its value/the # of payments.
 
-function AmortizationTable($scope){
-    //var Amortizationtable= [];
-    $scope.amortizationTable = [{payPeriod:0, principalRemaining:0, paymentTowardsPrincipal:0, paymentTowardsInterest:0, totalInterestPaid:0, equity:0 }];//computeAmortizationTable();
+// function AmortizationTable($scope){
+//     //var Amortizationtable= [];
+//     $scope.amortizationTable = [{payPeriod:0, principalRemaining:0, paymentTowardsPrincipal:0, paymentTowardsInterest:0, totalInterestPaid:0, equity:0 }];//computeAmortizationTable();
 
-    $scope.stuff= function() {
-	console.log("stuff");
-    }
-    //computeAmortizationTable:function(){
-    //function computeAmortizationTable(){
-    $scope.computeAmortizationTable = function(){
-	var amount = document.getElementById("amount");
-	var apr = document.getElementById("apr");
-	var years = document.getElementById("years");
-	var principal = parseFloat(amount.value);
-	var interest = parseFloat(apr.value) / 100 / 12;
-	var payments = parseFloat(years.value) * 12;
-	var yearlyTaxes =  document.getElementById("taxes");
-	console.log(principal, interest,payments);
+//     $scope.stuff= function() {
+// 	console.log("stuff");
+//     }
+//     //computeAmortizationTable:function(){
+//     //function computeAmortizationTable(){
+//     $scope.computeAmortizationTable = function(){
+// 	var amount = document.getElementById("amount");
+// 	var apr = document.getElementById("apr");
+// 	var years = document.getElementById("years");
+// 	var principal = parseFloat(amount.value);
+// 	var interest = parseFloat(apr.value) / 100 / 12;
+// 	var payments = parseFloat(years.value) * 12;
+// 	var yearlyTaxes =  document.getElementById("taxes");
+// 	console.log(principal, interest,payments);
 
-	//	calculate();
-	var table=[];
-	var tableItem={};
+// 	//	calculate();
+// 	var table=[];
+// 	var tableItem={};
 
-	var x = Math.pow(1 + interest, payments);   // Math.pow() computes powers
-	var monthly = (principal*x*interest)/(x-1);
+// 	var x = Math.pow(1 + interest, payments);   // Math.pow() computes powers
+// 	var monthly = (principal*x*interest)/(x-1);
 
-	var equity = 0;
-	var bal = principal;
+// 	var equity = 0;
+// 	var bal = principal;
 
-        var thisMonthsInterest = bal*interest;
+//         var thisMonthsInterest = bal*interest;
 
-	var totalInterestPaid = 0;
-	var currentDate = new Date();
-	for (var idx = 1 ; idx <= payments; idx++) {
-            var thisMonthsInterest = (principal-equity)*interest;
-            equity += (monthly - thisMonthsInterest);  // The rest goes to equity
-            bal -= (monthly - thisMonthsInterest);     // The rest goes to equity
-//	    computeTaxIncrease(idx,parseFloat(yearlyTaxes.value));
-	    totalInterestPaid+=thisMonthsInterest;//.toFixed(2); <-- doing it this way treats it as a string. 
-	    tableItem.payPeriod=idx; //get current year and month and perform date math adding a month at a time? and reformat ?
-	    tableItem.payPeriod=payPeriodDate(idx,currentDate);
-	    tableItem.principalRemaining=bal.toFixed(2);
-	    tableItem.paymentTowardsPrincipal=(monthly-thisMonthsInterest).toFixed(2);
-	    tableItem.paymentTowardsInterest=thisMonthsInterest.toFixed(2);
-	    tableItem.totalInterestPaid=totalInterestPaid.toFixed(2);
-	    tableItem.equity=equity.toFixed(2);
-	    tableItem.monthlyTax=computeTaxIncrease(idx,parseFloat(yearlyTaxes.value));
-	    //console.log(tableItem);
-	    table.push(tableItem);
-	    tableItem = {}; //clear out for next iteration
+// 	var totalInterestPaid = 0;
+// 	var currentDate = new Date();
+// 	for (var idx = 1 ; idx <= payments; idx++) {
+//             var thisMonthsInterest = (principal-equity)*interest;
+//             equity += (monthly - thisMonthsInterest);  // The rest goes to equity
+//             bal -= (monthly - thisMonthsInterest);     // The rest goes to equity
+// //	    computeTaxIncrease(idx,parseFloat(yearlyTaxes.value));
+// 	    totalInterestPaid+=thisMonthsInterest;//.toFixed(2); <-- doing it this way treats it as a string. 
+// 	    tableItem.payPeriod=idx; //get current year and month and perform date math adding a month at a time? and reformat ?
+// 	    tableItem.payPeriod=payPeriodDate(idx,currentDate);
+// 	    tableItem.principalRemaining=bal.toFixed(2);
+// 	    tableItem.paymentTowardsPrincipal=(monthly-thisMonthsInterest).toFixed(2);
+// 	    tableItem.paymentTowardsInterest=thisMonthsInterest.toFixed(2);
+// 	    tableItem.totalInterestPaid=totalInterestPaid.toFixed(2);
+// 	    tableItem.equity=equity.toFixed(2);
+// 	    tableItem.monthlyTax=computeTaxIncrease(idx,parseFloat(yearlyTaxes.value));
+// 	    //console.log(tableItem);
+// 	    table.push(tableItem);
+// 	    tableItem = {}; //clear out for next iteration
 	    
-	}
-	//return table;
-	$scope.amortizationTable = table;
-    }
+// 	}
+// 	//return table;
+// 	$scope.amortizationTable = table;
+//     }
 
-}
+// }
 
 
 "use strict"; // Use ECMAScript 5 strict mode in browsers that support it
@@ -70,14 +70,14 @@ function AmortizationTable($scope){
  */
 function calculate() {
     // Look up the input and output elements in the document
-    var initialInvestment = parseFloat(document.getElementById("initialInvestment"));
-    var annualReturn = parseFloat(document.getElementById("annualReturn"));
-    var years = parseInteger(document.getElementById("years"));
-    var expenseRatio = parseFloat(document.getElementById("expenseRatio"));
-    var redemptionFee = pareseFloat(document.getElementById("redemptionFee"));
+    var initialInvestment = (document.getElementById("initialInvestment"));
+    var annualReturn = (document.getElementById("annualReturn"));
+    var years = (document.getElementById("years"));
+    var expenseRatio = (document.getElementById("expenseRatio"));
+    var redemptionFee = (document.getElementById("redemptionFee"));
 
 
-var value = 0, totalAppreciation = 0 , totalFeesPaid = 0 ;    
+var value = 0, valueNoFees = 0, totalAppreciation = 0 , totalFeesPaid = 0 ;    
     // Get the user's input from the input elements. Assume it is all valid.
     // Convert interest from a percentage to a decimal
 
@@ -86,58 +86,68 @@ var value = 0, totalAppreciation = 0 , totalFeesPaid = 0 ;
 // push
 // }
 
-    // Now compute the monthly payment figure.
-    value  = (initialInvestment*(1-redemptionFee/100))*Math.pow(1 + annualReturn/100, years)*Math.pow(1-expenseRatio/100,years);   // Math.pow() computes powers
 
+    // Now compute the monthly payment figure.
+    value  = (parseFloat(initialInvestment.value)*(1-parseFloat(redemptionFee.value)/100))*Math.pow(1 + parseFloat(annualReturn.value)/100, parseInt(years.value))*Math.pow(1-parseFloat(expenseRatio.value)/100,parseInt(years.value));   // Math.pow() computes powers
+    valueNoFees  = (parseFloat(initialInvestment.value)*Math.pow(1 + parseFloat(annualReturn.value)/100, parseInt(years.value)));   // Math.pow() computes powers
+console.log(value);
 
     // If the result is a finite number, the user's input was good and
     // we have meaningful results to display
     if (isFinite(value)) {
+	console.log("finite");
         // Fill in the output fields, rounding to 2 decimal places
-        payment.innerHTML = monthly.toFixed(2);
-        total.innerHTML = (monthly * payments).toFixed(2);
-        // Save the user's input so we can restore it the next time they visit
-        save(amount.value, apr.value, years.value, yearlyTaxes.value);
+        valueOutput.innerHTML = value.toFixed(2);
+valueNoFeesOutput.innerHTML = valueNoFees.toFixed(2);
+        totalAppreciationOutput.innerHTML = (value-parseFloat(initialInvestment.value)).toFixed(2);
+	var temp = valueNoFees-value;
+	totalFeesPaidOutput.innerHTML = (temp).toFixed(2);
+//	console.log((temp).toFixed(2));
 
-        // Finally, chart loan balance, and interest and equity payments
-        chart(principal, interest, monthly, payments);
+        // total.innerHTML = (monthly * payments).toFixed(2);
+        // // Save the user's input so we can restore it the next time they visit
+        // save(amount.value, apr.value, years.value, yearlyTaxes.value);
+
+        // // Finally, chart loan balance, and interest and equity payments
+        // chart(principal, interest, monthly, payments);
     }
     else {  
         // Result was Not-a-Number or infinite, which means the input was
         // incomplete or invalid. Clear any previously displayed output.
-        payment.innerHTML = "";        // Erase the content of these elements
-        total.innerHTML = ""
-        totalinterest.innerHTML = "";
-	taxpayment.innerHTML = "";
-        chart();                       // With no arguments, clears the chart
+        value.innerHTML = "phail";        // Erase the content of these elements
+	totalAppreciation.innerHTML = "pahil";
+        // total.innerHTML = ""
+        // totalinterest.innerHTML = "";
+	// taxpayment.innerHTML = "";
+        // chart();                       // With no arguments, clears the chart
     }
 
     //    computeAmortizationTable();
 }
 
-// Save the user's input as properties of the localStorage object. Those
-// properties will still be there when the user visits in the future
-// This storage feature will not work in some browsers (Firefox, e.g.) if you 
-// run the example from a local file:// URL.  It does work over HTTP, however.
-function save(amount, apr, years, yearlyTaxes) {
-    if (window.localStorage) {  // Only do this if the browser supports it
-        localStorage.loan_amount = amount;
-        localStorage.loan_apr = apr;
-        localStorage.loan_years = years;
-        localStorage.loan_taxes = yearlyTaxes;
-    }
-}
+// // Save the user's input as properties of the localStorage object. Those
+// // properties will still be there when the user visits in the future
+// // This storage feature will not work in some browsers (Firefox, e.g.) if you 
+// // run the example from a local file:// URL.  It does work over HTTP, however.
+// function save(amount, apr, years, yearlyTaxes) {
+//     if (window.localStorage) {  // Only do this if the browser supports it
+//         localStorage.loan_amount = amount;
+//         localStorage.loan_apr = apr;
+//         localStorage.loan_years = years;
+//         localStorage.loan_taxes = yearlyTaxes;
+//     }
+// }
 
-// Automatically attempt to restore input fields when the document first loads.
-window.onload = function() {
-    // If the browser supports localStorage and we have some stored data
-    if (window.localStorage && localStorage.loan_amount) {  
-        document.getElementById("amount").value = localStorage.loan_amount;
-        document.getElementById("apr").value = localStorage.loan_apr;
-        document.getElementById("years").value = localStorage.loan_years;
-        document.getElementById("taxes").value = localStorage.loan_taxes;
-    }
-};
+// // Automatically attempt to restore input fields when the document first loads.
+// window.onload = function() {
+//     // If the browser supports localStorage and we have some stored data
+//     if (window.localStorage && localStorage.loan_amount) {  
+//         document.getElementById("amount").value = localStorage.loan_amount;
+//         document.getElementById("apr").value = localStorage.loan_apr;
+//         document.getElementById("years").value = localStorage.loan_years;
+//         document.getElementById("taxes").value = localStorage.loan_taxes;
+//     }
+// };
 
 // Chart monthly loan balance, interest and equity in an HTML <canvas> element.
 // If called with no arguments then just erase any previously drawn chart.
