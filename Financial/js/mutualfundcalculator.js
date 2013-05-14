@@ -102,6 +102,8 @@ valueNoFeesOutput.innerHTML = valueNoFees.toFixed(2);
         totalAppreciationOutput.innerHTML = (value-parseFloat(initialInvestment.value)).toFixed(2);
 	var temp = valueNoFees-value;
 	totalFeesPaidOutput.innerHTML = (temp).toFixed(2);
+	totalFeesPercentageOutput.innerHTML = ((temp/(value - parseFloat(initialInvestment.value)))*100).toFixed(2);
+// loop over fees showing how the expense ratio can eat a huge % of your profits. use JS as a way to animate and inform. 
 //	console.log((temp).toFixed(2));
 
         // total.innerHTML = (monthly * payments).toFixed(2);
