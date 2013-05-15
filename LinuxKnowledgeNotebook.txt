@@ -1975,3 +1975,10 @@ Revert a git file if you accidentally make mistakes to an uncommitted change:
 git checkout filename
 this will checkout the file from HEAD, overwriting your change. 
 http://www.norbauer.com/notebooks/notes/git-revert-reset-a-single-file.html
+
+Wed May 15 09:48:24 EDT 2013
+Arch-Nicky / partition full so can't update packages.
+You can literally just go in and start deleting packages from /var/cache/pacman/pkg
+I just deleted a few of the biggest packages so that I could have enough space to complete the upgrade.
+https://bbs.archlinux.org/viewtopic.php?id=76518
+possibly also helpful https://wiki.archlinux.org/index.php/Pacman_Tips
