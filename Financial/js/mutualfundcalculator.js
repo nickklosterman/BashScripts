@@ -2,15 +2,24 @@ $(function() {
     $("#expenseRatio").slider({
 	orientation: "horizontal",
 	min: 0,
-	max: 3,
-	value: 1,
-	slide: function (event, ui) {
-//	    $("#expenseRatioOut").val(ui.value);
-	    calculate();
+	max: 300,
+	value: 250,
+	//	slide: function (event, ui) {
+	//	    $("#expenseRatioOut").val(ui.value);
+	//	    calculate();
+	//	}
+	slide:function(event,ui) {
+	    var eR = $("#expenseRatio").slider("value")/10000;
+	    $("#expenseRatioOut").text(eR); //this always seems to be one off tho
 	}
+
     })
-    $("#expenseRatioOut").val( $("#expenseRatio").slider("value") );
+    // $("#expenseRatioOut").val( $("#expenseRatio").slider("value") );
+    var eR = $("#expenseRatio").slider("value")/10000;
+    $("#expenseRatioOut").text(eR); //WHY ARE YOU ALWAYS OFF BY 1??
+
 });
+
 "use strict"; // Use ECMAScript 5 strict mode in browsers that support it
 
 /*
@@ -27,15 +36,20 @@ function calculate() {
     var expenseRatio = (document.getElementById("expenseRatio"));
     var redemptionFee = (document.getElementById("redemptionFee"));
     var history = [];
-
+    var eR = $("#expenseRatio").slider("value")/10000;
+    $("#expenseRatioOut").text(eR);
+    //(document.getElementById("expenseRatio2").innerHTML = eR;
     var value = 0, valueNoFees = 0, totalAppreciation = 0 , totalFeesPaid = 0 ;    
     // Get the user's input from the input elements. Assume it is all valid.
     // Convert interest from a percentage to a decimal
     var temp = {};
+    //console.log( 	parseFloat(initialInvestment.value),parseFloat(redemptionFee.value), parseFloat(annualReturn.value), parseInt(years.value),parseFloat(expenseRatio2.value));
+    console.log( eR);
     for ( var cntr = 0 ; cntr < parseInt(years.value) ; cntr++)
     {
 	// Now compute the monthly payment figure.
-	value  = (parseFloat(initialInvestment.value)*(1-parseFloat(redemptionFee.value)/100))*Math.pow(1 + parseFloat(annualReturn.value)/100, parseInt(years.value))*Math.pow(1-parseFloat(expenseRatio.value)/100,parseInt(years.value));   // Math.pow() computes powers
+	//	value  = (parseFloat(initialInvestment.value)*(1-parseFloat(redemptionFee.value)/100))*Math.pow(1 + parseFloat(annualReturn.value)/100, parseInt(years.value))*Math.pow(1-parseFloat(expenseRatio2.value)/100,parseInt(years.value));   // Math.pow() computes powers
+	value  = (parseFloat(initialInvestment.value)*(1-parseFloat(redemptionFee.value)/100))*Math.pow(1 + parseFloat(annualReturn.value)/100, parseInt(years.value))*Math.pow(1-eR,parseInt(years.value));   // Math.pow() computes powers
 	valueNoFees  = (parseFloat(initialInvestment.value)*Math.pow(1 + parseFloat(annualReturn.value)/100, parseInt(years.value)));   // Math.pow() computes powers
 	console.log(value);
 
@@ -75,12 +89,5 @@ function calculate() {
         // incomplete or invalid. Clear any previously displayed output.
         value.innerHTML = "phail";        // Erase the content of these elements
 	totalAppreciation.innerHTML = "pahil";
-        // total.innerHTML = ""
-        // totalinterest.innerHTML = "";
-	// taxpayment.innerHTML = "";
-        // chart();                       // With no arguments, clears the chart
     }
-
-
 }
-

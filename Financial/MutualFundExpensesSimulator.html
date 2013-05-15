@@ -5,10 +5,9 @@
 <!-- for angular <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script><!-- for some reason it didn't like having the protocol left out....duh bc it was looking for localhost since it wasn't on web derrrr -->
 
 <!-- req'd for jquery ui slider -->
- <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-
 <script src="js/mutualfundcalculator.js"></script>
 
 <title>Mutual Fund Expense Calculator</title>
@@ -31,7 +30,7 @@ div { border-style: ridge;}
   elements define "onchange" or "onclick" event handlers. These specify strings
   of JavaScript code to be executed when the user enters data or clicks.
 -->
-      <input id="expenseRatio">
+      <div id="expenseRatio"></div>
 <table>
   <tr><th>Enter Loan Data:</th>
       <td></td>
@@ -45,9 +44,9 @@ div { border-style: ridge;}
   <tr><td>Investment period (years):</td>
       <td><input id="years" onchange="calculate();"></td>
   <tr><td>Expense Ratio:</td>
-<!--       <td><input id="expenseRatio" onchange="calculate();"><span id="expenseRatioOut"></span></td> 
-      <td><input id="expenseRatio"><span id="expenseRatioOut"></span></td>
--->
+<!--       <td><input id="expenseRatio" onchange="calculate();"><span id="expenseRatioOut"></span></td>  -->
+    <td><span id="expenseRatioOut"></span></td>  
+<!-- -->
       <td><input id="expenseRatio2"></td>
   <tr><td>Redemption Fee:</td>
       <td><input id="redemptionFee" onchange="calculate();"></td>

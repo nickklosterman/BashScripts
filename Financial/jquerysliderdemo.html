@@ -16,7 +16,9 @@ height:120px; float:left; margin:15px
 $(function() {
 // setup master volume
 $( "#master" ).slider({
-value: 60,
+min : 0,
+max: 400,
+value: 300,
 orientation: "horizontal",
 range: "min",
 animate: true,
@@ -36,6 +38,9 @@ animate: true,
 orientation: "vertical"
 });
 });
+output = function()
+{console.log( $("#master").slider("value"));
+}
 });
 </script>
 </head>
@@ -46,6 +51,9 @@ Master volume
 </p>
 <div id="master" style="width: 260px; margin: 15px;"></div>
 <div id="masterText">hello</div>
+
+<button onclick="output();">Click Me!</button>
+
 <p class="ui-state-default ui-corner-all" style="padding: 4px; margin-top: 4em;">
 <span class="ui-icon ui-icon-signal" style="float: left; margin: -2px 5px 0 0;"></span>
 Graphic EQ
