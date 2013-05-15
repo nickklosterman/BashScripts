@@ -2,8 +2,15 @@
 
 <html lang="en" ng-app>
 <head>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script><!-- for some reason it didn't like having the protocol left out....duh bc it was looking for localhost since it wasn't on web derrrr -->
+<!-- for angular <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script><!-- for some reason it didn't like having the protocol left out....duh bc it was looking for localhost since it wasn't on web derrrr -->
+
+<!-- req'd for jquery ui slider -->
+ <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+
 <script src="js/mutualfundcalculator.js"></script>
+
 <title>Mutual Fund Expense Calculator</title>
 <style> /* This is a CSS style sheet: it adds style to the program output */
 .output { font-weight: bold; }           /* Calculated values in bold */
@@ -14,7 +21,8 @@ span {border-style: inset;}
 div { border-style: ridge;}
 </style>
 </head>
-<body ng-controller="FeeTable">
+<!-- <body ng-controller="FeeTable"> -->
+<body >
 <!-- originally found here: http://examples.oreilly.com/9780596805531/examples/01.01.loancalc.html
   This is an HTML table with <input> elements that allow the user to enter data
   and <span> elements in which the program can display its results.
@@ -23,6 +31,7 @@ div { border-style: ridge;}
   elements define "onchange" or "onclick" event handlers. These specify strings
   of JavaScript code to be executed when the user enters data or clicks.
 -->
+      <input id="expenseRatio">
 <table>
   <tr><th>Enter Loan Data:</th>
       <td></td>
@@ -36,7 +45,10 @@ div { border-style: ridge;}
   <tr><td>Investment period (years):</td>
       <td><input id="years" onchange="calculate();"></td>
   <tr><td>Expense Ratio:</td>
-      <td><input id="expenseRatio" onchange="calculate();"></td>
+<!--       <td><input id="expenseRatio" onchange="calculate();"><span id="expenseRatioOut"></span></td> 
+      <td><input id="expenseRatio"><span id="expenseRatioOut"></span></td>
+-->
+      <td><input id="expenseRatio2"></td>
   <tr><td>Redemption Fee:</td>
       <td><input id="redemptionFee" onchange="calculate();"></td>
   <tr><th>Approximate Payments:</th>
