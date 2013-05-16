@@ -1,0 +1,81 @@
+<!DOCTYPE html>   
+
+<html lang="en" ng-app>
+<head>
+<!-- for angular <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script><!-- for some reason it didn't like having the protocol left out....duh bc it was looking for localhost since it wasn't on web derrrr -->
+
+<!-- req'd for jquery ui slider -->
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<!-- //<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script> -->
+<script src="js/retirement.js"></script>
+
+<title>Retirement Calculator</title>
+<style> /* This is a CSS style sheet: it adds style to the program output */
+.output { font-weight: bold; }           /* Calculated values in bold */
+#payment { text-decoration: underline; } /* For element with id="payment" */
+#graph { border: solid black 1px; }      /* Chart has a simple border */
+th, td { vertical-align: top; }          /* Don't center table cells */
+span {border-style: inset;}
+div { border-style: ridge;}
+</style>
+</head>
+<body >
+<!-- originally found here: http://examples.oreilly.com/9780596805531/examples/01.01.loancalc.html
+  This is an HTML table with <input> elements that allow the user to enter data
+  and <span> elements in which the program can display its results.
+  These elements have ids like "interest" and "years". These ids are used
+  in the JavaScript code that follows the table. Note that some of the input
+  elements define "onchange" or "onclick" event handlers. These specify strings
+  of JavaScript code to be executed when the user enters data or clicks.
+-->
+This is simply a calculator I wrote to see how long it would take to have $1M saved up assuming I kept contributing a steady amount each yr.
+<br>
+could also specify a salary and periodic increases and keep the contrib as a % of salary.
+<br>
+Again could show a graph of varying amounts or return % to show the effect of each. 
+<br>
+3D plot showing ann return vs ann contrib and how they interrelate, i.e. to reach X at 10% and $5000/yr in 5 yrs it would take 13% and $4500 in 5 yrs. 
+<table>
+  <tr><th>Initial Investment:</th>
+      <td></td>
+      <th>Loan Balance, Cumulative Equity, and Interest Payments</th></tr>
+  <tr><td>Initial Investment ($):</td>
+      <td><input id="initialInvestment" onchange="calculate();"></td>
+      <td rowspan=8>
+         <canvas id="graph" width="400" height="250"></canvas></td></tr>
+  <tr><td>Annual Return (%):</td>
+      <td><input id="annualReturn" onchange="calculate();"></td></tr>
+  <tr><td>Investment period (years):</td>
+      <td><input id="years" onchange="calculate();"></td>
+  <tr><td>Annual Contribution:</td>
+<!--       <td><input id="expenseRatio" onchange="calculate();"><span id="expenseRatioOut"></span></td>  -->
+    <td><input id="annualContribution" onchange="calculate();"></td>  
+<!-- -->
+  <tr><th>Approximate Payments:</th>
+      <!-- <td><button onclick="calculate();">Calculate</button></td></tr> -->
+      <td><button onclick="calculate();">Calculate</button>
+      <input type="Button" value="Click" ng-click="computeAmortizationTable()"/></td></tr> 
+
+  <tr><td>Value at end of investment period:</td>
+      <td> $<span class="output" id="valueOutput"></span></td></tr>
+  <tr><td>Total Appreciation :</td>
+      <td>$<span class="output" id="totalAppreciationOutput"></span></td></tr>
+  <tr><td>Total Fees Paid:</td>
+      <td>$<span class="output" id="totalFeesPaidOutput"></span></td></tr>
+  <tr><td>Fees as percentage of total return:</td>
+      <td><span class="output2" id="totalFeesPercentageOutput">%</span></td></tr>
+</table>
+
+Place the graph, output table on separate tabs, have tax info on separate tab.
+<br>
+OnHover, show the payment that month of taxes & mortgage payment.
+<br>
+ use canvas/svg & show a color bar that is % of money paid to int and to principal
+<br> 
+color bar of % of way through the pay off of loan.
+<!-- The rest of this example is JavaScript code in the <script> tag below -->
+<!-- Normally, this script would go in the document <head> above but it -->
+<!-- is easier to understand here, after you've seen its HTML context. -->
+</body>
+</html>
