@@ -1982,3 +1982,8 @@ You can literally just go in and start deleting packages from /var/cache/pacman/
 I just deleted a few of the biggest packages so that I could have enough space to complete the upgrade.
 https://bbs.archlinux.org/viewtopic.php?id=76518
 possibly also helpful https://wiki.archlinux.org/index.php/Pacman_Tips
+
+
+Wed Jun  5 17:00:05 EDT 2013
+http://stackoverflow.com/questions/5566310/how-to-recursively-find-and-list-the-latest-modified-files-in-a-directory-with-s
+find $1 -type f -print0 | xargs -0 stat --format '%Y :%y %n' | sort -nr | cut -d: -f2- | head
