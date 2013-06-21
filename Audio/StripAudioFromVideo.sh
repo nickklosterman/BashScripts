@@ -16,7 +16,7 @@ bit_rate=$( echo ${params} | sed 's/AUDIO: //'  | cut -d ',' -f 4 | sed 's/ kbit
 #echo $sampling_freq $num_channels $bit_rate
 
 #grab sampling freq, num channels, and bit rate 
-outputfilename="audio.mp3"
+outputfilename=${1%.*}.mp3  #"audio.mp3"
 if [ -e ${outputfilename} ]
 then
 while [ -e $outputfilename ]

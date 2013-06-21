@@ -1984,6 +1984,14 @@ https://bbs.archlinux.org/viewtopic.php?id=76518
 possibly also helpful https://wiki.archlinux.org/index.php/Pacman_Tips
 
 
+Wed Jun  5 17:00:05 EDT 2013
+http://stackoverflow.com/questions/5566310/how-to-recursively-find-and-list-the-latest-modified-files-in-a-directory-with-s
+find $1 -type f -print0 | xargs -0 stat --format '%Y :%y %n' | sort -nr | cut -d: -f2- | head
+
+Thu Jun  6 20:45:30 EDT 2013
+For merge conflicts, if you know that you are just going to overwrite what you get from the server, then just name the conflicting local file to the name of an unversioned file ie. nick.js ->nick.js.keep.  Then do a pull and it'll "update" nick.js and then you can simply move nick.js.keep to overwrite nick.js and then to commit etc etc. 
+
+
 Fri Jun 21 11:03:44 EDT 2013
 Arch-Nicky (cam's old laptop)
 It had been ~4+ months since the last reboot. I finally did that and luckily I remember that Arch was recommending moving from grub to systemd. Anyway I rebooted a couple times and it was ok, but then the last time it booted me into the grub shell. 

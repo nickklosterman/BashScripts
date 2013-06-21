@@ -44,6 +44,7 @@ public:
   void calculation2();
   void calculation3();
   void calculation4();
+  void calculation5();
   void totalContribution();
 private:
   double periodicContribution,  annualReturn,  expenseRatio;
@@ -194,6 +195,36 @@ Vanguard calculation
   std::cout<<"For a net difference of :"<<percentageEatenAwayByExpenseRatio<<" "<<percentageLeftAfterExpenseRatio<<".\n";
 }
 
+void Investment::calculation5()
+{
+  /*
+a single lump sum invested, eaten away by the E.R.
+
+This way makes sense bc at the end of the year we mult by the return but then we deduct the amount taken out by the expense ratio
+The results mirror method #4 quite closely although they are not exactly the same.
+*/
+  double returnRate = (1+annualReturn/100)*(1 - expenseRatio/100); //why is return this way?
+  double annualReturn0 = annualReturn/100;
+  double finalAmount = 0.0;
+  double finalAmountWithNoExpenseRatio = 0.0;
+
+  finalAmount = periodicContribution*pow(returnRate,years);
+  finalAmountWithNoExpenseRatio = periodicContribution*pow(1+annualReturn0,years);
+
+  std::cout<<"Amount invested:$"<<periodicContribution<<".\n";
+
+  std::cout<<"Your final invested amount is:"<<finalAmount<<".\n";
+  std::cout<<"Your final invested amount would've been :"<<finalAmountWithNoExpenseRatio<<" if there was no expense ratio.\n";
+  double differenceDueToExpenseRatio = finalAmountWithNoExpenseRatio-finalAmount;
+  double amountInvested = periodicContribution;
+  double percentageEatenAwayByExpenseRatio = (  differenceDueToExpenseRatio ) / ( finalAmountWithNoExpenseRatio - amountInvested); 
+
+
+    double percentageLeftAfterExpenseRatio = ( finalAmount - amountInvested  ) / ( finalAmountWithNoExpenseRatio - amountInvested);
+  std::cout<<"For a net difference of :"<<differenceDueToExpenseRatio<<".\n";
+  std::cout<<"For a net difference of :"<<percentageEatenAwayByExpenseRatio<<" "<<percentageLeftAfterExpenseRatio<<".\n";
+}
+
 //-------------------------------------------------------------------------------------
 
 void usage()
@@ -294,6 +325,7 @@ int main(int argc, char *argv[])
   //  inv.calculation2();
   inv.calculation3();
   inv.calculation4();
+  inv.calculation5();
 
 }
 
