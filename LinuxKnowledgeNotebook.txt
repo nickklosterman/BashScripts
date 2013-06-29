@@ -1990,3 +1990,19 @@ find $1 -type f -print0 | xargs -0 stat --format '%Y :%y %n' | sort -nr | cut -d
 
 Thu Jun  6 20:45:30 EDT 2013
 For merge conflicts, if you know that you are just going to overwrite what you get from the server, then just name the conflicting local file to the name of an unversioned file ie. nick.js ->nick.js.keep.  Then do a pull and it'll "update" nick.js and then you can simply move nick.js.keep to overwrite nick.js and then to commit etc etc. 
+
+
+Fri Jun 21 11:03:44 EDT 2013
+Arch-Nicky (cam's old laptop)
+It had been ~4+ months since the last reboot. I finally did that and luckily I remember that Arch was recommending moving from grub to systemd. Anyway I rebooted a couple times and it was ok, but then the last time it booted me into the grub shell. 
+The solution for getting into my system is here: https://bbs.archlinux.org/viewtopic.php?id=164570
+
+grub>root (hd0,0)
+grub>kernel /boot/vmlinuz-linux root=/dev/sda1 ro
+grub>initrd /boot/initramfs-linux.img
+grub>boot
+
+I'm not really sure the update had anything to do with it. I think it was bc I wanted to shutdown the system and that was removed. I had to install systemd-sysvcompat to get it back. I think this might've caused the problem.
+Further research shows that I was using GRUB Legacy which support for which was officially dropped. 
+Hmm or it could be that in /etc/grub/ there was no menu.lst file. there was menu.lst.pacsave. but no menu.lst
+Yes, it appeared to be that there was not menu.lst to go off of. 
