@@ -54,11 +54,16 @@ fi
 #gthumb $filename &
 feh $filename &
 
+if [ -e /tmp/BlogImages ] 
+then
+    rm /tmp/BlogImages
+fi
+
 #http://www.digitaldesire.com/blog.xml <- uses html codes for < i.e. &lt;
 wget -q http://www.digitaldesire.com/blog/newest_post -O /tmp/DDnewpost
 #grep cdn /tmp/DDnewpost | sed 's/^.*http/http/;s/[Jj][Pp][Gg].*/jpg/'>> /tmp/BlogImages
-grep cdn /tmp/DDnewpost | sed 's/^.*http/http/;s/\x27.*//'>> /tmp/BlogImages #key off single quote on backend
-grep cdn /tmp/DDnewpost | sed 's/^.*http/"http/;s/\x27.*/"/'>> /tmp/BlogImages #key off single quote on backend
+grep cdn /tmp/DDnewpost | grep auto |  sed 's/^.*http/http/;s/\x27.*//' >> /tmp/BlogImages #key off single quote on backend
+grep cdn /tmp/DDnewpost | grep auto | sed 's/^.*http/"http/;s/\x27.*/"/' >> /tmp/BlogImages #key off single quote on backend
 
 #I am trying to preload so there isn't the stutter as it goes and gets the next image but it isn't working
 #cd /home/nicolae/Documents/Artwork/DD/BlogImgs
