@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #TODO: specify horizontal and vertical border widths. specify the interstitial width, specify background color
-
+#allow specifiying the desired resultant height/width and center the triptych in that area.
 numberOfRequiredArguments=4
 
 echo "This script takes an image and splits it evenly into sections with a border in between each section"
