@@ -2006,3 +2006,24 @@ I'm not really sure the update had anything to do with it. I think it was bc I w
 Further research shows that I was using GRUB Legacy which support for which was officially dropped. 
 Hmm or it could be that in /etc/grub/ there was no menu.lst file. there was menu.lst.pacsave. but no menu.lst
 Yes, it appeared to be that there was not menu.lst to go off of. 
+
+Wed Jun 26 14:30:20 EDT 2013
+Cron scripts:
+first check and see if crond is running
+ps aux | grep crond
+otherwise start it as root. it'll auto background
+sudo crond
+if you place scripts in /etc/cron.{hourly|daily|weekly} then you need to set it so that the script is executable and, I'm a little dubious about this one, you can't have a file extension.
+Check to see which scripts will be run by the crond with 
+run-parts --test /etc/cron.hourly/ 
+you should see a list of the scripts that will be executed. 
+
+Arch-Nicky started to decide that it would suspend when the lid is down.
+change /etc/systemd/logind.conf and set HandleLidSwitch to 'ignore'
+
+set time 
+timedatectl set-time "2013-06-26 10:29:55"
+check the status, locale, daylight savings time etc. 
+timedatectl status
+sync using the ntp daemon
+sudo ntpd -q  
