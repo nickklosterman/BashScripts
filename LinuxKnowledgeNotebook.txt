@@ -2186,3 +2186,12 @@ date --date "Jan 1, 1970 00:00:00 +0000 + `date +%s` seconds"
 date --date "Jan 1, 1970 00:00:00 +0000 + 1233985026 seconds"
 
 # result = Sat Feb 7 00:37:06 EST 2009
+
+
+Wed Aug  7 10:25:35 EDT 2013
+Python utf-8 encoding and all that jazz.
+When encountering unicode characters in a string, you need to use somestring.encode('utf-8') or python will barf.
+When writing the file you may encounter "TypeError: must be str, not bytes" this is because you are trying to write unicode which needs to be written as binary. Therefore when you open/create the file for output you need to write it in binary mode: TypeError: f=open(somefile, 'wb')
+http://stackoverflow.com/questions/9942594/unicodeencodeerror-ascii-codec-cant-encode-character-u-xa0-in-position-20
+
+http://www.crummy.com/software/BeautifulSoup/bs4/doc/
