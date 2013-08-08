@@ -14,6 +14,14 @@ This program is just a simple simulator to see what ind of parasitic effects exp
    http://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Option-Example.html
 */
 
+/* Resources I believe I was using to come up with these calculations. I think I decided to simplify things and mirror the last vanguard simulation : check out my work muddle from May 10th.
+https://personal.vanguard.com/us/insights/retirement/cost-affect-retirement-spending-tool
+http://www.sec.gov/investor/tools/mfcc/mfcc-int.htm
+http://www.fool.com/school/mutualfunds/costs/ratios.htm
+https://personal.vanguard.com/us/insights/investingtruths/investing-truth-about-cost
+https://www.google.com/search?q=vanguard+expense+ratio+calculation&oq=vanguard+expense+ratio+calculation&aqs=chrome.0.69i57.5601j0&sourceid=chrome&ie=UTF-8
+*/
+
 /*
 1)show what amount that final amount comes from each contribution, color a band showing the power of compounding. show a graph and when you hover over the graph, show a color band across the graph showing what amount that contribution grew to.
 2)this doesn't take into acct any reinvestment of dividends
@@ -82,6 +90,7 @@ Investment::Investment(double pC,double aR,double eR,int y,int pPY,bool d)
  
 void Investment::totalContribution()
 {
+  //huh bc it seems like most of my calculations (to be simple??) aren't actually doing periodic contributions. 
   std::cout<<"Your total contribution is:$"<<periodicContribution*years*periodsPerYear<<".\n";
 }
 void Investment::calculation()
@@ -222,9 +231,41 @@ The results mirror method #4 quite closely although they are not exactly the sam
 
     double percentageLeftAfterExpenseRatio = ( finalAmount - amountInvested  ) / ( finalAmountWithNoExpenseRatio - amountInvested);
   std::cout<<"For a net difference of :"<<differenceDueToExpenseRatio<<".\n";
-  std::cout<<"For a net difference of :"<<percentageEatenAwayByExpenseRatio<<" "<<percentageLeftAfterExpenseRatio<<".\n";
+  std::cout<<"Producing a:"<<percentageEatenAwayByExpenseRatio<<"/"<<percentageLeftAfterExpenseRatio<<" split of money to the fund vs money to you. (really money eaten away by funds ER.) .\n";
+  std::cout<<"In other words, you paid the fund "<<percentageEatenAwayByExpenseRatio<<"% of your profits.\n";
 }
 
+/*
+void Investment::calculation6()
+{
+  /*
+a single lump sum invested, eaten away by the E.R.
+
+This way makes sense bc at the end of the year we mult by the return but then we deduct the amount taken out by the expense ratio
+The results mirror method #4 quite closely although they are not exactly the same.
+* /
+  double returnRate = (1+annualReturn/100)*(1 - expenseRatio/100); //why is return this way?
+  double annualReturn0 = annualReturn/100;
+  double finalAmount = 0.0;
+  double finalAmountWithNoExpenseRatio = 0.0;
+
+  finalAmount = periodicContribution*pow(returnRate,years);
+  finalAmountWithNoExpenseRatio = periodicContribution*pow(1+annualReturn0,years);
+
+  std::cout<<"Amount invested:$"<<periodicContribution<<".\n";
+
+  std::cout<<"Your final invested amount is:"<<finalAmount<<".\n";
+  std::cout<<"Your final invested amount would've been :"<<finalAmountWithNoExpenseRatio<<" if there was no expense ratio.\n";
+  double differenceDueToExpenseRatio = finalAmountWithNoExpenseRatio-finalAmount;
+  double amountInvested = periodicContribution;
+  double percentageEatenAwayByExpenseRatio = (  differenceDueToExpenseRatio ) / ( finalAmountWithNoExpenseRatio - amountInvested); 
+
+
+    double percentageLeftAfterExpenseRatio = ( finalAmount - amountInvested  ) / ( finalAmountWithNoExpenseRatio - amountInvested);
+  std::cout<<"For a net difference of :"<<differenceDueToExpenseRatio<<".\n";
+  std::cout<<"For a net difference of :"<<percentageEatenAwayByExpenseRatio<<" "<<percentageLeftAfterExpenseRatio<<".\n";
+}
+*/
 //-------------------------------------------------------------------------------------
 
 void usage()
