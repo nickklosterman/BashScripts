@@ -2027,3 +2027,171 @@ check the status, locale, daylight savings time etc.
 timedatectl status
 sync using the ntp daemon
 sudo ntpd -q  
+
+Tue Jul 30 17:49:10 EDT 2013
+getting my aknotepad notes without the crappy export method setting all the timestamps the same.
+You have to download the android developer toolkit to get the adb shell tools.
+The instructions I read stated to get the java 32bit jdk as well adn install it (even if you are running a 64bit OS). I suppose this has to do with Android being 32 bit. I got the 64bit version of the Android dev kit. 
+I ran the android sdkmanager and downloaded the google usb driver.
+The database where the notes are saved is here: /data/data/com.akproduction.notepad/databases/aknotepad.db
+I then followed the instructions found here: http://androidspin.com/2010/08/14/new-root-method-for-mytouch-3g-slide/ which state: 
+
+Download the exploid root files to your computer and extract the zip file.
+Make sure your phone is in USB debugging mode AND you are in .Charge Only. mode.
+Connect your phone to your computer. --> I was in Sync mode otherwise I didn't get the notification stating that I was in debugging mode.
+Make sure you.re in the same directory as where exploid is extracted before continuing to the next step.  -->adb isn't in the path so I actually copied exploid to the directory that adb was in to make it easier typing.
+Issue the following command: adb push exploid /sqlite_stmt_journals. Note: It MUST be in that directory . NO exceptions.
+Run: adb shell
+Run: cd /sqlite_stmt_journals
+Run: chmod 0755 exploid
+Run: ./exploid
+Turn on your phone.s Wifi (however you wish to do that). --> I did this via the home screen quicklauncher guy. 
+Now (again) run: ./exploid
+It should prompt you for a password, enter: secretlol. If it didn.t prompt you for a password, but instead just output the same text that it did the first time you ran it, then something isn.t setup right. Make sure to follow the directions verbatim. If you suspect you did follow them correctly, please reply to this post letting me know.
+You should now be rooted! At this point you can do many things, but if you.re looking to downgrade, continue Eugene.s instructions in his previous posts on how to flash .ENG..
+Download the ESPRIMG on that page to your SD card, then follow the rest of the instructions, followed by rebooting into HBOOT (using Volume Down + Power) and flashing the .update. once it asks you if you want to.
+
+Important: If you do nothing after step 12 then you are not .rooted.. This program grants itself root permissions in a shell, that is ALL. If you want to root your phone after this step then you need to follow instructions on how to do so. Due to the NAND-protection complexity on our device we cannot .One Click. root it, so just don.t ask!
+
+--->These are the relevant commands I had output etc to get root and to copy the file to someplace useful
+
+C:\Users\nick.klosterman\Downloads\adt-bundle-windows-x86_64-20130729\adt-bundle
+-windows-x86_64-20130729\sdk\platform-tools>adb devices
+List of devices attached
+SH0B3PS00477    device
+
+
+C:\Users\nick.klosterman\Downloads\adt-bundle-windows-x86_64-20130729\adt-bundle
+-windows-x86_64-20130729\sdk\platform-tools>dir
+ Volume in drive C has no label.
+ Volume Serial Number is CADA-F138
+
+ Directory of C:\Users\nick.klosterman\Downloads\adt-bundle-windows-x86_64-20130
+729\adt-bundle-windows-x86_64-20130729\sdk\platform-tools
+
+07/30/2013  05:35 PM    <DIR>          .
+07/30/2013  05:35 PM    <DIR>          ..
+07/30/2013  04:50 PM           819,200 adb.exe
+07/30/2013  04:50 PM            96,256 AdbWinApi.dll
+07/30/2013  04:50 PM            60,928 AdbWinUsbApi.dll
+07/30/2013  04:50 PM    <DIR>          api
+07/30/2013  05:35 PM            12,056 exploid
+07/30/2013  04:50 PM           160,768 fastboot.exe
+07/30/2013  04:50 PM           251,356 NOTICE.txt
+07/30/2013  04:50 PM                39 source.properties
+07/30/2013  04:51 PM    <DIR>          systrace
+               7 File(s)      1,400,603 bytes
+               4 Dir(s)  312,032,878,592 bytes free
+
+C:\Users\nick.klosterman\Downloads\adt-bundle-windows-x86_64-20130729\adt-bundle-windows-x86_64-20130729\sdk\platform-tools>adb push exploid /sqlite_stmt_journals
+1961 KB/s (12056 bytes in 0.006s)
+
+C:\Users\nick.klosterman\Downloads\adt-bundle-windows-x86_64-20130729\adt-bundle-windows-x86_64-20130729\sdk\platform-tools>adb shell
+$ cd /sqlite_stmt_journals
+cd /sqlite_stmt_journals
+$ chmod 0755 exploid
+chmod 0755 exploid
+$ ./exploid
+./exploid
+[*] Android local root exploid (C) The Android Exploid Crew
+[+] Using basedir=/sqlite_stmt_journals, path=/sqlite_stmt_journals/exploid
+[+] opening NETLINK_KOBJECT_UEVENT socket
+[+] sending add message ...
+[*] Try to invoke hotplug now, clicking at the wireless
+[*] settings, plugin USB key etc.
+[*] You succeeded if you find /system/bin/rootshell.
+[*] GUI might hang/restart meanwhile so be patient.
+$ ./exploid
+./exploid
+Password (echoed):secretlol
+secretlol
+# adb pull /data/data/com.akproduction.notepad/databases/adnotepad.db
+adb pull /data/data/com.akproduction.notepad/databases/adnotepad.db
+adb: not found  --> It appears that I was on the actual device so I needed to use the method outlined here: http://forum.xda-developers.com/showthread.php?t=1979909 which states that you should use 'cat' to copy the contents of a file
+# cat  /data/data/com.akproduction.notepad/databases/aknotepad.db > /sdcard/aknotepad.db
+cat  /data/data/com.akproduction.notepad/databases/aknotepad.db > /sdcard/aknotepad.db
+# exit
+exit
+$ exit
+exit
+
+C:\Users\nick.klosterman\Downloads\adt-bundle-windows-x86_64-20130729\adt-bundle
+-windows-x86_64-20130729\sdk\platform-tools>
+
+The aknotepad file is simply a sqlite3 database. use .database and .schema to see the relevant details: 
+$ sqlite3.exe aknotepad.db
+SQLite version 3.7.17 2013-05-20 00:56:22
+Enter ".help" for instructions
+Enter SQL statements terminated with a ";"
+sqlite> select created from notes limit 2;
+1353026451372
+1353176217972
+sqlite> select title from notes limit 2;
+Crossed finger
+From
+sqlite> select * from notes limit 5;
+1|Crossed finger|Crossed finger
+Sign w an x
+Just checking the keyboard layout
+Not as nice as the g1 but maybe it will grow on me
+diy stereoscopic camera setupOne uP controlling two cmos lens pairs write to one card|1353026451372|1353176210802|0|-1|0|1|0|-1
+2|From|From
+Paying for it by chester brown
+That's ridiculous.
+You cheated. Its not fair.
+Its not like I butted in line ahead of you.
+It IS like that.
+I didn't butt in front of you. I left the line you're in--the free-sex lin--and I walked over to the paying for sex line. You could walk over to the paying for-sex line too. It moves a lot faster.|1353176217972|1353427244065|0|-1|0|1|0|-1
+3|Patterns from wrapping paper|Patterns from wrapping paper
+Frank lloyd wrights indoor furniture designs|1353186350949|1353186426980|0|-1|0|1|0|-1
+4|Lauras made up word|Lauras made up word dictionary Approvement
+Productful|1353192208770|1353192255003|0|-1|0|1|0|-1
+5|From 'the photographer '|From 'the photographer '
+There was a bit in it where they went to an afghani villagers place. The father would pick his daughter up and then she would crumple down to the ground when he let go. He did this multiple times before the doctors inspected the child. The photographer looked on as the doctor inspected the child. They found a small hole the size of a grain of rice on her back. It was the location where a piece of shrapnel entered her back and severed her spinal cord. She would never walk again. The photographer was dumbfounded and crushed how such a small hole could destroy a life so quickly and completely. |1353192256507|1353279907523|0|-1|0|1|0|-1
+
+sqlite> .databases
+seq  name             file
+---  ---------------  ----------------------------------------------------------
+0    main             /cygdrive/H/aknotepad.db
+
+sqlite> .schema
+CREATE TABLE android_metadata (locale TEXT);
+CREATE TABLE notes (_id INTEGER PRIMARY KEY, title TEXT, note TEXT, created INTEGER DEFAULT 0 NOT NULL, modified INTEGER, reminder_date INTEGER DEFAULT 0 NOT NULL, nodeid TEXT DEFAULT -1 NOT NULL, server_modified_at INTEGER DEFAULT 0 NOT NULL, api_pending_op INTEGER DEFAULT 0 NOT NULL, has_title INTEGER DEFAULT 0 NOT NULL, owner_id INTEGER DEFAULT -1 NOT NULL);
+CREATE TABLE labels (_id INTEGER PRIMARY KEY, title TEXT);
+CREATE TABLE labels_content (_id INTEGER PRIMARY KEY, label_id INTEGER, note_id INTEGER);
+CREATE TABLE notes_backup (_id INTEGER PRIMARY KEY, title TEXT, note TEXT, created INTEGER DEFAULT 0 NOT NULL, modified INTEGER, reminder_date INTEGER DEFAULT 0 NOT NULL, nodeid TEXT DEFAULT -1 NOT NULL, server_modified_at INTEGER DEFAULT 0 NOT NULL, api_pending_op INTEGER DEFAULT 0 NOT NULL, has_title INTEGER DEFAULT 0 NOT NULL, owner_id INTEGER DEFAULT -1 NOT NULL);
+CREATE TABLE labels_backup (_id INTEGER PRIMARY KEY, title TEXT);
+CREATE TABLE labels_content_backup (_id INTEGER PRIMARY KEY, label_id INTEGER, note_id INTEGER);
+sqlite>
+
+
+you will need to convert the 'created' 'modified' ... etc times from epoch to human readable date times etc: http://www.epochconverter.com/
+http://www.unix.com/shell-programming-scripting/89039-convert-epoch-time-standard-date-time-vice-versa.html
+
+
+# epoch
+$ date +%s
+
+# If you have a time already in mind you can change the line above to use YOUR time and not system time like this:
+
+date -d "Sat Feb 7 00:37:06 EST 2009" +%s
+
+# result = 1233985026
+
+# and back to regular time from epoch
+date --date "Jan 1, 1970 00:00:00 +0000 + `date +%s` seconds"
+
+#You can substitute `date +%s` in the line above with your own epoch time that you have already obtained
+
+date --date "Jan 1, 1970 00:00:00 +0000 + 1233985026 seconds"
+
+# result = Sat Feb 7 00:37:06 EST 2009
+
+
+Wed Aug  7 10:25:35 EDT 2013
+Python utf-8 encoding and all that jazz.
+When encountering unicode characters in a string, you need to use somestring.encode('utf-8') or python will barf.
+When writing the file you may encounter "TypeError: must be str, not bytes" this is because you are trying to write unicode which needs to be written as binary. Therefore when you open/create the file for output you need to write it in binary mode: TypeError: f=open(somefile, 'wb')
+http://stackoverflow.com/questions/9942594/unicodeencodeerror-ascii-codec-cant-encode-character-u-xa0-in-position-20
+
+http://www.crummy.com/software/BeautifulSoup/bs4/doc/

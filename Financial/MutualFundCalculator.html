@@ -1,0 +1,95 @@
+<!DOCTYPE html>   
+
+<html lang="en" ng-app>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script><!-- for some reason it didn't like having the protocol left out....duh bc it was looking for localhost since it wasn't on web derrrr -->
+<script src="js/amortization.js"></script>
+<title>JavaScript Loan Calculator</title>
+<style> /* This is a CSS style sheet: it adds style to the program output */
+.output { font-weight: bold; }           /* Calculated values in bold */
+#payment { text-decoration: underline; } /* For element with id="payment" */
+#graph { border: solid black 1px; }      /* Chart has a simple border */
+th, td { vertical-align: top; }          /* Don't center table cells */
+span {border-style: inset;}
+div { border-style: ridge;}
+</style>
+</head>
+<body ng-controller="AmortizationTable">
+<!-- originally found here: http://examples.oreilly.com/9780596805531/examples/01.01.loancalc.html
+  This is an HTML table with <input> elements that allow the user to enter data
+  and <span> elements in which the program can display its results.
+  These elements have ids like "interest" and "years". These ids are used
+  in the JavaScript code that follows the table. Note that some of the input
+  elements define "onchange" or "onclick" event handlers. These specify strings
+  of JavaScript code to be executed when the user enters data or clicks.
+-->
+Is there a service where one could input the fund name and the program would go out and fetch the various fee info?
+<table>
+  <tr><th>Enter Loan Data:</th>
+      <td></td>
+      <th>Loan Balance, Cumulative Equity, and Interest Payments</th></tr>
+  <tr><td>Initial Investment ($):</td>
+      <td><input id="amount" onchange="calculate();"></td>
+      <td rowspan=8>
+         <canvas id="graph" width="400" height="250"></canvas></td></tr>
+  <tr><td>Annual return (%):</td>
+      <td><input id="annualReturn" onchange="calculate();"></td></tr>
+  <tr><td>Investment period (years):</td>
+      <td><input id="years" onchange="calculate();"></td>
+  <tr><td>Expense Ratio:</td>
+      <td><input id="expenseRatio" onchange="calculate();"></td>
+  <tr><td>Appreciation Rate for Taxes:</td>
+      <td><input id="appreciationRate" onchange="calculate();"></td>
+  <tr><th>Periodic Contribution ($)Approximate Payments:</th>
+      <!-- <td><button onclick="calculate();">Calculate</button></td></tr> -->
+      <td><button onclick="calculate();">Calculate</button>
+      <input type="Button" value="Click" ng-click="computeAmortizationTable()"/></td></tr> 
+
+  <tr><td>Monthly payment:</td>
+      <td>$<span class="output" id="payment"></span>+$<span class="output" id="taxpayment"></span></td></tr>
+  <tr><td>Total payment:</td>
+      <td>$<span class="output" id="total"></span></td></tr>
+  <tr><td>Total interest:</td>
+      <td>$<span class="output" id="totalinterest"></span></td></tr>
+</table>
+<table  class="AmortizationTable">
+<th>Pay Period</th>
+<th>Principal Remaining</th>
+<th>Payment Towards Principal</th>
+<th>Payment Towards Interest</th>
+<th>Total Interest Paid</th>
+<th>Equity</th>
+<th>Monthly Taxes</th>
+
+<tr ng-repeat="item in amortizationTable">
+<td>{{item.payPeriod}}</td>
+<td>${{item.principalRemaining}}</td>
+<td>${{item.paymentTowardsPrincipal}}</td>
+<td>${{item.paymentTowardsInterest}}</td>
+<td>${{item.totalInterestPaid}}</td>
+<td>${{item.equity}}</td>
+<td>${{item.monthlyTax}}</td>
+</tr>
+</table>
+
+<div ng-repeat="item in amortizationTable">
+<span>{{item.payPeriod}}</span>
+<span>${{item.principalRemaining}}</span>
+<span>${{item.paymentTowardsPrincipal}}</span>
+<span>${{item.paymentTowardsInterest}}</span>
+<span>${{item.totalInterestPaid}}</span>
+<span>${{item.equity}}</span>
+</div>
+
+Place the graph, output table on separate tabs, have tax info on separate tab.
+<br>
+OnHover, show the payment that month of taxes & mortgage payment.
+<br>
+ use canvas/svg & show a color bar that is % of money paid to int and to principal
+<br> 
+color bar of % of way through the pay off of loan.
+<!-- The rest of this example is JavaScript code in the <script> tag below -->
+<!-- Normally, this script would go in the document <head> above but it -->
+<!-- is easier to understand here, after you've seen its HTML context. -->
+</body>
+</html>
