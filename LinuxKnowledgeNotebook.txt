@@ -2195,3 +2195,72 @@ When writing the file you may encounter "TypeError: must be str, not bytes" this
 http://stackoverflow.com/questions/9942594/unicodeencodeerror-ascii-codec-cant-encode-character-u-xa0-in-position-20
 
 http://www.crummy.com/software/BeautifulSoup/bs4/doc/
+ 
+
+Sun Oct  6 19:03:46 EDT 2013
+Emacs doesn't recognize my .py3 extension.
+You can force emacs into .py3 mode via "M-x python-mode"
+You can also open a file in a certain mode on a per file basis: http://stackoverflow.com/questions/3312114/how-to-tell-emacs-to-open-h-file-in-c-mode : 
+If you don't want this to apply to every .h file, you can add the following to the bottom of your C++ header files.
+
+// Local Variables:
+// mode: c++
+// End:
+
+This will work for any emacs variables that you want to set on a per file basis. Emacs ignores the leading characters, so use whatever comment variable is appropriate for the file type.
+
+Or making permanent changes by using the .emacs file:
+
+And if I wanted Emacs to automatically switch to html-helper-mode every time that I opened a file that ended with .html or .htm, I would add this to my .emacs file:
+
+(setq auto-mode-alist (cons '("\\.html$" . html-helper-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '("\\.htm$" . html-helper-mode) auto-mode-alist))
+
+
+
+Screen and 
+M-[ a is undefined
+M-[ b is undefined
+M-[ c is undefined
+M-[ d is undefined
+This is caused most often in using screen,emacs, backgrounding and quite possibly full screening the application
+http://stackoverflow.com/questions/4548106/screen-somehow-unmaps-my-arrow-keys-in-emacs-after-a-z/19201546#19201546
+After reading that post, I posted my own experience:
+I had my xterm window full screen and was in screen and this happened. I double clicked the xterm border to go out of full screen. Ctrl-z to background emacs. Then fg to bring it back and then the arrow keys worked. I could go into full screen without any issues.
+
+
+Somehow my python scrape of yahoo stopped working. I now have to decode the output
+http://stackoverflow.com/questions/15817420/python-subprocess-and-type-str-doesnt-support-the-buffer-api
+
+
+Was receiving this error on puffjay/archd280
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012/Cygwin)
+restricted \write18 enabled.
+---! /var/lib/texmf/web2c/pdftex/latex.fmt doesn't match pdftex.pool
+(Fatal format file error; I'm stymied)
+There was apparently some issues and a 'fix' on the Arch website. https://mailman.archlinux.org/pipermail/arch-dev-public/2013-July/025174.html
+I had to reinstall texlive-collection-latex to get the error to go away.
+
+
+http://stackoverflow.com/questions/740287/python-check-if-one-of-the-following-items-is-in-a-list
+Python get differences between two lists: 
+ L1 = [2,3,4]
+>>> L2 = [1,2]
+>>> [i for i in L1 if i in L2]
+[2]
+>>> S1 = set(L1)
+>>> S2 = set(L2)
+>>> S1.intersection(S2)
+set([2])  this method is much slower
+
+
+I was having problems with file locks on the sqlite database. I couldn't figure out what the problem was and thought the proc was too fast adn tripping over itself. It turns out I had the database lcoked out with another script that was accessing it. :/ 
+
+Python gave: _sqlite.OperationalError: database is locked
+
+
+
+
+
+
+
