@@ -2195,6 +2195,37 @@ When writing the file you may encounter "TypeError: must be str, not bytes" this
 http://stackoverflow.com/questions/9942594/unicodeencodeerror-ascii-codec-cant-encode-character-u-xa0-in-position-20
 
 http://www.crummy.com/software/BeautifulSoup/bs4/doc/
+
+
+
+Tue Sep 17 16:43:10 EDT 2013
+adventures in cron:
+basically on arch-nicky crond was running but I really wanted to start cronie instead
+in my crontab I have:
+[arch-nicky@arch-nicky-bitches ~]$ crontab -l
+*5 * * * 1-5 `/usr/bin/date` >> /home/arch-nicky/crontouchtest.txt
+*/5 * * * 1-5 /home/arch-nicky/PortfolioCronJobScript.sh
+#run weekdays daily at 4:05 (i.e. when markets close)
+5 16 * * 1-5 /home/arch-nicky/DailyPortfolioNotification.sh
+[arch-nicky@arch-nicky-bitches ~]$  systemctl start cronie
+Failed to issue method call: Access denied
+[arch-nicky@arch-nicky-bitches ~]$ sudo  systemctl start cronie
+[arch-nicky@arch-nicky-bitches ~]$ sudo  systemctl start cronie.service  <-- these only start the service they don't enable it on boot. 
+[arch-nicky@arch-nicky-bitches ~]$ ps aux | grep cron
+root      1467  0.0  0.0   3264  1052 ?        Ss   13:40   0:00 crond
+root      4019  0.0  0.0   3228  1176 ?        Ss   15:00   0:00 /usr/bin/crond -n
+root      4037  0.0  0.0   2180   576 ?        Ss   15:01   0:00 /usr/sbin/anacron -s
+arch-ni+  4158  0.0  0.0   2840   580 pts/8    S+   15:06   0:00 grep cron
+
+sudo systemctl enable cronie.service <-- this starts service on boot.
+now my ps aux | grep cron is just this: 
+[arch-nicky@arch-nicky-bitches ~]$ ps aux | grep cron
+root       164  0.0  0.0   3260  1228 ?        Ss   17:21   0:00 /usr/bin/crond -n
+arch-ni+  1688  0.0  0.0   2844   580 pts/2    S+   17:34   0:00 grep cron
+which I didn't think was workign properly earlier.... the quest continues.
+but it appears that cron is working without user interaction upon startup now on arch-nicky
+
+
  
 
 Sun Oct  6 19:03:46 EDT 2013
@@ -2257,10 +2288,6 @@ set([2])  this method is much slower
 I was having problems with file locks on the sqlite database. I couldn't figure out what the problem was and thought the proc was too fast adn tripping over itself. It turns out I had the database lcoked out with another script that was accessing it. :/ 
 
 Python gave: _sqlite.OperationalError: database is locked
-
-
-
-
 
 
 
