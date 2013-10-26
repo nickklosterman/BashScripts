@@ -153,10 +153,10 @@ int main(int argc, char *argv[])
 
   //setup defaults
   double investmentAmount=4000;
-  int years=10;
+  int years=1;
   double annualReturn=40;
   double rebalanceFee=10;
-  int periodsPerYear=13;
+  int periodsPerYear=52;
   bool details=false; //default to off
 
 
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
   int option_index=0;
   //  std::cout<<argc<<std::endl;
   //  if (argc == 11)
-  if (argc >= 11)
+  if (argc >= 1)
     {
       while ((c = getopt_long(argc, argv, ":i:e:r:n:y:d",long_options,&option_index)) != -1) {
 	switch(c) {
@@ -228,6 +228,7 @@ int main(int argc, char *argv[])
   }
 
   Investment inv(investmentAmount,annualReturn,rebalanceFee,years,periodsPerYear,details);
+  std::cout<<investmentAmount<<":"<<annualReturn<<":"<<rebalanceFee<<":"<<years<<":"<<periodsPerYear<<std::endl;
   inv.calculateRebalanceFeeEffect();
   //  inv.totalContribution();
   //  inv.calculation();
