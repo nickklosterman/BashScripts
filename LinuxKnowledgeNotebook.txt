@@ -2291,3 +2291,76 @@ Python gave: _sqlite.OperationalError: database is locked
 
 
 
+Mon Nov  4 20:34:35 EST 2013
+re-read the fstab file:
+sudo mount -a 
+This isn't the recommended way.  It is best to call each entry. mount -a would do the trick but its best to just mount each mount manually..
+
+										    Say you have one in there to mount /data/one from another source.. a simple:
+
+mount /data/one
+
+Would mount it properly.
+
+torrent meta files.
+the filename is an info hash with .meta tacked on the end. 
+You can recreate a magnet link from this. The infohash is the btih: argument. You will need to append on trackers on to the end. I think it might work without the trackers, but will take longer since it then "guesses" which trackers to apply. 
+magnet:?xt=urn:btih:4c70ca914f588a2ea765e57c99d8ea1141b53154&dn=ducati+848+workshop+manual&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Ftracker.ccc.de%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337
+
+for i in *.meta; do echo $i; echo "magnet:?xt=urn:btih:${i}&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Ftracker.ccc.de%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337" ; done;
+
+I'm not so sure the name portion is all that important. 
+I could easily spoof in something for that.
+
+I was also trying to reload those new magnet uris (I actually never fully tested this as I had created a file of the magnet URIs that I then could reload when I first got the magnets from tpb.) and I kept getting a file chunk error permission denied. I just needed to rm the .meta files as they were written by root so as beagleboneblack they couldn't be written to. It appears that rtorrent needs to be able to access and write to those .meta files or its a no-go.
+
+
+Install arch linux to eMMC
+http://archlinuxarm.org/platforms/armv7/ti/beaglebone-black 
+I actually swapped /dev/mmcblk0p[1|2] instead of /dev/mmcblk1p[1|2] but it worked fine.
+SSH is set up and enabled by default.
+Install: rtorrent, screen git 
+disable root ssh login and create a new user http://blog.pixelami.com/2012/05/howto-add-user-on-archlinux/
+
+Howto add user on archlinux
+Posted on May 3, 2012
+
+A very quick cheat sheet for getting a user setup quickly on archlinux-arm
+
+Create a user called ‘myuser’ (obviously replace this with your desired username)
+# useradd -m -g users -G \
+audio,lp,optical,storage,video,wheel,games,power,scanner \
+-s /bin/bash myuser
+
+Set the password
+# passwd myuser
+Enter new UNIX password:
+Retype new UNIX password:
+passwd: password updated successfully
+
+Add to sudo users (Optional)
+# visudo
+
+If visudo does not exist then install with
+# pacman -S sudo
+
+Once vi launches use arrow key to scroll to the line:
+# %wheel    ALL=(ALL) ALL
+
+press ‘x’ twice to uncomment the line. Then exit vi (press ESC then “:” then “wq” then press ENTER).
+Now change to your newly created user account
+# su myuser
+
+Now edit the .bashrc to get TAB completion working for the new user when using sudo.
+$ nano ~/.bashrc
+
+And add the following line at the bottom.
+complete -cf sudo
+
+Then do
+$ source ~/.bashrc
+
+to reload .bashrc
+
+Also when I was going through the instructions to get the arch image onto the BBB's eMMC, I kept failing when extracting the bootloader to the boot directory. I could however extract to a temp dir and then copy over. Weird. 
+

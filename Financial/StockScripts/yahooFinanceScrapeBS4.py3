@@ -114,7 +114,7 @@ print(dictionary)
 
 #---- Profiles page
 print('================== Profiles ===============')
-Url='http://finance.yahoo.com/q/pr?s=PRLB+Profile'
+Url='http://finance.yahoo.com/q/pr?s='+ticker+'+Profile'
 Page=urlopen(Url)
 
 soup = BeautifulSoup(Page)
@@ -160,6 +160,7 @@ print(businessSummary[2].findAll(text=True))
 print('================== Key Stat===============')
 
 Url='http://finance.yahoo.com/q/ks?s=PRLB+Key+Statistics'
+Url='http://finance.yahoo.com/q/ks?s='+ticker+'+Key+Statistics'
 Page=urlopen(Url)
 
 soup = BeautifulSoup(Page)
@@ -198,14 +199,21 @@ for item in zipped:
 
 print('================== Financials ===============')
 #Income Statements
+
 Url='http://finance.yahoo.com/q/is?s=PRLB+Income+Statement&annual'
 #Url='http://finance.yahoo.com/q/is?s=PRLB' #quarterly
+Url='http://finance.yahoo.com/q/is?s='+ticker+'+Income+Statement&annual'
+Url='http://finance.yahoo.com/q/is?s='+ticker+'+Income+Statement'
 #Balance Sheets
 Url='http://finance.yahoo.com/q/bs?s=PRLB'
 #Url='http://finance.yahoo.com/q/bs?s=PRLB&annual'
+Url='http://finance.yahoo.com/q/bs?s='+ticker+'&annual'
+Url='http://finance.yahoo.com/q/bs?s='+ticker
 #Cash Flow
 Url='http://finance.yahoo.com/q/cf?s=PRLB+Cash+Flow&annual'
 #Url='http://finance.yahoo.com/q/cf?s=PRLB'
+Url='http://finance.yahoo.com/q/cf?s='+ticker+'+Cash+Flow&annual'
+Url='http://finance.yahoo.com/q/cf?s='+ticker
 
 Page=urlopen(Url)
 
@@ -214,4 +222,4 @@ soup = BeautifulSoup(Page)
 #tabularData=soup.findAll('table', attrs={'border':"0", 'cellpadding':"2", 'cellspacing':"1", 'width':"100%",'class':'yfunc_tabledata1'})
 #tabularData=soup.findAll('TABLE', attrs={'border':'0', 'cellpadding':'0', 'cellspacing':'0', 'width':'100%','class':'yfnc_tabledata1'})
 tabularData=soup.findAll('table', attrs={'class':'yfnc_tabledata1'})
-#print(tabularData)
+print(tabularData)
