@@ -2364,3 +2364,55 @@ to reload .bashrc
 
 Also when I was going through the instructions to get the arch image onto the BBB's eMMC, I kept failing when extracting the bootloader to the boot directory. I could however extract to a temp dir and then copy over. Weird. 
 
+Sun Nov 10 12:53:32 EST 2013
+delete file if size is zero 
+find path/to/dir -type f -size 0 -print0 | xargs -0 rm 
+-print0 and -0 are needed to handle files w spaces otherwise omit
+
+obtain image dimensions
+identify -format "%f,%h,%wn" *.jpg > imagesizeinfo.txt
+this will output the filename(%f) the height (%h), the width (%w) and a trailing newline
+you can also use "file imagefille.ext" for quick and dirty
+feh -l file.ext
+will produce width,height,pixels,size,alpha filename information in a nice tab delimited ouptut
+less file.ext
+will produce similar info in a spce delimited output
+
+I was trying to use convert on the command line today and it wasn't working.
+Specifically, I was trying to do this:
+for i in *.jpg; do convert $i -resize 1200x768 $i_; done
+it kept coming back saying: convert: option requires an argument `-resize' @ error/convert.c/ConvertImageCommand/2486.
+I update the system (arch) and tried again to no avail. In the end I started quoting the bash variables adn that worked
+for i in *.jpg; do convert "${i}" -resize 1200x768 "${i}"_; done
+
+gnu parallel: (from my old notebook)
+I thought it was a built in distributed/parallel computing app.
+It really is best used on multicore machines for the way I was planning on using it (ie convert & mogrify)
+I kept getting a file not found error from ogrify when trying to utilize remote computers. Finally I realized that parallel wasn't also sending the file to the remote computer like I had hoped. 
+parallel --progress mogrify -resize 80x80 {} ::: *.jpg
+for using remote computers creat an sshlogin file to specify the user,port, and addresss of the remote cmputers you want to use
+4/ssh -p 333 arch-nicky@192.168.1.71
+1/:  <-- this is use 1 core on the local machine (:)
+the number of cores is not necessary as it will try to determine on the fly, but specifying is better. 
+--slf sshloginfilename
+
+parallel --progress (or --eta) --slf ~/sshloginfile.txt --trc {} mogrify -resize 800x900 {} ::: *.jpg
+the 'trc' stands for 'transfer return cleanup' and will transfer the file to the clients /tmp space 
+NOTE: rsync must be installed for this to work.
+
+remove emacs temp files from git:
+find -name *.*~ -print0 | xargs -0 -I {} git rm {}
+
+Sed the stream editor - multiple sed command behavior
+when stringing multiple sed commands together realize that these commands are working on the modified stream passed to each command 
+e.g. you need to conver the 5th,6th,and 7th / into a - in a url
+sed 's/\//-/5;s/\//-/6;s/\//-/7;' <url 
+will not work as expected because the / replaced in the second comman will replace the 7th / of teh original string leaveing the 6th / of teh original string untouched. 
+for clarity perhaps
+sed 's/\//-/7;s/\//-/6;s/\//-/5;' < url
+would be better. this would be the clearest and most general solution for replacements that might not be sequential such as the 5th, 10th, and 12th / instead of our samlpe case.
+for our sample case where the replacements are sequential we could simply run the same replacement command for the number of sequential replacements we need.
+sed 's/\//-/5;s/\//-/5;s/\//-/5;'
+as each operation moves the remaining reqpured substitutions into or one slot away from the 5th position. 
+
+
