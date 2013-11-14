@@ -1,3 +1,4 @@
+# -*- text-mode -*-
 Sourcing .alias file: I was trying to source .alias by adding code to source it if it existed in .bash_profile but this wasn't being picked up. I then moved the code to .bashrc and it was executed. Here is a good explanation of how / when things are being sourced: http://stackoverflow.com/questions/415403/whats-the-difference-between-bashrc-bash-profile-and-environment
 a)
 The main difference with shell config files is that some are only read by "login" shells (eg. when you login from another host, or login at the text console of a local unix machine). these are the ones called, say, .login or .profile or .zlogin (depending on which shell you're using).
@@ -2416,3 +2417,8 @@ sed 's/\//-/5;s/\//-/5;s/\//-/5;'
 as each operation moves the remaining reqpured substitutions into or one slot away from the 5th position. 
 
 
+
+Mon Nov 11 18:39:41 EST 2013
+I was receiving a python error in StockTrackerJSON bc I didn't have valid json. 
+The error was 00.98 isn't automagically treated as a number.
+I had to convert 00.98 to 0.98 for it to work. Small, but frustrating problem.
