@@ -1,5 +1,8 @@
 #This program is meant to grab thenounproject.com webpage and extract all the svg icons from the page and spit them out into separate files
 #hmm it's be nice if just like the website it had an overview page and then a 'zoom' page so you knew which file the icon was in. or just a tooltip that zoomed the icon and gave the filename or just output the svg for copy and paste as well. Hmm but yeah want separate file for easy import/copy paste for adding to inkscape 
+
+#uses httplib2: http://code.google.com/p/httplib2/wiki/Install
+
 import httplib2, time
 #from BeautifulSoup import BeautifulSoup, SoupStrainer # for python2
 from bs4 import BeautifulSoup, SoupStrainer
