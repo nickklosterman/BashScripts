@@ -2422,3 +2422,43 @@ Mon Nov 11 18:39:41 EST 2013
 I was receiving a python error in StockTrackerJSON bc I didn't have valid json. 
 The error was 00.98 isn't automagically treated as a number.
 I had to convert 00.98 to 0.98 for it to work. Small, but frustrating problem.
+
+Mon Nov 18 21:49:53 EST 2013
+python 3:
+print line without newline
+print('.', end="")
+
+
+Parallel Wget:
+from: http://unix.stackexchange.com/questions/35956/is-there-parallel-wget-something-like-fping-but-only-for-downloading
+Using GNU Parallel,
+
+$ parallel -j ${jobs} wget < urls.txt
+
+or xargs from GNU Findutils,
+
+$ xargs -P ${jobs} wget < urls.txt
+
+where ${jobs} is the maximum number of wget you want to allow to run concurrently. Without -j/-P, parallel will run as many jobs at a time as CPU cores (which doesn't necessarily make sense for wget bound by network IO), and xargs will run one at a time.
+
+One nice feature that parallel has over xargs is keeping the output of the concurrently-running jobs separated, but if you don't care about that, xargs is more likely to be pre-installed.
+
+from  http://stackoverflow.com/questions/7577615/parallel-wget-in-bash
+Much preferrable to pushing wget into the background using & or -b, you can use xargs to the same effect, and better.
+
+The advantage is that xargs will synchronize properly with no extra work. Which means that you are safe to access the downloaded files (assuming no error occurs). All downloads will have completed (or failed) once xargs exits, and you know by the exit code whether all went well. This is much preferrable to busy waiting with sleep and testing for completion manually.
+
+Assuming that URL_LIST is a variable containing all the URLs (can be constructed with a loop in the OP's example, but could also be a manually generated list), running this:
+
+echo $URL_LIST | xargs -n 1 -P 8 wget -q
+(you can also do 
+cat YourURLFile.txt | xargs -n 1 -P 8 wget -q )
+
+will pass one argument at a time (-n 1) to wget, and execute at most 8 parallel wget processes at a time (-P 8). xarg returns after the last spawned process has finished, which is just what we wanted to know. No extra trickery needed.
+
+The "magic number" of 8 parallel downloads that I've chosen is not set in stone, but it is probably a good compromise. There are two factors in "maximising" a series of downloads:
+
+One is filling "the cable", i.e. utilizing the available bandwidth. Assuming "normal" conditions (server has more bandwidth than client), this is already the case with one or at most two downloads. Throwing more connections at the problem will only result in packets being dropped and TCP congestion control kicking in, and N downloads with asymptotically 1/N bandwidth each, to the same net effect (minus the dropped packets, minus window size recovery). Packets being dropped is a normal thing to happen in an IP network, this is how congestion control is supposed to work (even with a single connection), and normally the impact is practically zero. However, having an unreasonably large number of connections amplifies this effect, so it can be come noticeable. In any case, it doesn't make anything faster.
+
+The second factor is connection establishment and request processing. Here, having a few extra connections in flight really helps. The problem one faces is the latency of two round-trips (typically 20-40ms within the same geographic area, 200-300ms inter-continental) plus the odd 1-2 milliseconds that the server actually needs to process the request and push a reply to the socket. This is not a lot of time per se, but multiplied by a few hundred/thousand requests, it quickly adds up.
+Having anything from half a dozen to a dozen requests in-flight hides most or all of this latency (it is still there, but since it overlaps, it does not sum up!). At the same time, having only a few concurrent connections does not have adverse effects, such as causing excessive congestion, or forcing a server into forking new processes.
