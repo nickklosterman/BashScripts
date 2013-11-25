@@ -2462,3 +2462,9 @@ One is filling "the cable", i.e. utilizing the available bandwidth. Assuming "no
 
 The second factor is connection establishment and request processing. Here, having a few extra connections in flight really helps. The problem one faces is the latency of two round-trips (typically 20-40ms within the same geographic area, 200-300ms inter-continental) plus the odd 1-2 milliseconds that the server actually needs to process the request and push a reply to the socket. This is not a lot of time per se, but multiplied by a few hundred/thousand requests, it quickly adds up.
 Having anything from half a dozen to a dozen requests in-flight hides most or all of this latency (it is still there, but since it overlaps, it does not sum up!). At the same time, having only a few concurrent connections does not have adverse effects, such as causing excessive congestion, or forcing a server into forking new processes.
+
+Sun Nov 24 19:24:31 EST 2013
+I hadn't been able to connect to my HTC mytouch 3g slide with the adb shell. 
+I installed the htc syn (for all HTC Andriod phones) and then my device was finally showing up as a device when performing the 'adb devices' command.
+http://www.htc.com/www/support/
+http://dl4.htc.com/managed-assets/support/software/htc-sync/setup_3.3.63.exe
