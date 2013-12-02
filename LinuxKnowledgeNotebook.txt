@@ -2468,3 +2468,23 @@ I hadn't been able to connect to my HTC mytouch 3g slide with the adb shell.
 I installed the htc syn (for all HTC Andriod phones) and then my device was finally showing up as a device when performing the 'adb devices' command.
 http://www.htc.com/www/support/
 http://dl4.htc.com/managed-assets/support/software/htc-sync/setup_3.3.63.exe
+
+
+Sun Dec  1 16:59:32 EST 2013
+sed: replace first line of file (in place)
+sed '1 s/foo/bar/' -i file.txt
+the -i does in place substitution
+
+
+newline in echo (there was a previous post on this in here but it didn't address my problem)
+you can simply stick a newline in the echo
+echo "some stuff
+more stuff"
+or pass the -e parameter to enable interpretation of backslash escapes
+echo -e "foo\nbar"
+
+If you want to enter multiple commands/queries and pass them to sqlite, they must be entered via a script. A string delimited with semicolons won't work.
+At least that seems to be my experience when trying things like 
+sqlite3 somedb.sqlite ".mode csv; .separator ','; .import Foo.csv Bar"
+I get that .mode is an unknown command. However, throwing this in a script works fine.
+sqlite3 somedb.sqlite < Foo.sql
