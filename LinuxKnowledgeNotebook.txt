@@ -2501,6 +2501,40 @@ for item in *.eml;
 do 
 munpack $item
 done
+Tue Dec 10 20:02:24 EST 2013
+I was updating arch and failed at that because I was getting a "/some/file/" all ready exists on file system and so it wasn't going to update.
+I then read a blogpost that said to perform pacman -Qo /the/file to see who the owner was and to move it if no one owned it. So i did.
+that was /boot/vmlinuz-linux and /lib/module
+
+
+
+I kept performaing pacman -Syu and it eventually went off wo a hitch after. At one point I did perform -Syu on a few of the first couple packagegs that needed to be updated to see if that would lead me to the culprit.
+I rebooted as I was wary that something had gone wrong even tho the update worked. I didn't trust that there weren't going to be issues and I knew that it is best to deal with them right away when you know what you did to get into trouble than to push it off and struggle to remember what you did.
+I got the dreaded  'unable to find root device' upon reboot which dropped me into a recovery shell.
+
+I then burned a new iso of the latest arch and went throught recover process of mounting necessary partitions and repairing them.
+The first time I did this I failed. The mkinitcpio failed as it couldn't find some modules when creating the new image. The key was to move my backup /boot/vmlinuz-linux that I made back to /boot/bmlinuz-linux. Then I performed the mkinitcpio and it successfully created the correct image.
+Honestly I don't think I needed to perform an update as the system was just updated, but it never hurts. really I think i just needed to mount the correct partitions and then perform mkinitcpio to get it all back up and running fine.
+I rebooted and all was fine. 
+
+The one change to the instructions is the ethernet interface is no longer called eth0 so I needed to determine that to mount it. 
+get the name of your ethernet connection:
+ls /sys/class/net
+
+Wed Dec 11 08:47:27 EST 2013
+Get back those 2 hours: find closer job or move closer.
+
+Don't put the cart before the horse (and  buy an inv prop and then move right away such that managing it is a headache.)
+
+What skills do I need to grow (i.e. what skills am I lacking or weak in)
+What skills do I need to grow (i.e. what skills am I lacking that I need to become a better developer?)
+
+Shouldn't it raise red flags in an organization, when you can't put into standard words what skills you are looking for when you are attempting to fill a position? I.e. the 'tag' creation test. If you would need to create your own 'tag' for a job description you are doing things wrong bc you really want to use readily available skill sets as the base. you can diverge from that in your product, but not too much.  I suppose defining when that divergence is too much is a tough task though. 
+I had to reread this hours later and the caveat is that the red flag shouldn't go up if you are doing something exotic in a groundbreaking field or are TRULY looking to reinvent the wheel. If not then red flags should be pimp slapping you all over the place. Then you are trying to reinvent the wheel, you just don't realize it yet. 
+
+I think tim is a very black/white (no gray) person with a mechanical sort of personality. 
+I was thinking that it would be fun to fuck with him similar to the way Dan Akroyd plays w the guy in the opening scene of Ghostbusters where he shocks the kid if he doesn't guess the card correct.
 
 Sun Jan  5 16:00:18 EST 2014
 emacs has a built in graphical diff tool invoke ediff with M-x
+
