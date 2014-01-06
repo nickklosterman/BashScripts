@@ -1384,7 +1384,7 @@ because I hadn't touched the readme file to add.
 Mon Dec 10 14:05:23 EST 2012
 10-12-2012
 symlink: I was doing symbolic links incorrectly. I was assuming it goes  ' ln -s From To' when it goes ' ln -s To From'
-'ln -s  ~/Git/Fonts/ ~/.fonts' puts a link Fonts in /.fonts that links to the Git/Fronts directory
+'ln -s  ~/Git/Fonts/ ~/.fonts' puts a link Fonts in /.fonts that links to the Git/Fonts directory
 to see the symlink and where it points you need to do a long listing of the directory/file
 
 Any time a new font is added (to ~/.fonts if single user or /usr/share/fonts for global use) you need to update the fontconfig cache:
@@ -2280,6 +2280,10 @@ Python get differences between two lists:
 >>> L2 = [1,2]
 >>> [i for i in L1 if i in L2]
 [2]
+>>> L1=[2,3,4,5]
+>>> L2=[1,2]
+>>> [i for i in L1 if i not in L2]
+[3, 4, 5]
 >>> S1 = set(L1)
 >>> S2 = set(L2)
 >>> S1.intersection(S2)
@@ -2488,3 +2492,15 @@ At least that seems to be my experience when trying things like
 sqlite3 somedb.sqlite ".mode csv; .separator ','; .import Foo.csv Bar"
 I get that .mode is an unknown command. However, throwing this in a script works fine.
 sqlite3 somedb.sqlite < Foo.sql
+
+Tue Dec  3 21:50:00 EST 2013
+.eml files on linux
+get the 'mpack' package
+extract items from the .eml file
+for item in *.eml; 
+do 
+munpack $item
+done
+
+Sun Jan  5 16:00:18 EST 2014
+emacs has a built in graphical diff tool invoke ediff with M-x
