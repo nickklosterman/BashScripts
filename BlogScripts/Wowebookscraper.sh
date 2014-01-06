@@ -106,7 +106,7 @@ cat $outputIndividualLinks | parallel "wget {} -O - >> $individualPagesTogether"
 #this goes and obtains the shorte.st url. we therefore can skip the 5s wait time
 grep "sh.st"  $individualPagesTogether | sed 's/.*href="//;s/".*//' > $shortestURLs
 
-cat $shortestURLs | parallel "wget -U Mozilla  {} -O  - | grep prefiles >> $prefilesURLs" #adding the user agent string gives me the expected behavior; the output isn't as desired, I want to output usable links. I need to use the hold space somehow and append the name to the end and create a link
+cat $shortestURLs | parallel "wget -U Mozilla  {} -O  - | grep prefiles >> $prefilesURLs" #adding the user agent string gives me the expected behavior; the output isn't as desired, I want to output usable links. I need to use the hold space somehow and append the name to the end and create a link; or use awk or regexp somehow
 
 #cat $shortestURLs | parallel "wget {} -O - >> $prefilesURLs" #this wget call actually gets redirected and doesn't stay on the stupid ad page so I can just snage the prefiles URLs.  The output is really the actual prefiles page.  Lolz without the user agent string shorte.st sends me right to the real page via a 302 redirect.
 #cat $shortestURLs | parallel "wget {} -O - | grep prefiles >> $prefilesURLs"
