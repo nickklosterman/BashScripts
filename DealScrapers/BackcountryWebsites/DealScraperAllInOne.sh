@@ -1211,29 +1211,29 @@ echo "12"
     WhiskeyMilitiaPage=$(GiveWebsiteCodeGetWebpageTempFile http://www.whiskeymilitia.com 1 )
     if [ "$WhiskeyMilitiaPage" != "Error" ]
     then 
+echo "wm"
+    	# WhiskeyMilitiaText=$(GivePageReturnTextWM ${WhiskeyMilitiaPage} )
+    	# WhiskeyMilitia=$(GivePageReturnProductDescriptionV2WM ${WhiskeyMilitiaPage} )
 
-	WhiskeyMilitiaText=$(GivePageReturnTextWM ${WhiskeyMilitiaPage} )
-	WhiskeyMilitia=$(GivePageReturnProductDescriptionV2WM ${WhiskeyMilitiaPage} )
+    	# WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${WhiskeyMilitiaPage})
 
-	WMTimeLeftSeconds=$(GivePageReturnTimeRemainingInSeconds ${WhiskeyMilitiaPage})
+    	# if [ "${WhiskeyMilitia}" != "${WhiskeyMilitiaTemp}" ]
+    	# then
+    	#     echo ${WhiskeyMilitia}
+    	#     WhiskeyMilitiaImage=$(GivePageAndWebsiteReturnImage ${WhiskeyMilitiaPage} http://www.whiskeymilitia.com )
+    	#     GiveProductKeywordDatabaseTablethenNotify  "${WhiskeyMilitiaText}"  ${WhiskeyMilitiaImage}  ${EnableNotifications}
+    	#     GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase "test.db" "Backcountrydeals"  ${WhiskeyMilitiaPage} 1
+    	#     #PROBLEMs here ...having prob with apostrophe escaping in sqlite. did it change to match that of mysql? such that it needs to be escaped?
+    	#     GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${WhiskeyMilitiaPage} 1
+    	#     GiveProductProductImageEnterIntoDatabase "${WhiskeyMilitia}" "${WhiskeyMilitiaImage}"
+    	#     UpdateWebpage 1 "${WhiskeyMilitiaText}" "${WhiskeyMilitiaImage}"   "${WebpageIndex}"
+    	#     #notify-send  "$WhiskeyMilitiaText" -i ${WhiskeyMilitiaImage} -t 3
 
-	if [ "${WhiskeyMilitia}" != "${WhiskeyMilitiaTemp}" ]
-	then
-	    echo ${WhiskeyMilitia}
-	    WhiskeyMilitiaImage=$(GivePageAndWebsiteReturnImage ${WhiskeyMilitiaPage} http://www.whiskeymilitia.com )
-	    GiveProductKeywordDatabaseTablethenNotify  "${WhiskeyMilitiaText}"  ${WhiskeyMilitiaImage}  ${EnableNotifications}
-	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase "test.db" "Backcountrydeals"  ${WhiskeyMilitiaPage} 1
-	    #PROBLEMs here ...having prob with apostrophe escaping in sqlite. did it change to match that of mysql? such that it needs to be escaped?
-	    GiveDatabaseTableWebPageWebsiteCodeEnterDataIntoDatabase2   ${WhiskeyMilitiaPage} 1
-	    GiveProductProductImageEnterIntoDatabase "${WhiskeyMilitia}" "${WhiskeyMilitiaImage}"
-	    UpdateWebpage 1 "${WhiskeyMilitiaText}" "${WhiskeyMilitiaImage}"   "${WebpageIndex}"
-	    #notify-send  "$WhiskeyMilitiaText" -i ${WhiskeyMilitiaImage} -t 3
-
-	    WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
-	fi
+    	#     WhiskeyMilitiaTemp=`echo ${WhiskeyMilitia}`
+    	#fi
     else
-	echo "Wget didn't return a 200 OK response when getting the Whiskey Militia webpage"
-	WMTimeLeftSeconds=120
+    	echo "Wget didn't return a 200 OK response when getting the Whiskey Militia webpage"
+    	WMTimeLeftSeconds=120
     fi
 
     echo "------------------------------------CL------------------------------------"
