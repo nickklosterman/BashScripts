@@ -70,7 +70,7 @@ def PrintFeed(atom):
 #-----------------===============-----------------
 import sys,urllib.request,urllib.error,urllib.parse,base64
 from textwrap import wrap
-import feedparser 
+import feedparser  #sudo pacman -Syu python-feedparser
 import time
 
 if len(sys.argv)>1 and  sys.argv[1]!="":
