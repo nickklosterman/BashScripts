@@ -2538,3 +2538,44 @@ I was thinking that it would be fun to fuck with him similar to the way Dan Akro
 Sun Jan  5 16:00:18 EST 2014
 emacs has a built in graphical diff tool invoke ediff with M-x
 
+Wed Jan  8 23:20:48 EST 2014
+Save mp3s at a higher playback rate:
+ffmpeg -i Input.mp3 -filter:a "atempo=1.5" -vn Output.mp3
+outputs at 1.5 the playback rate
+https://trac.ffmpeg.org/wiki/How%20to%20speed%20up%20/%20slow%20down%20a%20video
+Speeding up/slowing down video
+
+You can change the speed of your video using setpts video filter. The "old way" of creating timelapse or still frame was to first split up a video into individual frames, (for instance, as jpg's) then delete some and recombine the frames. Using the setpts filter is the new way and is faster and possibly less lossy :)
+
+To speed up your video, you can type:
+
+ffmpeg -i input.mkv -filter:v "setpts=0.5*PTS" output.mkv
+
+Note that this method will drop frames to achieve your desired speed. You can avoid dropping frames by specifying a higher "output frame rate" than the input, for example, to go from an input of 4 to one that is sped up to 4x that (16 fps):
+
+ffmpeg -i input.mkv -r 16 -filter:v "setpts=0.125*PTS" -an output.mkv
+
+To slow down your video, you can type:
+
+ffmpeg -i input.mkv -filter:v "setpts=2.0*PTS" output.mkv
+
+Speeding up/slowing down audio
+
+You can speed up or slow down *audio* with the atempo audio filter. To double the speed of audio:
+
+ffmpeg -i input.mkv -filter:a "atempo=2.0" -vn output.mkv
+
+The atempo filter is limited to using values between 0.5 and 2.0 (so it can slow it down to no less than half the original speed, and speed up to no more than double the input). If you need to, you can get around this limitation by stringing multiple atempo filters together. The following with quadruple the audio speed:
+
+ffmpeg -i input.mkv -filter:a "atempo=2.0,atempo=2.0" -vn output.mkv
+
+Using a complex filtergraph, you can speed up video and audio at the same time:
+
+ffmpeg -i input.mkv -filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]" output.mkv
+
+with Mplayer: (I have tested)
+http://markplusplus.wordpress.com/2006/10/01/pitch-correct-play-speed-with-mplayer/
+http://shreevatsa.wordpress.com/2009/05/29/mplayer-changing-speed-without-changing-pitch-avoiding-the-chipmunk-effect/
+http://metricrat.co.uk/mplayer-change-tempo-and-pitch-of-audio-file/
+http://www.catonmat.net/blog/how-to-save-time-by-watching-videos-at-higher-playback-speeds/
+https://bbs.archlinux.org/viewtopic.php?id=119665
