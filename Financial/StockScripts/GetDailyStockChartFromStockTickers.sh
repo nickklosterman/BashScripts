@@ -45,12 +45,22 @@ then
 rm "$outputfilename"
 fi
 
+    if [ -f "$1" ] #if we specified a file on the command line then read the file and spit it out else parse args as stock tickers
+    then
+	while read LINE
+	do
+	    ticker=$(echo "$LINE" | tr '[a-z]' '[A-Z]' )
+	    GetCharts $ticker "$outputfilename"
+	done < "$1"
+    else 
+	until [ -z "$1" ] 
+	do
+	    GetCharts "$1" "$outputfilename"
+	    shift 
+	done
 
-until [ -z "$1" ] 
-do
-GetCharts "$1" "$outputfilename"
-shift 
-done
+    fi
+
 
 feh -f /tmp/Charts
 

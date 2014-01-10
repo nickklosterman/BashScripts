@@ -2538,6 +2538,33 @@ I was thinking that it would be fun to fuck with him similar to the way Dan Akro
 Sun Jan  5 16:00:18 EST 2014
 emacs has a built in graphical diff tool invoke ediff with M-x
 
+Mon Jan  6 08:59:42 EST 2014
+Emacs: diff-buffer-with-file.  "emacs compare buffer file changed".
+
+emacs: query-replace [ alt + % ]
+When a query command asks you for confirmation, press y to do the replacement, press n to skip, press ! to do all remaining replacements without asking, press q to exit.
+
+http://ergoemacs.org/emacs/emacs_package_system.html A Guide on Emacs 24 Package System
+M-x list-packages
+(when (>= emacs-major-version 24)
+  (require 'package)
+  (package-initialize)
+  (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+  )
+https://github.com/yasuyk/web-beautify for emacs; needs node
+http://jsbeautifier.org/
+
+http://nlighteneddevelopment.com/content/nodejs-cygwin getting node to work under newest cygwin
+
+Tue Jan  7 14:31:37 EST 2014
+emacs help on a function:
+C-h f function-name
+
+M-x replace-regexp 
+
+http://www.emacswiki.org/emacs/ShowWhiteSpace#toc7 get visws.el to highlight visible whitespace
+also M-X tabify/untabify to switch spaces into TABs etc.
+
 Wed Jan  8 23:20:48 EST 2014
 Save mp3s at a higher playback rate:
 ffmpeg -i Input.mp3 -filter:a "atempo=1.5" -vn Output.mp3
@@ -2579,3 +2606,4 @@ http://shreevatsa.wordpress.com/2009/05/29/mplayer-changing-speed-without-changi
 http://metricrat.co.uk/mplayer-change-tempo-and-pitch-of-audio-file/
 http://www.catonmat.net/blog/how-to-save-time-by-watching-videos-at-higher-playback-speeds/
 https://bbs.archlinux.org/viewtopic.php?id=119665
+
