@@ -22,7 +22,7 @@ function getInstagramImages()
 Number_Of_Expected_Args=1
 if [ $# -ne $Number_Of_Expected_Args ]
 then 
-    echo "Usage: GetAllBlogPages.sh www.blogurl.com "
+    echo "Usage: $0 www.blogurl.com "
 else
     tmptumblr=/tmp/tumblr
     tmpinstagram=/tmp/instagram
