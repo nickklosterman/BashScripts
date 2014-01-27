@@ -2607,3 +2607,34 @@ http://metricrat.co.uk/mplayer-change-tempo-and-pitch-of-audio-file/
 http://www.catonmat.net/blog/how-to-save-time-by-watching-videos-at-higher-playback-speeds/
 https://bbs.archlinux.org/viewtopic.php?id=119665
 
+Tue Jan 21 13:18:12 EST 2014
+http://serverfault.com/questions/568627/can-a-program-tell-it-is-being-run-under-sudo
+Yes, there are 4 environment variables set when a program is running under sudo:
+
+$ sudo env |grep SUDO
+SUDO_COMMAND=/usr/bin/env
+SUDO_USER=tal
+SUDO_UID=501
+SUDO_GID=20
+Note that these can be faked by simply setting them. Don't trust them for anything critical.
+
+For example: In this program we need to tell the user to run some other program. If the current one was run with sudo, the other one will be too.
+
+#!/bin/bash
+
+echo 'Thank you for running me.'
+
+if [[ $(id -u) == 0 ]]; then
+  if [[ -z "$SUDO_COMMAND" ]]; then
+    echo 'Please now run: next_command'
+  else
+    echo 'Please now run: sudo next_command'
+  fi
+else  echo 'Error: Sadly you need to run me as root.'
+  exit 1
+fi
+
+
+http://stackoverflow.com/questions/3538064/nerdtree-for-emacs
+I prefer dirtree (screenshot below) by Ye Wenbin. It feels pretty close to NERDTree / the TextMate drawer.
+It took me a few minutes of trial and error to figure out the dependencies, so take a look at the install instructions (and a few minor edits to the source) I've got in this repo.
