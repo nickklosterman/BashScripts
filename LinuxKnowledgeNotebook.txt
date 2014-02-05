@@ -2638,3 +2638,16 @@ fi
 http://stackoverflow.com/questions/3538064/nerdtree-for-emacs
 I prefer dirtree (screenshot below) by Ye Wenbin. It feels pretty close to NERDTree / the TextMate drawer.
 It took me a few minutes of trial and error to figure out the dependencies, so take a look at the install instructions (and a few minor edits to the source) I've got in this repo.
+
+Mon Jan 27 20:26:07 EST 2014
+Setting up printer on Arch
+I had to install:
+libcups cups hplip gutenprint foomatic-db-engine
+I then had run 
+hp-setup -i
+I had to manually point to the ppd file. I had to poke around specifiying different ones for the hp p2015. It isn't a 'n' series as that is networked. I think I chose the -series ppd one. 
+I'm not sure if I really needed to do:
+cupsenable
+I did need to start the cups service and enable the daemon
+sudo systemctl start cups.service
+sudo systemctl enable cups.service
