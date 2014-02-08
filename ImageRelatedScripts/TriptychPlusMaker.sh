@@ -15,7 +15,7 @@ else
     numberOfPanels=${2}
     borderWidth=${3}
     outputfilename=${4}
-    rotate=0
+    rotate=1
 
     #echo "$inputfile $numberOfPanels $borderWidth"
 

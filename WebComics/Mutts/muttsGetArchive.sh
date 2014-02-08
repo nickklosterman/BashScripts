@@ -1,7 +1,7 @@
 #!/bin/bash
 #this version improves on the previous version in that it doesn't keep respawning feh and you can navigate forward and backward
 NumberOfExpectedArguments=0
-NumberOfImages=36 # the mutts website states that only the last 5 weeks of strips are archived due to syndication licensing.
+NumberOfImages=66 # the mutts website states that only the last 5 weeks of strips are archived due to syndication licensing.
 
 if [ $# -ne $NumberOfExpectedArguments ]
 then
@@ -17,7 +17,7 @@ else
 	StartFromBackMonth=`date --date "$TodaysDate $counter days ago" +%m`
 	StartFromBackLastTwoDigitsOfYear=`date --date "$TodaysDate $counter days ago" +%g`
 	filename=$StartFromBackMonth$StartFromBackDay$StartFromBackLastTwoDigitsOfYear.gif
-#	echo $filename
+	echo $filename
 	filelist+="http://www.muttscomics.com/art/images/daily/$filename "
 	let "counter-=1"
     done
