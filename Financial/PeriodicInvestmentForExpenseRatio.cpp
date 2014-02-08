@@ -1,4 +1,4 @@
-//g++ -o PeriodicInvestmentForExpenseRatio PeriodicInvestmentForExpenseRatio.cpp
+Mo//g++ -o PeriodicInvestmentForExpenseRatio PeriodicInvestmentForExpenseRatio.cpp
 
 /*
 This program is just a simple simulator to see what ind of parasitic effects expense ratios have on returns. 

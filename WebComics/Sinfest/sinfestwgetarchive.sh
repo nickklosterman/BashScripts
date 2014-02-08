@@ -48,7 +48,7 @@ feh *.gif &
 
 #this previous method was pretty stupid and not very elegant. It just started at a certain date and hammered away until stopped by the user.
 #for i in year
-for (( i = 20019 ; i <= 2009 ; i++))
+for (( i = 20019 ; i <= 2009 ; i++)) #this will never execute since we set i> 2009
 do
 # 	for j in month
 	for (( j = 10 ; j <= 12 ; j++))

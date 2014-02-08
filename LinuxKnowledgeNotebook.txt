@@ -1,3 +1,4 @@
+# -*- text-mode -*-
 Sourcing .alias file: I was trying to source .alias by adding code to source it if it existed in .bash_profile but this wasn't being picked up. I then moved the code to .bashrc and it was executed. Here is a good explanation of how / when things are being sourced: http://stackoverflow.com/questions/415403/whats-the-difference-between-bashrc-bash-profile-and-environment
 a)
 The main difference with shell config files is that some are only read by "login" shells (eg. when you login from another host, or login at the text console of a local unix machine). these are the ones called, say, .login or .profile or .zlogin (depending on which shell you're using).
@@ -1383,7 +1384,7 @@ because I hadn't touched the readme file to add.
 Mon Dec 10 14:05:23 EST 2012
 10-12-2012
 symlink: I was doing symbolic links incorrectly. I was assuming it goes  ' ln -s From To' when it goes ' ln -s To From'
-'ln -s  ~/Git/Fonts/ ~/.fonts' puts a link Fonts in /.fonts that links to the Git/Fronts directory
+'ln -s  ~/Git/Fonts/ ~/.fonts' puts a link Fonts in /.fonts that links to the Git/Fonts directory
 to see the symlink and where it points you need to do a long listing of the directory/file
 
 Any time a new font is added (to ~/.fonts if single user or /usr/share/fonts for global use) you need to update the fontconfig cache:
@@ -2195,3 +2196,458 @@ When writing the file you may encounter "TypeError: must be str, not bytes" this
 http://stackoverflow.com/questions/9942594/unicodeencodeerror-ascii-codec-cant-encode-character-u-xa0-in-position-20
 
 http://www.crummy.com/software/BeautifulSoup/bs4/doc/
+
+
+
+Tue Sep 17 16:43:10 EDT 2013
+adventures in cron:
+basically on arch-nicky crond was running but I really wanted to start cronie instead
+in my crontab I have:
+[arch-nicky@arch-nicky-bitches ~]$ crontab -l
+*5 * * * 1-5 `/usr/bin/date` >> /home/arch-nicky/crontouchtest.txt
+*/5 * * * 1-5 /home/arch-nicky/PortfolioCronJobScript.sh
+#run weekdays daily at 4:05 (i.e. when markets close)
+5 16 * * 1-5 /home/arch-nicky/DailyPortfolioNotification.sh
+[arch-nicky@arch-nicky-bitches ~]$  systemctl start cronie
+Failed to issue method call: Access denied
+[arch-nicky@arch-nicky-bitches ~]$ sudo  systemctl start cronie
+[arch-nicky@arch-nicky-bitches ~]$ sudo  systemctl start cronie.service  <-- these only start the service they don't enable it on boot. 
+[arch-nicky@arch-nicky-bitches ~]$ ps aux | grep cron
+root      1467  0.0  0.0   3264  1052 ?        Ss   13:40   0:00 crond
+root      4019  0.0  0.0   3228  1176 ?        Ss   15:00   0:00 /usr/bin/crond -n
+root      4037  0.0  0.0   2180   576 ?        Ss   15:01   0:00 /usr/sbin/anacron -s
+arch-ni+  4158  0.0  0.0   2840   580 pts/8    S+   15:06   0:00 grep cron
+
+sudo systemctl enable cronie.service <-- this starts service on boot.
+now my ps aux | grep cron is just this: 
+[arch-nicky@arch-nicky-bitches ~]$ ps aux | grep cron
+root       164  0.0  0.0   3260  1228 ?        Ss   17:21   0:00 /usr/bin/crond -n
+arch-ni+  1688  0.0  0.0   2844   580 pts/2    S+   17:34   0:00 grep cron
+which I didn't think was workign properly earlier.... the quest continues.
+but it appears that cron is working without user interaction upon startup now on arch-nicky
+
+
+ 
+
+Sun Oct  6 19:03:46 EDT 2013
+Emacs doesn't recognize my .py3 extension.
+You can force emacs into .py3 mode via "M-x python-mode"
+You can also open a file in a certain mode on a per file basis: http://stackoverflow.com/questions/3312114/how-to-tell-emacs-to-open-h-file-in-c-mode : 
+If you don't want this to apply to every .h file, you can add the following to the bottom of your C++ header files.
+
+// Local Variables:
+// mode: c++
+// End:
+
+This will work for any emacs variables that you want to set on a per file basis. Emacs ignores the leading characters, so use whatever comment variable is appropriate for the file type.
+
+Or making permanent changes by using the .emacs file:
+
+And if I wanted Emacs to automatically switch to html-helper-mode every time that I opened a file that ended with .html or .htm, I would add this to my .emacs file:
+
+(setq auto-mode-alist (cons '("\\.html$" . html-helper-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '("\\.htm$" . html-helper-mode) auto-mode-alist))
+
+
+
+Screen and 
+M-[ a is undefined
+M-[ b is undefined
+M-[ c is undefined
+M-[ d is undefined
+This is caused most often in using screen,emacs, backgrounding and quite possibly full screening the application
+http://stackoverflow.com/questions/4548106/screen-somehow-unmaps-my-arrow-keys-in-emacs-after-a-z/19201546#19201546
+After reading that post, I posted my own experience:
+I had my xterm window full screen and was in screen and this happened. I double clicked the xterm border to go out of full screen. Ctrl-z to background emacs. Then fg to bring it back and then the arrow keys worked. I could go into full screen without any issues.
+
+
+Somehow my python scrape of yahoo stopped working. I now have to decode the output
+http://stackoverflow.com/questions/15817420/python-subprocess-and-type-str-doesnt-support-the-buffer-api
+
+
+Was receiving this error on puffjay/archd280
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012/Cygwin)
+restricted \write18 enabled.
+---! /var/lib/texmf/web2c/pdftex/latex.fmt doesn't match pdftex.pool
+(Fatal format file error; I'm stymied)
+There was apparently some issues and a 'fix' on the Arch website. https://mailman.archlinux.org/pipermail/arch-dev-public/2013-July/025174.html
+I had to reinstall texlive-collection-latex to get the error to go away.
+
+
+http://stackoverflow.com/questions/740287/python-check-if-one-of-the-following-items-is-in-a-list
+Python get differences between two lists: 
+ L1 = [2,3,4]
+>>> L2 = [1,2]
+>>> [i for i in L1 if i in L2]
+[2]
+>>> L1=[2,3,4,5]
+>>> L2=[1,2]
+>>> [i for i in L1 if i not in L2]
+[3, 4, 5]
+>>> S1 = set(L1)
+>>> S2 = set(L2)
+>>> S1.intersection(S2)
+set([2])  this method is much slower
+
+
+I was having problems with file locks on the sqlite database. I couldn't figure out what the problem was and thought the proc was too fast adn tripping over itself. It turns out I had the database lcoked out with another script that was accessing it. :/ 
+
+Python gave: _sqlite.OperationalError: database is locked
+
+
+
+Mon Nov  4 20:34:35 EST 2013
+re-read the fstab file:
+sudo mount -a 
+This isn't the recommended way.  It is best to call each entry. mount -a would do the trick but its best to just mount each mount manually..
+
+										    Say you have one in there to mount /data/one from another source.. a simple:
+
+mount /data/one
+
+Would mount it properly.
+
+torrent meta files.
+the filename is an info hash with .meta tacked on the end. 
+You can recreate a magnet link from this. The infohash is the btih: argument. You will need to append on trackers on to the end. I think it might work without the trackers, but will take longer since it then "guesses" which trackers to apply. 
+magnet:?xt=urn:btih:4c70ca914f588a2ea765e57c99d8ea1141b53154&dn=ducati+848+workshop+manual&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Ftracker.ccc.de%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337
+
+for i in *.meta; do echo $i; echo "magnet:?xt=urn:btih:${i}&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Ftracker.ccc.de%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337" ; done;
+
+I'm not so sure the name portion is all that important. 
+I could easily spoof in something for that.
+
+I was also trying to reload those new magnet uris (I actually never fully tested this as I had created a file of the magnet URIs that I then could reload when I first got the magnets from tpb.) and I kept getting a file chunk error permission denied. I just needed to rm the .meta files as they were written by root so as beagleboneblack they couldn't be written to. It appears that rtorrent needs to be able to access and write to those .meta files or its a no-go.
+
+
+Install arch linux to eMMC
+http://archlinuxarm.org/platforms/armv7/ti/beaglebone-black 
+I actually swapped /dev/mmcblk0p[1|2] instead of /dev/mmcblk1p[1|2] but it worked fine.
+SSH is set up and enabled by default.
+Install: rtorrent, screen git 
+disable root ssh login and create a new user http://blog.pixelami.com/2012/05/howto-add-user-on-archlinux/
+
+Howto add user on archlinux
+Posted on May 3, 2012
+
+A very quick cheat sheet for getting a user setup quickly on archlinux-arm
+
+Create a user called ‘myuser’ (obviously replace this with your desired username)
+# useradd -m -g users -G \
+audio,lp,optical,storage,video,wheel,games,power,scanner \
+-s /bin/bash myuser
+
+Set the password
+# passwd myuser
+Enter new UNIX password:
+Retype new UNIX password:
+passwd: password updated successfully
+
+Add to sudo users (Optional)
+# visudo
+
+If visudo does not exist then install with
+# pacman -S sudo
+
+Once vi launches use arrow key to scroll to the line:
+# %wheel    ALL=(ALL) ALL
+
+press ‘x’ twice to uncomment the line. Then exit vi (press ESC then “:” then “wq” then press ENTER).
+Now change to your newly created user account
+# su myuser
+
+Now edit the .bashrc to get TAB completion working for the new user when using sudo.
+$ nano ~/.bashrc
+
+And add the following line at the bottom.
+complete -cf sudo
+
+Then do
+$ source ~/.bashrc
+
+to reload .bashrc
+
+Also when I was going through the instructions to get the arch image onto the BBB's eMMC, I kept failing when extracting the bootloader to the boot directory. I could however extract to a temp dir and then copy over. Weird. 
+
+Sun Nov 10 12:53:32 EST 2013
+delete file if size is zero 
+find path/to/dir -type f -size 0 -print0 | xargs -0 rm 
+-print0 and -0 are needed to handle files w spaces otherwise omit
+
+obtain image dimensions
+identify -format "%f,%h,%wn" *.jpg > imagesizeinfo.txt
+this will output the filename(%f) the height (%h), the width (%w) and a trailing newline
+you can also use "file imagefille.ext" for quick and dirty
+feh -l file.ext
+will produce width,height,pixels,size,alpha filename information in a nice tab delimited ouptut
+less file.ext
+will produce similar info in a spce delimited output
+
+I was trying to use convert on the command line today and it wasn't working.
+Specifically, I was trying to do this:
+for i in *.jpg; do convert $i -resize 1200x768 $i_; done
+it kept coming back saying: convert: option requires an argument `-resize' @ error/convert.c/ConvertImageCommand/2486.
+I update the system (arch) and tried again to no avail. In the end I started quoting the bash variables adn that worked
+for i in *.jpg; do convert "${i}" -resize 1200x768 "${i}"_; done
+
+gnu parallel: (from my old notebook)
+I thought it was a built in distributed/parallel computing app.
+It really is best used on multicore machines for the way I was planning on using it (ie convert & mogrify)
+I kept getting a file not found error from ogrify when trying to utilize remote computers. Finally I realized that parallel wasn't also sending the file to the remote computer like I had hoped. 
+parallel --progress mogrify -resize 80x80 {} ::: *.jpg
+for using remote computers creat an sshlogin file to specify the user,port, and addresss of the remote cmputers you want to use
+4/ssh -p 333 arch-nicky@192.168.1.71
+1/:  <-- this is use 1 core on the local machine (:)
+the number of cores is not necessary as it will try to determine on the fly, but specifying is better. 
+--slf sshloginfilename
+
+parallel --progress (or --eta) --slf ~/sshloginfile.txt --trc {} mogrify -resize 800x900 {} ::: *.jpg
+the 'trc' stands for 'transfer return cleanup' and will transfer the file to the clients /tmp space 
+NOTE: rsync must be installed for this to work.
+
+remove emacs temp files from git:
+find -name *.*~ -print0 | xargs -0 -I {} git rm {}
+
+Sed the stream editor - multiple sed command behavior
+when stringing multiple sed commands together realize that these commands are working on the modified stream passed to each command 
+e.g. you need to conver the 5th,6th,and 7th / into a - in a url
+sed 's/\//-/5;s/\//-/6;s/\//-/7;' <url 
+will not work as expected because the / replaced in the second comman will replace the 7th / of teh original string leaveing the 6th / of teh original string untouched. 
+for clarity perhaps
+sed 's/\//-/7;s/\//-/6;s/\//-/5;' < url
+would be better. this would be the clearest and most general solution for replacements that might not be sequential such as the 5th, 10th, and 12th / instead of our samlpe case.
+for our sample case where the replacements are sequential we could simply run the same replacement command for the number of sequential replacements we need.
+sed 's/\//-/5;s/\//-/5;s/\//-/5;'
+as each operation moves the remaining reqpured substitutions into or one slot away from the 5th position. 
+
+
+
+Mon Nov 11 18:39:41 EST 2013
+I was receiving a python error in StockTrackerJSON bc I didn't have valid json. 
+The error was 00.98 isn't automagically treated as a number.
+I had to convert 00.98 to 0.98 for it to work. Small, but frustrating problem.
+
+Mon Nov 18 21:49:53 EST 2013
+python 3:
+print line without newline
+print('.', end="")
+
+
+Parallel Wget:
+from: http://unix.stackexchange.com/questions/35956/is-there-parallel-wget-something-like-fping-but-only-for-downloading
+Using GNU Parallel,
+
+$ parallel -j ${jobs} wget < urls.txt
+
+or xargs from GNU Findutils,
+
+$ xargs -P ${jobs} wget < urls.txt
+
+where ${jobs} is the maximum number of wget you want to allow to run concurrently. Without -j/-P, parallel will run as many jobs at a time as CPU cores (which doesn't necessarily make sense for wget bound by network IO), and xargs will run one at a time.
+
+One nice feature that parallel has over xargs is keeping the output of the concurrently-running jobs separated, but if you don't care about that, xargs is more likely to be pre-installed.
+
+from  http://stackoverflow.com/questions/7577615/parallel-wget-in-bash
+Much preferrable to pushing wget into the background using & or -b, you can use xargs to the same effect, and better.
+
+The advantage is that xargs will synchronize properly with no extra work. Which means that you are safe to access the downloaded files (assuming no error occurs). All downloads will have completed (or failed) once xargs exits, and you know by the exit code whether all went well. This is much preferrable to busy waiting with sleep and testing for completion manually.
+
+Assuming that URL_LIST is a variable containing all the URLs (can be constructed with a loop in the OP's example, but could also be a manually generated list), running this:
+
+echo $URL_LIST | xargs -n 1 -P 8 wget -q
+(you can also do 
+cat YourURLFile.txt | xargs -n 1 -P 8 wget -q )
+
+will pass one argument at a time (-n 1) to wget, and execute at most 8 parallel wget processes at a time (-P 8). xarg returns after the last spawned process has finished, which is just what we wanted to know. No extra trickery needed.
+
+The "magic number" of 8 parallel downloads that I've chosen is not set in stone, but it is probably a good compromise. There are two factors in "maximising" a series of downloads:
+
+One is filling "the cable", i.e. utilizing the available bandwidth. Assuming "normal" conditions (server has more bandwidth than client), this is already the case with one or at most two downloads. Throwing more connections at the problem will only result in packets being dropped and TCP congestion control kicking in, and N downloads with asymptotically 1/N bandwidth each, to the same net effect (minus the dropped packets, minus window size recovery). Packets being dropped is a normal thing to happen in an IP network, this is how congestion control is supposed to work (even with a single connection), and normally the impact is practically zero. However, having an unreasonably large number of connections amplifies this effect, so it can be come noticeable. In any case, it doesn't make anything faster.
+
+The second factor is connection establishment and request processing. Here, having a few extra connections in flight really helps. The problem one faces is the latency of two round-trips (typically 20-40ms within the same geographic area, 200-300ms inter-continental) plus the odd 1-2 milliseconds that the server actually needs to process the request and push a reply to the socket. This is not a lot of time per se, but multiplied by a few hundred/thousand requests, it quickly adds up.
+Having anything from half a dozen to a dozen requests in-flight hides most or all of this latency (it is still there, but since it overlaps, it does not sum up!). At the same time, having only a few concurrent connections does not have adverse effects, such as causing excessive congestion, or forcing a server into forking new processes.
+
+Sun Nov 24 19:24:31 EST 2013
+I hadn't been able to connect to my HTC mytouch 3g slide with the adb shell. 
+I installed the htc syn (for all HTC Andriod phones) and then my device was finally showing up as a device when performing the 'adb devices' command.
+http://www.htc.com/www/support/
+http://dl4.htc.com/managed-assets/support/software/htc-sync/setup_3.3.63.exe
+
+
+Sun Dec  1 16:59:32 EST 2013
+sed: replace first line of file (in place)
+sed '1 s/foo/bar/' -i file.txt
+the -i does in place substitution
+
+
+newline in echo (there was a previous post on this in here but it didn't address my problem)
+you can simply stick a newline in the echo
+echo "some stuff
+more stuff"
+or pass the -e parameter to enable interpretation of backslash escapes
+echo -e "foo\nbar"
+
+If you want to enter multiple commands/queries and pass them to sqlite, they must be entered via a script. A string delimited with semicolons won't work.
+At least that seems to be my experience when trying things like 
+sqlite3 somedb.sqlite ".mode csv; .separator ','; .import Foo.csv Bar"
+I get that .mode is an unknown command. However, throwing this in a script works fine.
+sqlite3 somedb.sqlite < Foo.sql
+
+Tue Dec  3 21:50:00 EST 2013
+.eml files on linux
+get the 'mpack' package
+extract items from the .eml file
+for item in *.eml; 
+do 
+munpack $item
+done
+Tue Dec 10 20:02:24 EST 2013
+I was updating arch and failed at that because I was getting a "/some/file/" all ready exists on file system and so it wasn't going to update.
+I then read a blogpost that said to perform pacman -Qo /the/file to see who the owner was and to move it if no one owned it. So i did.
+that was /boot/vmlinuz-linux and /lib/module
+
+
+
+I kept performaing pacman -Syu and it eventually went off wo a hitch after. At one point I did perform -Syu on a few of the first couple packagegs that needed to be updated to see if that would lead me to the culprit.
+I rebooted as I was wary that something had gone wrong even tho the update worked. I didn't trust that there weren't going to be issues and I knew that it is best to deal with them right away when you know what you did to get into trouble than to push it off and struggle to remember what you did.
+I got the dreaded  'unable to find root device' upon reboot which dropped me into a recovery shell.
+
+I then burned a new iso of the latest arch and went throught recover process of mounting necessary partitions and repairing them.
+The first time I did this I failed. The mkinitcpio failed as it couldn't find some modules when creating the new image. The key was to move my backup /boot/vmlinuz-linux that I made back to /boot/bmlinuz-linux. Then I performed the mkinitcpio and it successfully created the correct image.
+Honestly I don't think I needed to perform an update as the system was just updated, but it never hurts. really I think i just needed to mount the correct partitions and then perform mkinitcpio to get it all back up and running fine.
+I rebooted and all was fine. 
+
+The one change to the instructions is the ethernet interface is no longer called eth0 so I needed to determine that to mount it. 
+get the name of your ethernet connection:
+ls /sys/class/net
+
+Wed Dec 11 08:47:27 EST 2013
+Get back those 2 hours: find closer job or move closer.
+
+Don't put the cart before the horse (and  buy an inv prop and then move right away such that managing it is a headache.)
+
+What skills do I need to grow (i.e. what skills am I lacking or weak in)
+What skills do I need to grow (i.e. what skills am I lacking that I need to become a better developer?)
+
+Shouldn't it raise red flags in an organization, when you can't put into standard words what skills you are looking for when you are attempting to fill a position? I.e. the 'tag' creation test. If you would need to create your own 'tag' for a job description you are doing things wrong bc you really want to use readily available skill sets as the base. you can diverge from that in your product, but not too much.  I suppose defining when that divergence is too much is a tough task though. 
+I had to reread this hours later and the caveat is that the red flag shouldn't go up if you are doing something exotic in a groundbreaking field or are TRULY looking to reinvent the wheel. If not then red flags should be pimp slapping you all over the place. Then you are trying to reinvent the wheel, you just don't realize it yet. 
+
+I think tim is a very black/white (no gray) person with a mechanical sort of personality. 
+I was thinking that it would be fun to fuck with him similar to the way Dan Akroyd plays w the guy in the opening scene of Ghostbusters where he shocks the kid if he doesn't guess the card correct.
+
+Sun Jan  5 16:00:18 EST 2014
+emacs has a built in graphical diff tool invoke ediff with M-x
+
+Mon Jan  6 08:59:42 EST 2014
+Emacs: diff-buffer-with-file.  "emacs compare buffer file changed".
+
+emacs: query-replace [ alt + % ]
+When a query command asks you for confirmation, press y to do the replacement, press n to skip, press ! to do all remaining replacements without asking, press q to exit.
+
+http://ergoemacs.org/emacs/emacs_package_system.html A Guide on Emacs 24 Package System
+M-x list-packages
+(when (>= emacs-major-version 24)
+  (require 'package)
+  (package-initialize)
+  (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+  )
+https://github.com/yasuyk/web-beautify for emacs; needs node
+http://jsbeautifier.org/
+
+http://nlighteneddevelopment.com/content/nodejs-cygwin getting node to work under newest cygwin
+
+Tue Jan  7 14:31:37 EST 2014
+emacs help on a function:
+C-h f function-name
+
+M-x replace-regexp 
+
+http://www.emacswiki.org/emacs/ShowWhiteSpace#toc7 get visws.el to highlight visible whitespace
+also M-X tabify/untabify to switch spaces into TABs etc.
+
+Wed Jan  8 23:20:48 EST 2014
+Save mp3s at a higher playback rate:
+ffmpeg -i Input.mp3 -filter:a "atempo=1.5" -vn Output.mp3
+outputs at 1.5 the playback rate
+https://trac.ffmpeg.org/wiki/How%20to%20speed%20up%20/%20slow%20down%20a%20video
+Speeding up/slowing down video
+
+You can change the speed of your video using setpts video filter. The "old way" of creating timelapse or still frame was to first split up a video into individual frames, (for instance, as jpg's) then delete some and recombine the frames. Using the setpts filter is the new way and is faster and possibly less lossy :)
+
+To speed up your video, you can type:
+
+ffmpeg -i input.mkv -filter:v "setpts=0.5*PTS" output.mkv
+
+Note that this method will drop frames to achieve your desired speed. You can avoid dropping frames by specifying a higher "output frame rate" than the input, for example, to go from an input of 4 to one that is sped up to 4x that (16 fps):
+
+ffmpeg -i input.mkv -r 16 -filter:v "setpts=0.125*PTS" -an output.mkv
+
+To slow down your video, you can type:
+
+ffmpeg -i input.mkv -filter:v "setpts=2.0*PTS" output.mkv
+
+Speeding up/slowing down audio
+
+You can speed up or slow down *audio* with the atempo audio filter. To double the speed of audio:
+
+ffmpeg -i input.mkv -filter:a "atempo=2.0" -vn output.mkv
+
+The atempo filter is limited to using values between 0.5 and 2.0 (so it can slow it down to no less than half the original speed, and speed up to no more than double the input). If you need to, you can get around this limitation by stringing multiple atempo filters together. The following with quadruple the audio speed:
+
+ffmpeg -i input.mkv -filter:a "atempo=2.0,atempo=2.0" -vn output.mkv
+
+Using a complex filtergraph, you can speed up video and audio at the same time:
+
+ffmpeg -i input.mkv -filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]" output.mkv
+
+with Mplayer: (I have tested)
+http://markplusplus.wordpress.com/2006/10/01/pitch-correct-play-speed-with-mplayer/
+http://shreevatsa.wordpress.com/2009/05/29/mplayer-changing-speed-without-changing-pitch-avoiding-the-chipmunk-effect/
+http://metricrat.co.uk/mplayer-change-tempo-and-pitch-of-audio-file/
+http://www.catonmat.net/blog/how-to-save-time-by-watching-videos-at-higher-playback-speeds/
+https://bbs.archlinux.org/viewtopic.php?id=119665
+
+Tue Jan 21 13:18:12 EST 2014
+http://serverfault.com/questions/568627/can-a-program-tell-it-is-being-run-under-sudo
+Yes, there are 4 environment variables set when a program is running under sudo:
+
+$ sudo env |grep SUDO
+SUDO_COMMAND=/usr/bin/env
+SUDO_USER=tal
+SUDO_UID=501
+SUDO_GID=20
+Note that these can be faked by simply setting them. Don't trust them for anything critical.
+
+For example: In this program we need to tell the user to run some other program. If the current one was run with sudo, the other one will be too.
+
+#!/bin/bash
+
+echo 'Thank you for running me.'
+
+if [[ $(id -u) == 0 ]]; then
+  if [[ -z "$SUDO_COMMAND" ]]; then
+    echo 'Please now run: next_command'
+  else
+    echo 'Please now run: sudo next_command'
+  fi
+else  echo 'Error: Sadly you need to run me as root.'
+  exit 1
+fi
+
+
+http://stackoverflow.com/questions/3538064/nerdtree-for-emacs
+I prefer dirtree (screenshot below) by Ye Wenbin. It feels pretty close to NERDTree / the TextMate drawer.
+It took me a few minutes of trial and error to figure out the dependencies, so take a look at the install instructions (and a few minor edits to the source) I've got in this repo.
+
+Mon Jan 27 20:26:07 EST 2014
+Setting up printer on Arch
+I had to install:
+libcups cups hplip gutenprint foomatic-db-engine
+I then had run 
+hp-setup -i
+I had to manually point to the ppd file. I had to poke around specifiying different ones for the hp p2015. It isn't a 'n' series as that is networked. I think I chose the -series ppd one. 
+I'm not sure if I really needed to do:
+cupsenable
+I did need to start the cups service and enable the daemon
+sudo systemctl start cups.service
+sudo systemctl enable cups.service
