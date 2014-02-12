@@ -57,11 +57,16 @@ for majorkey,subdict in jsonString.items():
     #print(subdict[7])
     if majorkey in desiredStyles:
         shoeSizeList=subdict[7]
+        sizeFlag=False
         for item in shoeSizeList:
             if item[0] == ' 09.5':
+                sizeFlag=True
                 if float(item[2])<priceThreshold:
                     #print("Product #: %s, Shoe Size: %s, Sale Price: $%s, Style: %s, Fit/Width: %s" % (majorkey,item[0],item[2],subdict[15],subdict[16]))
                     outputList.append(("Product #: %s, Shoe Size: %s, Sale Price: $%s, Style: %s, Fit/Width: %s" % (majorkey,item[0],item[2],subdict[15],subdict[16])))
+        if sizeFlag==False:
+            outputList.append(("Product #: %s, no longer has Shoe Size: 9.5 " % (majorkey)))
+        
 
 if (len(outputList)>0):
     print(shoeUrl)
