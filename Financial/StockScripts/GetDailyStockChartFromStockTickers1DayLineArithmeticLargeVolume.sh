@@ -50,6 +50,7 @@ else
 #due to options being allowed to be blank we need to use an array otherwise if ema is blank but t1 isn't then t1 will show up in ma's variable slot in the function being called.    
 
     options="&t=1d&q=l&l=off&z=l&p=&a=v&c=&lang=en-US&region=US"
+
     until [ -z "$1" ] 
     do
 	BuildCharts "$1" "$outputfilename" "$options"

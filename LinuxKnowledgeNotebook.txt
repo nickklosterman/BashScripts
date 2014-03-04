@@ -2652,8 +2652,11 @@ I did need to start the cups service and enable the daemon
 sudo systemctl start cups.service
 sudo systemctl enable cups.service
 
-
 Thu Feb  6 23:17:54 EST 2014
-I did an OTA update to CM 10.2 and upon reboot I had a grey wifi connection and whenever I tried to access the play store it gave a no connection error. I needed to download the latest gapps and reboot into the recovery mode (power off and popwer up holding down the "n" then install zip from memory and then reboot and it all worked. 
+I did an OTA update to CM 10.2 and upon reboot I had a grey wifi connection and whenever I tried to access the play store it gave a no connection error. I needed to download the latest gapps and reboot into the recovery mode (power off and power up holding down the "n" then install zip from memory and then reboot and it all worked. 
 
-Because of the above error, trying to run some apps would come back and say it wasn't installed.  YOu could get on the net but you just coulnd't use the app store. Many posts said to delete your acct or there was a problem with the time beign wrong and breaking the authentication certificates, but that wasn't it. 
+Because of the above error, trying to run some apps would come back and say it wasn't installed.  You could get on the net but you just coulnd't use the app store. Many posts said to delete your acct or there was a problem with the time being wrong and breaking the authentication certificates, but that wasn't it. 
+
+Tue Mar  4 14:40:09 UTC 2014
+I think one of the problems with my bash scripts not being run by cron, was because the new scripts hadn't been made executable. Therefore my straight calls to the file weren't executing the file. 
+
