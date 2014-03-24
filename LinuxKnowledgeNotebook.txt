@@ -2661,8 +2661,6 @@ Tue Mar  4 14:40:09 UTC 2014
 I think one of the problems with my bash scripts not being run by cron, was because the new scripts hadn't been made executable. Therefore my straight calls to the file weren't executing the file. 
 
 
-Because of the above error, trying to run some apps would come back and say it wasn't installed.  YOu could get on the net but you just coulnd't use the app store. Many posts said to delete your acct or there was a problem with the time beign wrong and breaking the authentication certificates, but that wasn't it. 
-
 Sat Mar 15 20:13:15 EDT 2014
 On the mint machine I did a http clone of a repo and was having problems where git was asking for my username and password but not accepting the password despite being correct.  Performing these commands seemed to help. 
  from http://stackoverflow.com/questions/6565357/git-push-requires-username-and-password
@@ -2681,4 +2679,43 @@ Instead of forecastrss?w=$l you can also use forecastrss?p=$l and use the RSS li
 Also see http://developer.yahoo.com/weather/ for more information
 
 l=12765843;curl -s http://weather.yahooapis.com/forecastrss?w=$l|grep astronomy| awk -F\" '{print $2 "\n" $4;}'
+
+
+Tue Mar 18 08:59:36 EDT 2014
+
+http://askubuntu.com/questions/434259/batch-converting-swf-to-png
+I'd probably use find to do this:
+
+find -iname 'fis*.swf' -exec swfrender "{}" -o "{}.png" \;
+But you could probably use other sorts of loops:
+
+for f in fis{1..20}.swf; do
+    swfrender "$f" -o "$f.png"
+done
+First make a new file and call it for example swfconvert
+
+gedit swfconvert
+Paste the code below into it:
+
+for img in *.swf; 
+do 
+ swfrender "$img" -o "$img.png"
+done
+Save and close. Then run the new batch from terminal:
+
+sh swfconvert
+
+
+http://www.masteringemacs.org/articles/2011/03/16/removing-blank-lines-buffer/
+
+You want to remove all empty (blank) lines from a buffer. How do you do it? Well, it’s super easy.
+
+Mark what you want to change (or use C-x h to mark the whole buffer) and run this:
+
+M-x flush-lines RET ^$ RET
+
+And you’re done. So what does that mean? Well, M-x flush-lines will flush (remove) lines that match a regular expression, and ^$ contain the meta-characters ^ for beginning of string and $ for end of string. Ergo, if the two meta-characters are next to eachother, it must be a blank line.
+
+There were also other types of whitespace removal
+
 
