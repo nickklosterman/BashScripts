@@ -192,7 +192,7 @@ then
 	# wait for /tmp/gogetaroomie to be populated
 	sleep 5s	
 
-	zip Gogetaroomie rename.${fileExtension} 
+	zip Gogetaroomie rename*.${fileExtension} 
 	mv Gogetaroomie.zip Gogetaroomie.cbz
 	evince Gogetaroomie.cbz  &
     fi 

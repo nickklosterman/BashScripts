@@ -1,5 +1,8 @@
 #!/bin/bash
 #this version improves on the previous version in that it doesn't keep respawning feh and you can navigate forward and backward
+
+fileExtension=png
+
 function performCleanup () {
     echo "Remove temporary files (y/n)?"
     read inputkey
