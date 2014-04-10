@@ -45,8 +45,6 @@ function performWgetOnFileForImages () {
     done < ${1}
 }
 
-
-
 function fileCheck () {
 START=1
 STOP="${1}"
@@ -58,7 +56,6 @@ STOP="${1}"
 	    echo ${filename} ${cnter} ${fileExtension}
 	fi
     done
-
 }
 
 
@@ -185,7 +182,7 @@ then
 	# wait for /tmp/blindsprings to be populated
 	sleep 5s	
 
-	mv cover.jpg Cover.jpg #otherwise it ends up being last. seems that lowercase are shown after uppercase.
+	mv cover.jpg blindspringsCover.jpg #otherwise it ends up being last. seems that lowercase are shown after uppercase.
 
 	zip Blindsprings *.${fileExtension} 
 	mv Blindsprings.zip Blindsprings.cbz

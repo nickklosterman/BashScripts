@@ -1,3 +1,4 @@
+# -*- python -*-
 #!/bin/python2
 
 # http://effbot.org/zone/bencode.htm
