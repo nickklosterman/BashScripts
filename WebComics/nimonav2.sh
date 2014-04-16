@@ -213,7 +213,7 @@ then
 	# sleep 10s
 
 
-	zip Nimona *.${fileExtension}
+	zip Nimona nimona*.${fileExtension}
 	mv Nimona.zip Nimona.cbz
 	evince Nimona.cbz  &
     fi 

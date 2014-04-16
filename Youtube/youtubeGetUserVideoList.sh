@@ -1,5 +1,7 @@
 #!/bin/bash
 
+options="--write-description --write-info-json --write-annotations --write-thumbnail --no-playlist"
+
 function getYoutubeUsersVideos() {
     echo ${1}
     inputfilename="/tmp/youtube${1}"
@@ -11,6 +13,8 @@ function getYoutubeUsersVideos() {
     #grep 'href="/watch' /tmp/sycrayoutube | sed 's/.*href="\/watch?v=//;s/".*//;' | uniq  #get just the video guid
     #grep 'href="/watch' /tmp/sycrayoutube | sed 's/.*href="//;s/".*//;' | uniq
     grep 'href="/watch' "${inputfilename}" | sed 's/.*href="/http:\/\/www.youtube.com/;s/".*//;' | uniq > "${outputfilename}"
+   videoUrl=$( grep 'href="/watch' "${inputfilename}" | sed 's/.*href="/http:\/\/www.youtube.com/;s/".*//;' | uniq ) #| youtube-dl
+   youtube-dl ${options} ${videoUrl} 
 }
 
 if [ -f "$1" ]
@@ -22,7 +26,13 @@ then
 else 
     until [ -z "$1" ] 
     do 
+	if [ ! -d "${1}" ]
+	then 
+	    mkdir "${1}"
+	fi
+	cd "${1}"
 	getYoutubeUsersVideos "${1}"
+	cd ..
 	shift 
     done 
 

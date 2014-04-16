@@ -4,8 +4,9 @@
 #NOTE::you can't be logged in and view the source and go off that bc diff pages are served to you when you are logged in vs this script which isn't logged in
 #2011.06.23 It appears that DA wised up and now you can't just chop the 150 from the url to get the mature version. Only the thumbnail is accessible without brutefocring the URL. Which we'll be doing.
 GetFullSizeImages=0
-GetLargeImages=0
-
+GetSuper_FullImg=1
+GetSuper_Img=1
+GetDatSrcImages=0
 
 function downloadIndividualPages ()
 {
@@ -14,7 +15,7 @@ function downloadIndividualPages ()
     for x in ${passed_array[@]} #1
     do 
 	echo "Downloading $x"
-	wget -nc -U Mozilla "$x" 2>>/tmp/wgeterrors.txt
+	wget -nv -nc -U Mozilla "$x" 2>>/tmp/wgeterrors.txt
     done
 }
 
@@ -30,12 +31,18 @@ function removeIndividualPages ()
 
 function downloadMatureImageFromURL ()
 {
-    tempPage="/tmp/DAMaturePage"
+###
+### Note this method doesn't work for all images/urls
+### some such as http://kunkka.deviantart.com/art/ero-ero-2-62788422
+### do not have tumblr links :( Sun Apr 13 19:34:35 EDT 2014
+###
+
+    tempPage="/tmp/${deviantID}_DAMaturePage"
     passed_array=( `echo "$1"` )
     for x in ${passed_array[@]} 
     do 
 	echo "${x}"
-	wget -U Mozilla "${x}" -O ${tempPage}
+	wget -nv -U Mozilla "${x}" -O ${tempPage}
 
 	echo "Searching $x for 'Download Image' "
 	DownloadImage=$( grep 'deviantart.net'  "${tempPage}"| grep 'gmi-ResourceViewShareTumblr' | sed 's/.*openurl="http:\/\/www.tumblr.com\/share\/photo?source=//;s/&amp;caption=.*//;s/%2F/\//g;s/%3A/:/' )
@@ -43,7 +50,10 @@ function downloadMatureImageFromURL ()
 	echo ${DownloadImage} >> /tmp/DAMatureImages.txt
 	if [ "$DownloadImage" != "" ]
 	then 
-	    wget  -U Mozilla  $DownloadImage 2>>/tmp/wgeterrors.txt  # we don't have a -nc bc we want to overwrite the old thumbnails we have when this was run using my older scrapers
+	    wget -nv -N  -U Mozilla  $DownloadImage 2>>/tmp/wgeterrors.txt  # we don't have a -nc bc we want to overwrite the old thumbnails we have when this was run using my older scrapers
+	else
+	    DownloadImage=$( grep 'deviantart.net'  "${tempPage}"| grep 'gmi-ResourceViewShareTumblr' | sed 's/.*openurl="http:\/\/www.tumblr.com\/share\/photo?source=//;s/&amp;caption=.*//;s/%2F/\//g;s/%3A/:/' )
+	    echo ${DownloadImage}  >> /tmp/DA
 	fi
     done
 }
@@ -59,7 +69,7 @@ function downloadFullImageFromFile ()
 	then 
 	    #we don't want our variable to be quoted otherwise we'll get a Scheme missing error from wget
 	    #	    wget -nc -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt $DownloadImage
-	    wget -nc -U Mozilla  $DownloadImage 2>>/tmp/wgeterrors.txt
+	    wget -nv -nc -U Mozilla  $DownloadImage 2>>/tmp/wgeterrors.txt
 	fi
     done
 }
@@ -71,7 +81,7 @@ function downloadallowingclobber ()
     do 
 	echo "$x"
 	#	wget -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt "$x"
-	wget -U Mozilla "$x" 2>>/tmp/wgeterrors.txt
+	wget -nv -U Mozilla "$x" 2>>/tmp/wgeterrors.txt
     done
 
 }
@@ -84,7 +94,7 @@ function downloadnoclobber ()
     do 
 	echo "$x"
 	#	wget -U Mozilla -nc  --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt "$x"
-	wget -U Mozilla -nc   "$x" 2>>/tmp/wgeterrors.txt
+	wget -nv -U Mozilla -nc   "$x" 2>>/tmp/wgeterrors.txt
     done
 }
 
@@ -122,7 +132,7 @@ else
 	    echo "Getting gallery index file"
 	    #without the trailing / it saves the file as gallery instead of index.html
 	    #	wget -U Mozilla --referer=http://deviantart.com  --cookies=on --load-cookies=/home/arch-nicky/cookies.txt --keep-session-cookies --save-cookies=/home/arch-nicky/cookies.txt  http://${1}.deviantart.com/gallery/ #-O $OutputFile
-	    wget -U Mozilla http://${deviantID}.deviantart.com/gallery/ 2>>/tmp/wgeterrors.txt   #-O $OutputFile
+	    wget -nv -U Mozilla http://${deviantID}.deviantart.com/gallery/ 2>>/tmp/wgeterrors.txt   #-O $OutputFile
 	    #check if the gallery index has additional pages.
 	    NextPageCheck=$(grep "gallery/?offset=" index.html | grep "Next" )
 	    #2011.06.21 appears they no longer put "next page" they just do next. grep "Next Page</a>" )
@@ -134,7 +144,7 @@ else
 		let 'offsetcounter+=1'
 		let "offset=${offsetcounter} * 24"
 		echo "Getting gallery index with offset of ${offset}"
-		wget -U Mozilla http://${deviantID}.deviantart.com/gallery/?offset=${offset} 
+		wget -nv -U Mozilla http://${deviantID}.deviantart.com/gallery/?offset=${offset} 
 		NextPageCheck=$(grep "gallery/?offset=" index.html?offset=${offset}  | grep "Next") # Page</a>" )
 		cat index.html?offset=${offset} >> index.html
 	    done
@@ -146,7 +156,7 @@ else
 	#2012.02.08 we aern't getting all the files from the index page for some reason
 	# I had to formulate this roundabouts way to separate the images as they were all being put on a single line which sed was then missing.
 	#Wed Mar 12 21:06:24 EDT 2014 : changed from super_fullimg to super-full-img etc 
-	MatureLinks=$( grep 'thumb ismature' index.html | sed 's/.*thumb ismature" href="//;s/".*//' | sort | uniq )
+	MatureLinks=$( grep 'thumb ismature' index.html | sed 's/.*ismature//;s/.*href="//;s/".*//' | sort | uniq )
 	Super_FullImg=$( sed 's/super-full-img="/super_fullimg=/g' index.html | tr '"' '\n' | grep super_fullimg |  sed 's/.*super_fullimg=//g;s/" .*//g' )
 	Super_Img=$( sed 's/super-img="/super_img=/g' index.html | tr '"' '\n' | grep super_img |  sed 's/.*super_img=//g;s/" .*//g' )
 	DataSrc=$( sed 's/data-src="/super_fullimg=/g' index.html | tr '"' '\n' | grep super_fullimg |  sed 's/.*super_fullimg=//g;s/" .*//g' )
@@ -183,7 +193,7 @@ else
 	    echo "Done compiling fullimg and img lists."
 	fi
 	#Since the full images are first priority, we now try to get the fullimg then img listed in the gallery index file (as they are of lower res)	
-	if [ $GetLargeImages -eq 1 ]
+	if [ $GetSuper_FullImg -eq 1 ]
 	then 
 	    if [ "$Super_FullImg" != "" ]
 	    then
@@ -192,15 +202,21 @@ else
 	    fi
 	fi	
 	#via the 'noclobber' we get all the images, so the order is impt that we attempt to get SuperFull, then Large, then Super, then the thumbnails
-	if [ "$Super_Img" != "" ]
-	then 
-	    downloadnoclobber "$Super_Img" 
+	if [ ${GetSuper_Img} -eq 1 ] 
+	then
+	    if [ "$Super_Img" != "" ]
+	    then 
+		downloadnoclobber "$Super_Img" 
+	    fi
 	fi
 
-	if [ "$DataSrc" != "" ]
+	if [ ${GetDatSrcImages} -eq 1 ]
 	then
-	    downloadnoclobber "$DataSrc" #this catches all the ones that don't have superimages
-	    #echo "$DataSrc"
+	    if [ "$DataSrc" != "" ]
+	    then
+		downloadnoclobber "$DataSrc" #this catches all the ones that don't have superimages
+		#echo "$DataSrc"
+	    fi
 	fi
 	# ??not sure this works or what it is supposed to do	rm `ls | grep -v '\.'` #use this to rm files since my above comd wasn't working
 	rm index.html?offset*
