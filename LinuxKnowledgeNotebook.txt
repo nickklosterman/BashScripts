@@ -2725,3 +2725,5 @@ sed Replace everything up to first string occurrence :http://stackoverflow.com/q
 echo "one two three four five four three two one"  | sed 's/.*two \(three\)/\1/'
 three four five four three two one
 
+Wed Apr 16 12:13:18 EDT 2014
+using sed with bash variables. simply use double quotes. sed "s/${var}/${foo}/"
