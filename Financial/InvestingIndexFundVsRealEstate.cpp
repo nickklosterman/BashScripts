@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     I totally forgot about using capital letters for optargs
   */
   int option_index=0;
-  if (argc >= 11)
+  if (argc >= 1)
     {
       while ((c = getopt_long(argc, argv, ":p:e:r:n:y:d",long_options,&option_index)) != -1) {
 	switch(c) {

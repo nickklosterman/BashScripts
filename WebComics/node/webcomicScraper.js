@@ -2,6 +2,8 @@ var request = require('request');
 var cheerio = require('cheerio');
 var fs = require('fs');
 
+// rar libs : https://www.npmjs.org/package/rarfile https://www.npmjs.org/package/rarjs
+
 urlArray = [
 //    "http://cucumber.gigidigi.com/cq/page-1/"    ,
 //"http://shiverbureau.com/2012/04/04/welcome-to-london-chapter-1-page-1/" //the rel links sometimes take you to diff pages (blog pages) instead of the webcomic pages
