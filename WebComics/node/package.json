@@ -1,8 +1,11 @@
 {
-  "name" : "ModulusDemoApp",
+  "name" : "Nickys_Web_Comic_Scraper",
   "version" : "0.0.1",
   "dependencies" : {
     "request" : "*",
-    "cheerio" : "*"
+    "cheerio" : "*",
+     "glob":"*",
+"node-zip":"*"
+
   }
 }
