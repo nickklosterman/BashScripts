@@ -1,17 +1,29 @@
+/**
+*
+This is a basic webscraper for webcomics.
+It scrapes from an initial url and searches for 'next' page type indicators.
+It then starts to download the image from the current page.
+It also downloads the next page to scrape.
+It proceeds in this fashion until the 'next' page is undefined signalling the last webcomic page.
+When it is all done it zips up the images into a cbz file. 
+
+Bugs:
+currently having a hard time triggering the kickoff of the zipping
+I'm trying ot trigger it when the last page is being scraped by setting a flag to true and then checking that flag on the callback of writing the image to file. I have a scoping issue. 
+I'm not sure this is the best solution because right now the last two+ images will kickoff the zip process. I don't want to kick off multiple ones.
+I was thiking of setting a counter that is incremented when the request for the image goes out but and checking to see if the number of completed requests equals the number of initiated requests. Hmm I suppose I could use that method in conjunction with my 'done flag' method.
+*/
+
+
+
 var request = require('request'),
 cheerio = require('cheerio'),
-fs = require('fs'),
-glob = require('glob');
+fs = require('fs');
+
 
 // to test css selectors in firebug: in console type: $$('css selector') this will return an array
 // in chrome use $('') or $$('') in the console
 
-urlArray = [
-//    "http://cucumber.gigidigi.com/cq/page-1/"    ,
-//"http://shiverbureau.com/2012/04/04/welcome-to-london-chapter-1-page-1/" //the rel links sometimes take you to diff pages (blog pages) instead of the webcomic pages
-//"http://shiverbureau.com/2014/04/17/welcome-to-london-chapter-3-page-6"
-"http://gingerhaze.com/nimona/comic/page-1"
-];
 
 /*
 starturl: url the webcomic starts on
@@ -21,93 +33,17 @@ baseurl: in the case where the next link is relative, used to create a full url
 engine: optional to see what type of engine the author is using.
 */
 webcomicArray = [
-{
+//{starturl:"http://shiverbureau.com/2012/04/04/welcome-to-london-chapter-1-page-1/", title:"ShiverBureau",fileextension:"jpg",baseurl:"",engine:""} //seems to work fine
 //http://cucumber.gigidigi.com/cq/page-498/ http://cucumber.gigidigi.com/cq/page-1/
-starturl:"http://cucumber.gigidigi.com/cq/page-497/", title:"CucumberQuest",fileextension:"jpg",baseurl:"",engine:""}
-//,{starturl:"http://gingerhaze.com/nimona/comic/page-1", title:"Nimona",fileextension:"jpg",baseurl:"http://gingerhaze.com",engine:"Drupal 7"}
+//,
+{starturl:"http://cucumber.gigidigi.com/cq/page-1/", title:"CucumberQuest",fileextension:"jpg",baseurl:"",engine:""}, // worked fine
+{starturl:"http://gingerhaze.com/nimona/comic/page-1", title:"Nimona",fileextension:"jpg",baseurl:"http://gingerhaze.com",engine:"Drupal 7"}  get that doneFlag is undefined at the end; it is not coming up w undefined for the last page !!
 ];
 
-/*
-*
-*
-*Each one of the cases must work gracefully for all other webcomics. so it doesn't prevent a undefined from being set as the nextlink when the last page is handled. 
-*/
-var getNextLink= function(body) {
-  //  console.log("current page:"+nextlink);
-    var nextLinkElement=$('link[rel=\'next\']'); //<link rel='next' ...>
-    if (typeof nextLinkElement !== 'undefined' && typeof nextLinkElement[0] !== 'undefined' && nextLinkElement[0].hasOwnProperty('attribs'))
-    {
-	var nextLink=nextLinkElement[0].attribs.href;
-    }
-    else {
-	if( typeof nextLink === 'undefined'){
-	    //	    nextLinkElement=$('a > img[src="http://gingerhaze.com/sites/default/files/comicdrop/comicdrop_next_label_file.png"]'); This won't work because this gets the child element of the one i want, and there is currently, as of early 2014, no way to get at the parent element via selectors
-
-	    nextLinkElement=$('li > a'); //nimona
-	    //I am blatantly banking on the format not changing such that the 8th element is the <a href...> that wraps the next button
-	    if (typeof nextLinkElement !== 'typeof' 
-		&& typeof nextLinkElement[8] !== 'undefined' 
-		&& nextLinkElement[8].hasOwnProperty('attribs')) {
-
-	    console.log(nextLinkElement[8]);
-	    if (typeof nextLinkElement[8].attribs.hasOwnProperty('href')){
-  		nextLink=baseurl+nextLinkElement[8].attribs.href;
-	    }
-}	    //	    console.log("nextLinkElement nimona:"+nextLinkElement);			      
-	}	    else {
-	    console.log("No next link found");
-	}
-    }
-    console.log("next link from currentpage:"+nextLink);
-    return nextLink;
-};
 
 var searchForArchiveList = function() { 
 //this should work for ShiverBureau
 var archiveElement=$('select');
-};
-
-var getComicImage=function(counter){
-// switch (title){
-// case "Nimona":
-//     var comicImageElement=$('img #comic-1 img'); 
-// break;
-// }
-    var comicImageElement=$('#comic-1 img'); //shiverbureau
-    var comicImage;
-    if (typeof comicImageElement[0] === 'undefined' || !comicImageElement[0].hasOwnProperty('attribs'))
-    {
-	comicImageElement=$('#webcomic img') //cucumberquest
-	//	    console.log(comicImageElement);
-	if (typeof comicImageElement[0] !== 'undefined' && comicImageElement[0].hasOwnProperty('attribs')) 
-	{
-	    comicImage=comicImageElement[0].attribs.src;
-	} else 
-	{ 
-	    comicImageElement=$('img[typeof="foaf:Image"]');//nimona <img typeof="foaf:Image"
-	    if (typeof comicImageElement[0] !== 'undefined' && comicImageElement[0].hasOwnProperty('attribs')) 
-	    {
-		comicImage=comicImageElement[0].attribs.src;
-	    } else 
-	    { 
-		console.log("no image found"+comicImageElement);
-	    }
-	}
-    } else {
-	console.log("11nnnn11");
-	//	    console.log(typeof comicImageElement[0].attribs );
-	comicImage=comicImageElement[0].attribs.src;
-    }
-
-    console.log("comicImage:"+comicImage);
-    //    var filename = sprintf("test%03d.png",) ; //shit didn't realize there is js implementation of sprintf but I don't wanna dl. http://www.diveintojavascript.com/projects/javascript-sprintf :(
-    var filenumber=pad(counter,4);
-    var filename=title+filenumber+"."+fileextension;
-    if (typeof comicImage !== 'undefined') {
-	var options= {url:comicImage,headers:{ 'User-Agent': 'request'} };
-//	request(comicImage).pipe(fs.createWriteStream(filename)) //from  https://www.npmjs.org/package/request
-	request(options).pipe(fs.createWriteStream(filename)) 
-    }
 };
 
 var pad=function(num, size) { //http://stackoverflow.com/questions/2998784/how-to-output-integers-with-leading-zeros-in-javascript 
@@ -115,25 +51,19 @@ var pad=function(num, size) { //http://stackoverflow.com/questions/2998784/how-t
     return s.substr(s.length-size);
 };
 
-var packageIntoArchive = function() {
-
+var  packageIntoArchive = function(title,fileextension) {
 //from: http://stackoverflow.com/questions/5754153/zip-archives-in-node-js
-    var spawn = require('child_process').spawn;
+//    var spawn = require('child_process').spawn;
     var exec = require('child_process').exec;
 
     var filename="";
-
 //http://nodejs.org/api/child_process.html
-
-
     var archivename=title+'.cbz';
-    filename=title+'*.'+fileextension;
-    console.log(filename);
+    filename='_'+title+'*.'+fileextension;
+    //console.log(filename);
     //    var zip = spawn('zip', ['', archivename, filename]);
     //    var zip = spawn('zip', [ archivename, filename]); //see  http://stackoverflow.com/questions/11717281/wildcards-in-child-process-spawn  , basically -->The * is being expanded by the shell, and for child_process.spawn the arguments are coming through as strings so will never get properly expanded. It's a limitation of spawn. You could try child_process.exec instead, it will allow the shell to expand any wildcards properly:
     //    var zip = spawn('zip', ['-u', archivename, filename]);
-    
-  
     var zip = exec('zip '+archivename+' '+ filename,function(error,stdout,stderr){
 	console.log('stdout: ' + stdout);
 	console.log('stderr: ' + stderr);
@@ -141,42 +71,189 @@ var packageIntoArchive = function() {
 	    console.log('exec error: ' + error);
 	}
     });
-
 };
 
+function WebcomicScrape(starturl,title,baseurl,fileextension) {
+    this.starturl=starturl;
+    this.title=title;
+    this.baseurl=baseurl;
+    this.fileextension=fileextension;
+    this.doneFlag=false;
+    this.processUrl(this.starturl,0);
+}
 
-if ( 1 === 0 )
-{
-    var urlarraylength=urlArray.length;
-for (var counter = 0; counter < urlarraylength; counter++) {
-    var imagecounter=0;
-    var url=urlArray[counter];
-    var nextlink=url;
-    console.log('----');
-    console.log(url);
-    console.log('----');
-    console.log(nextlink);
-    imagecounter+=1;
+//Javascsript 6th ed pg 204
+WebcomicScrape.prototype = {
+    constructor:WebcomicScrape,
+//    doneFlag:undefined,
+    /*
+     *
+     *
+     *Each one of the cases must work gracefully for all other webcomics. so it doesn't prevent a undefined from being set as the nextlink when the last page is handled. 
+     */
+    getComicImage:function($,counter,url){
+	// switch (title){
+	// case "Nimona":
+	//     var comicImageElement=$('img #comic-1 img'); 
+	// break;
+	// }
+	var comicImageElement=$('#comic-1 img'); //shiverbureau
+	var comicImage;
+	if (typeof comicImageElement[0] === 'undefined' || !comicImageElement[0].hasOwnProperty('attribs'))
+	{
+	    comicImageElement=$('#webcomic img') //cucumberquest
+	    //	    console.log(comicImageElement);
+	    if (typeof comicImageElement[0] !== 'undefined' && comicImageElement[0].hasOwnProperty('attribs')) 
+	    {
+		comicImage=comicImageElement[0].attribs.src;
+	    } else 
+	    { 
+		comicImageElement=$('img[typeof="foaf:Image"]');//nimona <img typeof="foaf:Image"
+		if (typeof comicImageElement[0] !== 'undefined' && comicImageElement[0].hasOwnProperty('attribs')) 
+		{
+		    comicImage=comicImageElement[0].attribs.src;
+		} else 
+		{ 
+		    console.log(url+":no image found"+comicImageElement);
+		}
+	    }
+	} else {
+	    //	    console.log(typeof comicImageElement[0].attribs );
+	    comicImage=comicImageElement[0].attribs.src;
+	}
+	//	console.log("comicImage:"+comicImage);
+	var filenumber=pad(counter,4);
+	var imagenameonserver=function(){
+	    if (typeof comicImage !== 'undefined') {
+		var pathsplit=comicImage.split('/');
+		console.log(pathsplit[pathsplit.length-1]);
+		return pathsplit[pathsplit.length-1];
+	    }
+	    return "empty";
+	};
+	var realname= imagenameonserver();
+	var filename='_'+this.title+filenumber+"."+this.fileextension;
+	console.log("doneFlag:"+this.doneFlag+' '+' ');
+	var getImage=function(comicImage,_this){
+	    var that=_this;
+	    if (typeof comicImage !== 'undefined') {
+		var imageStream=fs.createWriteStream(filename);
+		imageStream.on('close', function() {
+		    console.log(filename+' / '+realname+' file done');
+		    
+		    //create a counter such that when all the imagestreams close we write the archive, check that the nextLink is undefined 
+		    if (that.doneFlag===true){
+			packageIntoArchive(that.title,that.fileextension);
+			console.log("Finished scraping "+that.title+".");
+			//set that.doneFlag back to false to prevent trying to start the process again;
+			that.doneFlag=false;
+		    }else { 
+//			console.log("doneFlag:"+this.doneFlag+' '+doneFlag+' '+that.doneFlag);
+			console.log("inside;doneFlag:"+that.doneFlag+' '+' ');
+}
+		});
+		var options= {url:comicImage,headers:{ 'User-Agent': 'request'} };
+		//	    request(options).pipe(fs.createWriteStream(filename)); //from  https://www.npmjs.org/package/request
 
-    !function processUrl (url,counter){
+		var imagerequest =request(options,function(err,resp,body){
+		    if (err){
+			
+			if (err.code === 'ECONNREFUSED'){
+			    console.error(url+'Refused connection');
+			} else if (err.code==='ECONNRESET'){
+			    console.error(url+'reset connection')
+			} else if (err.code==='ENOTFOUND'){
+			    console.error(url+'enotfound')
+			} else{
+			    console.log(url+err);
+			    console.log(err.stack);
+			}
+			getImage(comicImage,that.doneFlag);//call ourself again if there was an error (mostlikely due to hitting the server too hard)
+		    } else {
+			//do nothing
+		    }
+		});
+		imagerequest.pipe(imageStream);
+	    }
+	} ;
+	getImage(comicImage,this);
+    },
+    getNextLink:function($,url) {
+	var nextLinkElement=$('link[rel=\'next\']'); //<link rel='next' ...>
+	if (typeof nextLinkElement !== 'undefined' && typeof nextLinkElement[0] !== 'undefined' && nextLinkElement[0].hasOwnProperty('attribs'))
+	{
+	    var nextLink=nextLinkElement[0].attribs.href;
+	}
+	else {
+	    if( typeof nextLink === 'undefined'){
+		nextLinkElement=$('li > a'); //nimona
+		//I am blatantly banking on the format not changing such that the 8th element is the <a href...> that wraps the next button
+		if (typeof nextLinkElement !== 'typeof' 
+		    && typeof nextLinkElement[8] !== 'undefined' 
+		    && nextLinkElement[8].hasOwnProperty('attribs')) {
+
+		    //		    console.log(nextLinkElement[8]);
+		    if (typeof nextLinkElement[8].attribs.hasOwnProperty('href')){
+  			nextLink=this.baseurl+nextLinkElement[8].attribs.href;
+		    }
+		}	    //	    console.log("nextLinkElement nimona:"+nextLinkElement);			      
+	    }	    else {
+		console.log(url+":No next link found");
+	    }
+	}
+	//	console.log("next link from currentpage:"+nextLink);
+	return nextLink;
+    },
+    processUrl:function(url,counter){
+	var that = this; //needed to prevent this referring to request inside the calls
 	if (typeof url !=='undefined') {
 	    request(url, function(err, resp, body) {
 		if (err)
-    		    throw err;
-		$ = cheerio.load(body); //hmm so $ is global??
-		//	    console.log(counter);
-		
-		nextlink=getNextLink();
-		//	    console.log(nextlink)
-		getComicImage(counter);
-		processUrl(nextlink,counter+1);
+		{//    			throw err;
+		    if (err.code === 'ECONNREFUSED'){
+			console.error(url+' Refused connection');
+		    } else if (err.code==='ECONNRESET'){
+			console.error(url+' reset connection')
+		    } else if (err.code==='ENOTFOUND'){
+			console.error(url+' enotfound')
+		    } else{
+			console.log(url+err);
+			console.log(err.stack);
+		    }
+		}
+		//		    console.log(err);
+		//if there aren't any errors we proceed w extraactoin
+		if (typeof err==='undefined'
+		    || err===null){
+		    var $ = cheerio.load(body); //hmm so $ is global??
+		    //	    console.log(counter);
+		    
+		    var nextlink=that.getNextLink($,url);
+		    //	    console.log(nextlink)
+		    that.getComicImage($,counter,url);
+
+		    that.processUrl(nextlink,counter+1);
+		}else if (typeof err!=='undefined') {
+		    //			console.log(err.code);
+		    //wait 0.25 sec before tryiing again
+		    setTimeout(function() {
+			that.processUrl(url,counter);
+		    },250);//could make this timeout wait longer the more frq the reset connections happen
+		}
 	    })
 	}
-    }(nextlink,imagecounter);
+	else { // when we finish and the last link is undefined, package up the images into a zip file
+	    that.doneFlag=true;
+	    console.log("setting doneFlag:"+that.doneFlag);
+	    // setTimeout(function(){
+	    // 	packageIntoArchive(that.title,that.fileextension);
+	    // 	console.log("Finished scraping "+that.title+".");
+	    // },2500); //this is a hack as large images may take longer or if net work traffic is bad this may attempt to archive before all files are downloaded --> moved to flag and performing check when images downloaded
+	}
+    }
+};
 
-}
-
-} else {
+function Main() {
     var webcomicarraylength=webcomicArray.length;
     for (var counter = 0; counter < webcomicarraylength; counter++) {
 	var imagecounter=0;
@@ -190,33 +267,39 @@ for (var counter = 0; counter < urlarraylength; counter++) {
 	// console.log('----');
 	// console.log(nextlink);
 
+console.log("Launching for "+title+"."); 
+	var wcs = new WebcomicScrape(nextlink,title,baseurl,fileextension);
 
-	!function processUrl (url,counter){
-	    if (typeof url !=='undefined') {
-		request(url, function(err, resp, body) {
-		    if (err)
-    			throw err;
-		    $ = cheerio.load(body); //hmm so $ is global??
-		    //	    console.log(counter);
+
+	// !function processUrl (url,counter){
+	//     if (typeof url !=='undefined') {
+	// 	request(url, function(err, resp, body) {
+	// 	    if (err)
+    	// 		throw err;
+	// 	    var $ = cheerio.load(body); //hmm so $ is global??
+	// 	    //	    console.log(counter);
 		    
-		    nextlink=getNextLink();
-		    //	    console.log(nextlink)
-		    getComicImage(counter);
+	// 	    nextlink=wcs.getNextLink($);
+	// 	    //	    console.log(nextlink)
+	// 	    wcs.getComicImage($,counter);
 
-		    // if (counter === 19)
-		    // {
-		    // 	nextlink=undefined;
-		    // }
-		    processUrl(nextlink,counter+1);
-		})
-	    }
-	    else { // when we finish and the last link is undefined, package up the imags into a zip file
-		packageIntoArchive();
-	    }
-	}(nextlink,imagecounter);
+	// 	    // if (counter === 19)
+	// 	    // {
+	// 	    // 	nextlink=undefined;
+	// 	    // }
+	// 	    processUrl(nextlink,counter+1);
+	// 	})
+	//     }
+	//     else { // when we finish and the last link is undefined, package up the imags into a zip file
+	// 	packageIntoArchive(wcs.title,wcs.fileextension);
+	//     }
+	// }(nextlink,imagecounter);
 
     }
-}
+
 
     
 
+}
+
+Main();
