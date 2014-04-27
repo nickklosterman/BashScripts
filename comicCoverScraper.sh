@@ -1,11 +1,12 @@
 #!/bin/bash
+#This is a script to crawl and extract the first image from all found .cbr .cbz files and to create an index cbr of all the extracted cover images
 
 function determineArchiveType()
 {
     flag=2 #0 for zip, 1 for rar, 2 for unknown
     filename="${1}"
     file_output=$( file -b "${filename}" | awk '{print $1}' )
-    #flag=$file_output
+    flag=$file_output
     if [ "${file_output}" == "Zip" ]
     then
 	flag=0
@@ -17,15 +18,19 @@ function determineArchiveType()
 }
 
 function addArchiveLabelToImage() {
+#1=filename 2=archive
     mytext="${1}"-"${2}"
+    outputfile=_comic"${1}"
     echo $mytext
 #    convert "${1}" -background White -fill Black -font Courier -pointsize 24 label:"${mytext}" -gravity South -append comiccovers"${1}"
-    convert "${1}" -background White -fill Black -font Courier -pointsize 24 label:"${2}" -gravity South -append _comiccovers"${1}"
+#    convert "${1}" -background White -fill Black -font Courier -pointsize 24 label:"${2}" -gravity South -append _comiccovers"${1}"
+    convert "${1}" -background White -fill Black -font Courier -pointsize 24 label:"${2}" -gravity South -append "${outputfile}" 2>> errorlog.txt
+    #rm "${1}" hmm performing rm seems risk, yet is needed.
 }
 
 function checkFilenameDoesntExist() {
 
-imageToExtract="${1}"
+imageToExtract=_comic"${1}" #since we are converting the image
 if [ -e "${imageToExtract}" ]
 then
     echo "uh oh, file all ready exists"
@@ -41,57 +46,54 @@ number=$( printf "%03d" $counter )
 imageToExtract="${filename}${number}.${extension}"
 let 'counter+=1'
 done
-echo "${imageToExtract}" #for a better way to return values to callers http://www.linuxjournal.com/content/return-values-bash-functions
+mv "${1}" "${imageToExtract}"
+#echo "${imageToExtract}" #for a better way to return values to callers http://www.linuxjournal.com/content/return-values-bash-functions
 }
 
-function extractFirstImageFromArchive() 
+
+function extractImageFromArchive() 
 {
-#we need to check if the file we are about to extract to all ready exists and if so to rename it.
+    imageToExtract="${3}"
     if [ $1 -eq 0 ]
     then #Zip 
-	imageToExtract=$( unzip -Z -1 "${2}" | sed '1!d' )
-#	checkFilenameDoesntExist "${imageToExtract}"  fuck since we 'return' things from this function, the 'return' eats  the dialog....damnit.
 	b=$( unzip "${2}" "${imageToExtract}" )
     fi
     if [ $1 -eq 1 ] 
     then #Rar
-	imageToExtract=$( unrar lb "${2}" | sed '1!d' )
-#	checkFilenameDoesntExist "${imageToExtract}"
 	b=$( unrar e "${2}" "${imageToExtract}" )
     fi
-    echo "${imageToExtract}"
 }
 
-# filelist=$( find . -name "*.[Cc][Bb][RrZz]" -print0 | split  )
-# for ((i=0;i<${#filelist[@]};i++))
-# do
-#     echo $i
-#     echo ${filelist[${i}]} 
-#     #archiveType=$( determineArchiveType ${filelist[${i}]} )
-#     #echo $archiveType
-#     #imageName=$( extractFirstImageFromArchive ${archiveType}  ${filelist[${i}]} )
-#     #mv "${imageName}"  comiccovers_"${imageName}" 
-# done
-
-if [ 1 -eq 0 ]
-then
-    #for i in `find . -type f -name "*.[Cc][Bb][RrZz]" ` #-print0` #*.cbz
-    for i in *.cbz
-    do 
-	echo "${i}"
-	archiveType=$( determineArchiveType "${i}" )
-	echo $archiveType
-	imageName=$( extractFirstImageFromArchive ${archiveType}  "${i}" )
-	echo ${imageName}
-	addArchiveLabelToImage "${imageName}" "${i}" 
-	#    mv "${imageName}"  comiccovers_"${imageName}" 
-    done
-
-    zip ComicCovers _comiccovers*.*
-    mv ComicCovers.zip ComicCovers.cbz
-    evince ComicCovers.cbz
-    # rar wtf rar is only in the AUR
-fi
+function getImageName()
+{
+    counter=1
+    imageToExtract=""
+    while [ "${imageToExtract}" = "" ]
+    do
+#	echo "${counter}"
+	if [ $1 -eq 0 ]
+	then #Zip 
+	    imageToExtract=$( unzip -Z -1 "${2}" | sed "${counter}!d" )
+	fi
+	if [ $1 -eq 1 ] 
+	then #Rar
+	    imageToExtract=$( unrar lb "${2}" | sed "${counter}!d" )
+	fi
+	extension_=${imageToExtract##*.}
+	extension=${extension_^^}
+	
+	if [ "${extension}" = "JPG" ] ||  [ "${extension}" = "PNG" ] || [ "${extension}" = "GIF" ] || [ "${extension}" = "JPEG" ]
+	then
+	    bill="bob"
+	else
+#	    echo "fail: ${imageToExtract} ext:${extension}"
+	    imageToExtract=""
+	    let 'counter+=1'
+	fi
+   done	
+#	echo "fail: ${imageToExtract} ext:${extension}"
+    echo "${imageToExtract}"
+}
 
 
 #from: http://stackoverflow.com/questions/1116992/capturing-output-of-find-print0-into-a-bash-array
@@ -100,8 +102,19 @@ while IFS= read -r -d $'\0' file; do
     echo "$file"        # or however you want to process each file
 	archiveType=$( determineArchiveType "${file}" )
 	echo $archiveType
-	imageName=$( extractFirstImageFromArchive ${archiveType}  "${file}" )
+	if [ $archiveType -eq 1 ] || [ $archiveType -eq 0 ] 
+	then
+#	imageName=$( extractFirstImageFromArchive ${archiveType}  "${file}" )
+	imageName=$( getImageName ${archiveType}  "${file}" )
 	echo ${imageName}
+	extractImageFromArchive ${archiveType}  "${file}" "${imageName}" 
 	addArchiveLabelToImage "${imageName}" "${file}" 
-
+	else 
+	    echo "$file not identifed as rar or zip: ${archiveType}"
+	fi
 done < <(find . -type f -name "*.[Cc][Bb][RrZz]" -print0)
+#zip CoverImages *.png #*.jpg *.png *.gif *.JPG *.PNG *.GIF *.JPEG
+zip CoverImages _comic*
+#rm *.jpg *.png *.gif *.JPG *.PNG *.GIF *.JPEG We don't want to do this unless we know we are working in a temp directory or we could blow away images we want
+mv CoverImages.zip CoverImages.cbz
+
