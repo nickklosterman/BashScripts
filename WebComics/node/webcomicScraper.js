@@ -229,6 +229,7 @@ WebcomicScrape.prototype = {
 case "TheMeek":
 	    nextLinkElement=$('.nav-next > a'); //the black brick road of oz
 	    if (typeof nextLinkElement !== 'undefined' 
+		&& typeof nextLinkElement[0] !== 'undefined'
 		&& nextLinkElement[0].hasOwnProperty('attribs')
 		&& nextLinkElement[0].attribs.hasOwnProperty('href')
 	       ) {

@@ -74,10 +74,12 @@ function getImageName()
 	if [ $1 -eq 0 ]
 	then #Zip 
 	    imageToExtract=$( unzip -Z -1 "${2}" | sed "${counter}!d" )
+	    unzip -Z -1 "${2}" >> filelist.txt
 	fi
 	if [ $1 -eq 1 ] 
 	then #Rar
 	    imageToExtract=$( unrar lb "${2}" | sed "${counter}!d" )
+	    unrar lb "${2}" >> filelist.txt
 	fi
 	extension_=${imageToExtract##*.}
 	extension=${extension_^^}
@@ -106,9 +108,9 @@ while IFS= read -r -d $'\0' file; do
 	then
 #	imageName=$( extractFirstImageFromArchive ${archiveType}  "${file}" )
 	imageName=$( getImageName ${archiveType}  "${file}" )
-	echo ${imageName}
-	extractImageFromArchive ${archiveType}  "${file}" "${imageName}" 
-	addArchiveLabelToImage "${imageName}" "${file}" 
+#	echo ${imageName}
+#	extractImageFromArchive ${archiveType}  "${file}" "${imageName}" 
+#	addArchiveLabelToImage "${imageName}" "${file}" 
 	else 
 	    echo "$file not identifed as rar or zip: ${archiveType}"
 	fi
