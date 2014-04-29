@@ -18,10 +18,13 @@ for (var counter = 0; counter < urlArray.length; counter++) {
     		throw err;
 	    var myurl=url.split('.')[1];
 	    //cheerio can't handle fake element tags like odat:price so we translate them to remove the :
-	    $ = cheerio.load(body.replace(/odat:price/g,"odatPrice").replace(/sac:price/g,"odatPrice"));
-	    var titleArray=$('title').slice(1).eq(0).text(); //https://www.npmjs.org/package/cheerio 
-	    var priceArray=$('odatPrice').slice(1).eq(0).text(); //https:www.npmjs.org/package/cheerio 
-	    console.log(myurl+":"+titleArray+"---"+priceArray)
+	    $ = cheerio.load(body.replace(/odat:price/g,"odatPrice").replace(/sac:price/g,"odatPrice"));//,{xmlMode:true});
+//	    var titleArray=$('title'); //https://www.npmjs.org/package/cheerio 
+	    var title=$('title').slice(1).eq(0).text(); //this is the second title
+//	    var priceArray=$('odatPrice'); //https:www.npmjs.org/package/cheerio 
+	    var price=$('odatPrice').slice(0).eq(0).text(); //this is the first odatPrice element
+	    priceArray=$('odatPrice');//https:www.npmjs.org/package/cheerio 
+	    console.log(myurl+":"+title+"---"+price);
 	})
     }(url);
 }
