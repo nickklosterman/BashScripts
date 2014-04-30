@@ -1,0 +1,51 @@
+Emacs 
+-----
+You need to load the .el file and then 'M-x eval-buffer' then open the epub file.
+I didn't really get to see a nice way to view the epub contents. It just seemed to 
+show raw html content so you needed to read around the html tags :(
+ EPubmode: This DID work
+  http://sourceforge.net/p/epubmode/code/ci/master/tree/
+ Epubmode - this *didn't* work; evaluating the buffer failed 
+  http://www.emacswiki.org/emacs-se/EpubMode
+also from http://inasmuch.as/2011/04/06/opening-epub-in-emacs/
+add this to your .emacs:
+(setq auto-mode-alist
+ (append
+ (list
+ '("\\.epub$" . archive-mode))
+ auto-mode-alist))
+(setq auto-coding-alist
+ (append
+ (list
+ '("\\.epub$" . no-conversion))
+ auto-coding-alist))
+
+Bash Script + Lynx
+------------------
+https://code.google.com/p/textallion/source/browse/contrib/others/epub-read.sh
+for the lynx viewer you will also need the patch found here: http://www.mobileread.com/forums/attachment.php?attachmentid=79788&d=1323429880
+which I downloaded. 
+You then need to apply the patch to the above bash file
+ patch epub-read.sh epub-read_lynxviewer.patch
+ epub-read.sh -v FooBar.epub
+
+The -v switch uses lynx
+I also turned images on in the lynx.conf file by adding the following.
+
+XLOADIMAGE_COMMAND:feh %s &  //replace feh with your fav img viewer, xv etc etc.
+MAKE_LINKS_FOR_ALL_IMAGES:TRUE
+
+resource links for this : 
+http://www.mobileread.com/forums/archive/index.php/t-144166.html
+http://www.mobileread.com/forums/showthread.php?t=144166
+http://www.mobileread.com/forums/showthread.php?t=51267
+
+
+Python 
+------
+https://github.com/rupa/epub uses ncurse, didn't try it out
+
+
+Alternatives
+------------
+unzip -p book.epub | strings | less
