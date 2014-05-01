@@ -2727,3 +2727,14 @@ three four five four three two one
 
 Wed Apr 16 12:13:18 EDT 2014
 using sed with bash variables. simply use double quotes. sed "s/${var}/${foo}/"
+
+Thu May  1 10:41:28 EDT 2014
+gnu screen
+if you upgrade/update screen with an active screen session, you will no longer be able to reattach once disconnected due to version conflicts. 
+You can downgrade to the previous version for official packages as such : 
+Official packages
+
+    Q: I just ran pacman -Syu and package XYZ was upgraded from version M to version N. Version N is causing problems on my computer; how can I downgrade to version M?
+    A: You may be able to downgrade the package trivially by visiting /var/cache/pacman/pkg on your system and seeing if the older version of the package is stored there. (If you have not run pacman -Scc recently, it should be there). If the package is there, you can install that version using pacman -U /var/cache/pacman/pkg/pkgname-olderpkgver.pkg.tar.gz.
+
+this was taken from https://wiki.archlinux.org/index.php/Downgrading_packages#Official_packages
