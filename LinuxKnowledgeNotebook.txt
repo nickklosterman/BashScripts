@@ -2740,6 +2740,24 @@ three four five four three two one
 Wed Apr 16 12:13:18 EDT 2014
 using sed with bash variables. simply use double quotes. sed "s/${var}/${foo}/"
 
+
+Thu Apr 24 22:28:49 EDT 2014
+for generating pretty menus w icons use : https://wiki.archlinux.org/index.php/XdgMenu 
+xdg_menu --format icewm --fullmenu --root-menu /etc/xdg/menus/arch-applications.menu > ~/.icewm/menu 
+
+
+--
+For wireless settings, you can use wifi-menu -o to generate the profile file in /etc/netctl/.
+netctl enable profile
+
+Thu Apr 24 22:58:31 EDT 2014
+the wireless connection now uses netctl and automagically 
+starts the wifi profile for 952 on boot.
+if something changes in the profile you need to run
+netctl reenable profile 
+for the changes to propagate. (or something like that)
+RTFM/ RTFWiki on arch 
+
 Thu May  1 10:41:28 EDT 2014
 gnu screen
 if you upgrade/update screen with an active screen session, you will no longer be able to reattach once disconnected due to version conflicts. 
