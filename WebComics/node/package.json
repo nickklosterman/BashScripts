@@ -1,6 +1,6 @@
 {
-  "name" : "ModulusDemoApp",
-  "version" : "0.0.1",
+  "name" : "Nickys_Web_Comic_Scraper",
+  "version" : "0.0.2",
   "dependencies" : {
     "request" : "*",
     "cheerio" : "*"

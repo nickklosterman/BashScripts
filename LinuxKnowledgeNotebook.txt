@@ -1385,7 +1385,19 @@ Mon Dec 10 14:05:23 EST 2012
 10-12-2012
 symlink: I was doing symbolic links incorrectly. I was assuming it goes  ' ln -s From To' when it goes ' ln -s To From'
 'ln -s  ~/Git/Fonts/ ~/.fonts' puts a link Fonts in /.fonts that links to the Git/Fonts directory
-to see the symlink and where it points you need to do a long listing of the directory/file
+to see the symlink and where it points you need to do a long listing of the directory/file 
+update on Thu May  1 13:04:49 EDT 2014
+I'm still confused for symbolic links:
+[arch-nicky@arch-bitches ~]$ mv .screenrc BB/ConfigFiles/
+[arch-nicky@arch-bitches ~]$ ln -s .screenrc BB/ConfigFiles/.screenrc
+ln: failed to create symbolic link ‘BB/ConfigFiles/.screenrc’: File exists
+[arch-nicky@arch-bitches ~]$ ln -s  BB/ConfigFiles/.screenrc .screenrc
+[arch-nicky@arch-bitches ~]$ ls .sc* -lsrt
+4 -rw-r--r-- 1 arch-nicky users 139 May  1 11:29 .screenrc~
+0 lrwxrwxrwx 1 arch-nicky users  24 May  1 13:03 .screenrc -> BB/ConfigFiles/.screenrc
+The above command set seems to conflict with what I wrote earlier.
+
+
 
 Any time a new font is added (to ~/.fonts if single user or /usr/share/fonts for global use) you need to update the fontconfig cache:
 fc-cache -vf
@@ -2727,3 +2739,32 @@ three four five four three two one
 
 Wed Apr 16 12:13:18 EDT 2014
 using sed with bash variables. simply use double quotes. sed "s/${var}/${foo}/"
+
+
+Thu Apr 24 22:28:49 EDT 2014
+for generating pretty menus w icons use : https://wiki.archlinux.org/index.php/XdgMenu 
+xdg_menu --format icewm --fullmenu --root-menu /etc/xdg/menus/arch-applications.menu > ~/.icewm/menu 
+
+
+--
+For wireless settings, you can use wifi-menu -o to generate the profile file in /etc/netctl/.
+netctl enable profile
+
+Thu Apr 24 22:58:31 EDT 2014
+the wireless connection now uses netctl and automagically 
+starts the wifi profile for 952 on boot.
+if something changes in the profile you need to run
+netctl reenable profile 
+for the changes to propagate. (or something like that)
+RTFM/ RTFWiki on arch 
+
+Thu May  1 10:41:28 EDT 2014
+gnu screen
+if you upgrade/update screen with an active screen session, you will no longer be able to reattach once disconnected due to version conflicts. 
+You can downgrade to the previous version for official packages as such : 
+Official packages
+
+    Q: I just ran pacman -Syu and package XYZ was upgraded from version M to version N. Version N is causing problems on my computer; how can I downgrade to version M?
+    A: You may be able to downgrade the package trivially by visiting /var/cache/pacman/pkg on your system and seeing if the older version of the package is stored there. (If you have not run pacman -Scc recently, it should be there). If the package is there, you can install that version using pacman -U /var/cache/pacman/pkg/pkgname-olderpkgver.pkg.tar.gz.
+
+this was taken from https://wiki.archlinux.org/index.php/Downgrading_packages#Official_packages
