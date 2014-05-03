@@ -18,12 +18,14 @@ else
 	StartFromBackLastTwoDigitsOfYear=`date --date "$TodaysDate $counter days ago" +%g`
 	filename=$StartFromBackMonth$StartFromBackDay$StartFromBackLastTwoDigitsOfYear.gif
 	echo $filename
-	filelist+="http://www.muttscomics.com/art/images/daily/$filename "
+                  #https://muttscomics.com/sites/default/files/strips/050314.gif
+	filelist+="https://muttscomics.com/sites/default/files/strips/$filename "
+	#filelist+="http://www.muttscomics.com/art/images/daily/$filename "
 	let "counter-=1"
     done
 #    echo "${filelist}"
 #attempted to use -p for preload but it isn't working
-    wget -q -nc  $filelist
+    wget -U "Mozilla"  -nc  $filelist --no-check-certificate &
     feh --geometry 1024x768 -S name .
 
 fi
