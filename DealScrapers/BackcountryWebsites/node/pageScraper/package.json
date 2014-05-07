@@ -1,0 +1,8 @@
+{
+    "name":"backcountry-rss-scraper",
+    "dependencies":{
+	"request":"*",
+	"cheerio":"*",
+	"sqlite3": "~2.1"
+    }
+}
