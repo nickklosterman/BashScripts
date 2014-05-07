@@ -1,6 +1,8 @@
-var request = require('request');
-var cheerio = require('cheerio');
-var fs = require('fs');
+var request = require('request')
+, cheerio = require('cheerio')
+, fs = require('fs')
+, sqlite = require('sqlite3');
+
 
 urlArray = [
 "http://rss.chainlove.com/docs/chainlove/rss.xml"
@@ -8,9 +10,13 @@ urlArray = [
 ,"http://rss.steepandcheap.com/docs/steepcheap/rss.xml"
 ];
 
+pageArray = [
+"http://www.steepandcheap.com/current-steal",
+"http://www.whiskeymilitia.com/",
+"http://www.chainlove.com/"
+];
 
 for (var counter = 0; counter < urlArray.length; counter++) {
-    var imagecounter=0;
     var url=urlArray[counter];
     var myfunc=function(url){
 	request(url, function(err, resp, body) {
@@ -28,7 +34,31 @@ for (var counter = 0; counter < urlArray.length; counter++) {
 	})
     }(url);
 }
+for (var counter = 0; counter < pageArray.length; counter++) {
+    var page = pageArray[counter];
+//find index of our string for our json, find the index of the EOL starting from where we found our first search text. 
+}
+    
+    //var db = new sqlite3.Database(sqliteDatabaseName);
+/*
+   var db = new sqlite3.Database(sqlite_database);
+  if (req.params.date) {
+    db.all(
+      util.format('SELECT rank,stockticker from BC20 where Date="%s" order by Rank Asc', req.params.date),
+      function(err, rows) {
+        db.close();
+        if (err) return res.json(501, { error: err.message });
+        res.json(rows);
+      });
+  } else {
+    db.all('SELECT distinct(date) from BC20', function(err, rows) {
+      db.close();
+      if (err) return res.json(501, { error: err.message });
+      res.json(rows);
+    });
+  }
+};
+stackoverflow.com/.../read-nth-line-of-file-in-nodejs‎....well shit I don't want to READ the file since I have it in memory as the body
+*/
 
-    
-    
 
