@@ -1,8 +1,9 @@
 {
-    "name":"backcountry-rss-scraper",
+    "name":"backcountry-page-scraper",
     "dependencies":{
 	"request":"*",
 	"cheerio":"*",
-	"sqlite3": "~2.1"
+	"sqlite3": "~2.1",
+	"mongodb":"*"
     }
 }

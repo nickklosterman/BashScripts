@@ -1,7 +1,10 @@
 var request = require('request')
 , cheerio = require('cheerio')
 , fs = require('fs')
-, sqlite = require('sqlite3');
+, mongo  = require('mongodb').MongoClient;
+//, sqlite = require('sqlite3');
+
+var myDB,myCollection;
 
 pageArray = [
 {url:"http://www.steepandcheap.com/current-steal",type:0},
@@ -9,6 +12,15 @@ pageArray = [
 {url:"http://www.chainlove.com/",type:1}
 ];
 
+mongo.connect('mongodb://127.0.0.1:27017/backCountry',function(err,db){
+    if (err) { throw err};
+    myDB=db;
+    // db.createCollection('test_backCountry', function(err, collection) {
+    //     collection.insert({'a':1}, function(err, docs) {
+    // 	    db.close();
+    // 	});
+    // });
+});
 
 
 for (var counter = 0; counter < pageArray.length; counter++) {
@@ -44,7 +56,8 @@ var searchStringStart = "BCNTRY.page_data = ";
     
 
 }
-    
+   
+myDB.close(); 
     //var db = new sqlite3.Database(sqliteDatabaseName);
 /*
 will need a timestampe for the json entry or something to sort or query on
