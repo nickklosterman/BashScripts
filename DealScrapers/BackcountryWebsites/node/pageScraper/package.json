@@ -3,6 +3,7 @@
     "dependencies":{
 	"request":"*",
 	"cheerio":"*",
+	"mongodb":"*",
 	"sqlite3": "~2.1"
     }
 }
