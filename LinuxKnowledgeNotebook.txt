@@ -2768,3 +2768,16 @@ Official packages
     A: You may be able to downgrade the package trivially by visiting /var/cache/pacman/pkg on your system and seeing if the older version of the package is stored there. (If you have not run pacman -Scc recently, it should be there). If the package is there, you can install that version using pacman -U /var/cache/pacman/pkg/pkgname-olderpkgver.pkg.tar.gz.
 
 this was taken from https://wiki.archlinux.org/index.php/Downgrading_packages#Official_packages
+
+Mon May 12 09:26:31 EDT 2014
+on arch-nicky at work, the networking was no longer able to get to the internet.
+https://wiki.archlinux.org/index.php/Network_configuration gave debug steps if you can resolve 8.8.8.8 but not google.com as a dns issue. I then added the google nameservers to resolv.conf and things started workign again:
+# Google nameservers
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+
+There are also IPv6 servers available:
+
+nameserver 2001:4860:4860::8888
+nameserver 2001:4860:4860::8844
+https://wiki.archlinux.org/index.php/Resolv.conf
