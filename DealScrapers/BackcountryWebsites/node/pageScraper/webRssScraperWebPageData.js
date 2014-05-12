@@ -61,8 +61,12 @@ console.log("Entering SAC data");
 	    var start = body.indexOf(searchString);
 	    var end = body.indexOf(",",start+1);
 	    WMtimeremaining = parseInt(body.substring(start+searchString.length,end),10);
+	    start = end;
+	    end = body.indexOf(')',start+1);
+	    WMduration = parseInt(body.substring(start+1,end),10);
+	    parsedDetailsJSON.duration=WMduration;
 	    if ( WMtimeremaining < 5) { WMtimeremaining = 5;}
-	    console.log(parsedDetailsJSON.productTitle+"WMtr:"+WMtimeremaining);
+	    console.log(parsedDetailsJSON.productTitle+"WMtr:"+WMtimeremaining+' /'+WMduration);
 	    setTimeout(stripData,WMtimeremaining*1000,pageArray[1]);
 
 
@@ -77,10 +81,13 @@ console.log("Entering SAC data");
 	    var start = body.indexOf("setupTimerBar(");
 	    var end = body.indexOf(",",start+1);
 	    CLtimeremaining = parseInt(body.substring(start+searchString.length,end),10);
+	    start = end;
+	    end = body.indexOf(')',start+1);
+	    CLduration = parseInt(body.substring(start+1,end),10);
 	    if ( CLtimeremaining < 5) { CLtimeremaining = 5;}
-	    console.log(parsedDetailsJSON.productTitle+"CLtr:"+CLtimeremaining);
+	    console.log(parsedDetailsJSON.productTitle+"CLtr:"+CLtimeremaining+' /'+CLduration);
 	    setTimeout(stripData,CLtimeremaining*1000,pageArray[2]);
-
+	    parsedDetailsJSON.duration=CLduration;
 	    if (pageObj.previous.odat_id != parsedDetailsJSON.odat_id) {
 		pageObj.previous = parsedDetailsJSON;
 		console.log("Entering CL data");

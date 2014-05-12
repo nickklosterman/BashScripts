@@ -12,22 +12,38 @@ app.get('/data/:site?', function( req, res, next) {
 	//deals will be the name of the table/colleciton
 	var collection  = db.collection('deal');
 	var output="<ul>";
-	collection.find({site:site}).limit(21).toArray(function(err,data) {
+	var image;
+	collection.find({site:site}).sort({_id:-1}).limit(4).toArray(function(err,data) {
 	    if (err) { throw err;}
 	    else {
 		switch(site){
 		case "WM":
 		case "CL":
 		    for (var counter = 0, size=data.length; counter<size;counter++){
+			//for these, the quantity is in the 'variant' data; I think it might also be elsewhere in the html of the page in the javascript
+			if (data[counter].variants) { 
+			    for (var key in data[counter].variants) {console.log(key); break;}
+			    console.log(key);
+			    if (data[counter].variants[key].images && data[counter].variants[key].images.mediumImage !== null){
+				image =  data[counter].variants[key].images.mediumImage;
+			    } else if (data[counter].variants[key].images && data[counter].variants[key].images.smallImage !== null){
+				image = data[counter].variants[key].images.smallImage;
+			    } else { image = ":(";}
+			}
 			console.log(data[counter].productTitle+' $'+data[counter].price);
-			output+='<li>'+data[counter].productTitle+' $'+data[counter].price+'</li>';
+			output+='<li> <img src="'+image+'">'+data[counter].productTitle+' $'+data[counter].price+'</li>';
 		    }
 		    console.log(data);
 		    break;
 		case "SAC":
 		    for (var counter = 0, size=data.length; counter<size;counter++){
 			console.log(data[counter].brand.name+data[counter].name+' $'+data[counter].price);
-			output+='<li>'+data[counter].brand.name+' '+data[counter].name+' $'+data[counter].price+' duration:'+data[counter].duration+' quantity:'+data[counter].qtyInitial+'</li>';
+			if (data[counter].defaultImage && data[counter].defaultImage.url.medium) {
+			    image = data[counter].defaultImage.url.medium;
+			} else if (data[counter].defaultImage && data[counter].defaultImage.url.tiny) {
+			    image = data[counter].defaultImage.url.url.tiny;
+			}
+			output+='<li> <img src="'+image+'">'+data[counter].brand.name+' '+data[counter].name+' $'+data[counter].price+' duration:'+data[counter].duration+' quantity:'+data[counter].qtyInitial+'</li>';
 
 		    }
 		    console.log(data);
