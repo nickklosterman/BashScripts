@@ -1,7 +1,7 @@
 {
     "name":"backcountry-page-scraper",
     "dependencies":{
-	"request":"*",
+	"express":"*",
 	"mongodb":"*"
     }
 }

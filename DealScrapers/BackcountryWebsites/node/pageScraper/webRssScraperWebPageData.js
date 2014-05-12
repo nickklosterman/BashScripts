@@ -1,84 +1,143 @@
 var request = require('request')
-, cheerio = require('cheerio')
 , fs = require('fs')
-, mongo  = require('mongodb').MongoClient;
-//, sqlite = require('sqlite3');
+, mongoClient = require('mongodb').MongoClient;
 
-var myDB,myCollection;
+var SACtimeremaining = 0.001
+, WMtimeremaining = 0.001
+, CLtimeremaining = 0.001;
 
-pageArray = [
-{url:"http://www.steepandcheap.com/current-steal",type:0},
-{url:"http://www.whiskeymilitia.com/",type:1},
-{url:"http://www.chainlove.com/",type:1}
+
+var previous = {SAC: "",
+WM: "",
+CL: ""};
+
+var pageArray = [
+    {url:"http://www.steepandcheap.com/current-steal",type:0,site:"SAC",previous:""},
+    {url:"http://www.whiskeymilitia.com/",type:1,site:"WM",previous:""},
+    {url:"http://www.chainlove.com/",type:1,site:"CL",previous:""}
 ];
 
-mongo.connect('mongodb://127.0.0.1:27017/backCountry',function(err,db){
-    if (err) { throw err};
-    myDB=db;
-    // db.createCollection('test_backCountry', function(err, collection) {
-    //     collection.insert({'a':1}, function(err, docs) {
-    // 	    db.close();
-    // 	});
-    // });
-});
 
-
-for (var counter = 0; counter < pageArray.length; counter++) {
-    var page = pageArray[counter];
-
-//find index of our string for our json, find the index of the EOL starting from where we found our first search text. 
-var searchStringStart = "BCNTRY.page_data = ";
-
-    if ( page.type === 0){
+var stripData=function(pageObj){
+    //find index of our string for our json, find the index of the EOL starting from where we found our first search text. 
+    var searchStringStart = "BCNTRY.page_data = ";
+    
+    if ( pageObj.type === 0){
 	searchStringStart = "window.BC.currentSteal = ";
     }
 
-  var myfunc=function(url,searchStringStart){
-	request(url, function(err, resp, body) {
-	    if (err)
-    		throw err;
-	    var offset = searchStringStart.length;
-	    var currentStealStart = body.indexOf(searchStringStart);
-	    //var productStart = body.indexOf("window.BC.product =");
-	    var currentStealEnd = body.indexOf("};",currentStealStart);
-	    //var productEnd = body.indexOf("};",productStart);
-	    var detailsJSON = body.substring(currentStealStart+offset,currentStealEnd+1);
-	    var parsedDetailsJSON = JSON.parse(detailsJSON);
-	    if (parsedDetailsJSON.hasOwnProperty('prev_items')){
-		delete parsedDetailsJSON['prev_items'];
+    request(pageObj.url, function(err, resp, body) {
+	if (err)
+    	    throw err;
+
+	var offset = searchStringStart.length;
+	var currentStealStart = body.indexOf(searchStringStart);
+	var currentStealEnd = body.indexOf("};",currentStealStart);
+	var detailsJSON = body.substring(currentStealStart+offset,currentStealEnd+1);
+	var parsedDetailsJSON = JSON.parse(detailsJSON);
+	if (parsedDetailsJSON.hasOwnProperty('prev_items')){
+	    delete parsedDetailsJSON['prev_items'];
+	}
+
+	switch (pageObj.site) {
+	case "SAC":
+	    SACtimeremaining = parseInt(parsedDetailsJSON.timeRemaining,10);
+	    if ( SACtimeremaining < 5) { SACtimeremaining = 5;}
+// if (typeof SACtimeremaining === 'number') { 
+// console.log("Number"); 
+// }else {
+// console.log("not number");
+// }
+	    console.log(parsedDetailsJSON.name+" SACtr:"+SACtimeremaining);
+	    setTimeout(stripData,SACtimeremaining*1000,pageArray[0]);
+	    if (pageObj.previous.odatId != parsedDetailsJSON.odatId) {
+		pageObj.previous = parsedDetailsJSON;
+console.log("Entering SAC data");
+		enterData(parsedDetailsJSON);
 	    }
-		//  console.log(detailsJSON);
-	    console.log('----------------------');
-	    console.log(parsedDetailsJSON);
-	    console.log('----------------------');
-	})
-  }(page.url,searchStringStart);
-    
+	    break;
+	case "WM":
+	    var searchString = "setupWMTimerBar(";
+	    var start = body.indexOf(searchString);
+	    var end = body.indexOf(",",start+1);
+	    WMtimeremaining = parseInt(body.substring(start+searchString.length,end),10);
+	    if ( WMtimeremaining < 5) { WMtimeremaining = 5;}
+	    console.log(parsedDetailsJSON.productTitle+"WMtr:"+WMtimeremaining);
+	    setTimeout(stripData,WMtimeremaining*1000,pageArray[1]);
 
-}
-   
-myDB.close(); 
-    //var db = new sqlite3.Database(sqliteDatabaseName);
-/*
-will need a timestampe for the json entry or something to sort or query on
-   var db = new sqlite3.Database(sqlite_database);
-  if (req.params.date) {
-    db.all(
-      util.format('SELECT rank,stockticker from BC20 where Date="%s" order by Rank Asc', req.params.date),
-      function(err, rows) {
-        db.close();
-        if (err) return res.json(501, { error: err.message });
-        res.json(rows);
-      });
-  } else {
-    db.all('SELECT distinct(date) from BC20', function(err, rows) {
-      db.close();
-      if (err) return res.json(501, { error: err.message });
-      res.json(rows);
-    });
-  }
+
+	    if (pageObj.previous.odat_id !== parsedDetailsJSON.odat_id) {
+		pageObj.previous = parsedDetailsJSON;
+		console.log("Entering WM data");
+		enterData(parsedDetailsJSON);
+	    }
+	    break;
+	case "CL":
+	    var searchString = "setupTimerBar(";
+	    var start = body.indexOf("setupTimerBar(");
+	    var end = body.indexOf(",",start+1);
+	    CLtimeremaining = parseInt(body.substring(start+searchString.length,end),10);
+	    if ( CLtimeremaining < 5) { CLtimeremaining = 5;}
+	    console.log(parsedDetailsJSON.productTitle+"CLtr:"+CLtimeremaining);
+	    setTimeout(stripData,CLtimeremaining*1000,pageArray[2]);
+
+	    if (pageObj.previous.odat_id != parsedDetailsJSON.odat_id) {
+		pageObj.previous = parsedDetailsJSON;
+		console.log("Entering CL data");
+		enterData(parsedDetailsJSON);
+	    }
+	    break;
+	default: 
+	    SACtimeremaining=10;
+	    WMtimeremaining=10;
+	    CLtimeremaining=10;
+	}
+	parsedDetailsJSON.site=pageObj.site;
+
+	//  console.log(detailsJSON);
+
+    })
+
 };
-stackoverflow.com/.../read-nth-line-of-file-in-nodejs‎....well shit I don't want to READ the file since I have it in memory as the body
-*/
 
+    var enterData = function(data){
+	//bc will be the name of the database
+	mongoClient.connect('mongodb://127.0.0.1:27017/bc',function(err,db){
+	    if (err) {throw err;}
+	    //deals will be the name of the table/colleciton
+	    var collection  = db.collection('deal');
+	    if (data  !== undefined) {
+		//console.log(data)
+		collection.insert(data,function(err,data) {
+		    if (err) { throw err;}
+		    db.close();//node will hang without this 
+		});
+	    }
+
+	});
+    }
+
+if ( 1===1){
+    for (var counter = 0; counter < pageArray.length; counter++) {
+    	var page = pageArray[counter];
+    	stripData(page);
+    }
+
+// setTimeout(stripData(pageArray[0]),SACtimeremaining*1000);
+// setTimeout(stripData(pageArray[1]),WMtimeremaining*1000);
+// setTimeout(stripData(pageArray[2]),CLtimeremaining*1000);
+
+
+} else {
+
+    mongoClient.connect('mongodb://127.0.0.1:27017/bc',function(err,db){
+   	if (err) {throw err;}
+	var collection  = db.collection('deal');
+	collection.find().toArray(function(err,results) {
+	    console.log('----=====----');
+   	    console.log(results);
+   	    db.close();
+   	});
+    });
+}
 
