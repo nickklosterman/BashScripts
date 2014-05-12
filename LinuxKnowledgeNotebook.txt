@@ -2781,3 +2781,10 @@ There are also IPv6 servers available:
 nameserver 2001:4860:4860::8888
 nameserver 2001:4860:4860::8844
 https://wiki.archlinux.org/index.php/Resolv.conf
+
+gnu screen
+I think some of my fumbling with gnu screen had to do with turning the flow on
+C-a f
+this then prevented me from C-x C-s in emacs.
+another C-a f 
+put things back to normal and everything was ok. 
