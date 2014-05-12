@@ -1,21 +1,19 @@
 var request = require('request')
-, cheerio = require('cheerio')
 , fs = require('fs')
-//, sqlite = require('sqlite3');
 , mongoClient = require('mongodb').MongoClient;
 
 var SACtimeremaining = 0.001
 , WMtimeremaining = 0.001
 , CLtimeremaining = 0.001;
 
-var oldSAC = "",
-oldWM = "",
-oldCL = "";
+var previous = {SAC: "",
+WM: "",
+CL: ""};
 
 var pageArray = [
-    {url:"http://www.steepandcheap.com/current-steal",type:0,site:"SAC"},
-    {url:"http://www.whiskeymilitia.com/",type:1,site:"WM"},
-    {url:"http://www.chainlove.com/",type:1,site:"CL"}
+    {url:"http://www.steepandcheap.com/current-steal",type:0,site:"SAC",previous:""},
+    {url:"http://www.whiskeymilitia.com/",type:1,site:"WM",previous:""},
+    {url:"http://www.chainlove.com/",type:1,site:"CL",previous:""}
 ];
 
 
@@ -43,14 +41,18 @@ var stripData=function(pageObj){
 	switch (pageObj.site) {
 	case "SAC":
 	    SACtimeremaining = parseInt(parsedDetailsJSON.timeRemaining,10);
-if (typeof SACtimeremaining === 'number') { 
-console.log("Number"); 
-}else {
-console.log("not number");
-}
+// if (typeof SACtimeremaining === 'number') { 
+// console.log("Number"); 
+// }else {
+// console.log("not number");
+// }
 	    console.log(parsedDetailsJSON.name+" SACtr:"+SACtimeremaining);
-	    setInterval(stripData(pageArray[0]),SACtimeremaining*1000);
-
+	    setTimeout(stripData,SACtimeremaining*1000,pageArray[0]);
+	    if (pageObj.previous.odatId != parsedDetailsJSON.odatId) {
+		pageObj.previous = parsedDetailsJSON;
+console.log("Entering SAC data");
+		enterData(parsedDetailsJSON);
+	    }
 	    break;
 	case "WM":
 	    var searchString = "setupWMTimerBar(";
@@ -58,9 +60,13 @@ console.log("not number");
 	    var end = body.indexOf(",",start+1);
 	    WMtimeremaining = parseInt(body.substring(start+searchString.length,end),10);
 	    console.log(parsedDetailsJSON.productTitle+"WMtr:"+WMtimeremaining);
-	    setInterval(stripData(pageArray[1]),WMtimeremaining*1000);
+	    setTimeout(stripData,WMtimeremaining*1000,pageArray[1]);
 
-
+	    if (pageObj.previous.odat_id !== parsedDetailsJSON.odat_id) {
+		pageObj.previous = parsedDetailsJSON;
+		console.log("Entering WM data");
+		enterData(parsedDetailsJSON);
+	    }
 	    break;
 	case "CL":
 	    var searchString = "setupTimerBar(";
@@ -68,7 +74,13 @@ console.log("not number");
 	    var end = body.indexOf(",",start+1);
 	    CLtimeremaining = parseInt(body.substring(start+searchString.length,end),10);
 	    console.log(parsedDetailsJSON.productTitle+"CLtr:"+CLtimeremaining);
-	    setInterval(stripData(pageArray[2]),CLtimeremaining*1000);
+	    setTimeout(stripData,CLtimeremaining*1000,pageArray[2]);
+
+	    if (pageObj.previous.odat_id != parsedDetailsJSON.odat_id) {
+		pageObj.previous = parsedDetailsJSON;
+		console.log("Entering CL data");
+		enterData(parsedDetailsJSON);
+	    }
 	    break;
 	default: 
 	    SACtimeremaining=10;
@@ -78,7 +90,7 @@ console.log("not number");
 	parsedDetailsJSON.site=pageObj.site;
 
 	//  console.log(detailsJSON);
-	enterData(parsedDetailsJSON);
+
     })
 };
 
@@ -105,9 +117,9 @@ if ( 1===1){
     	stripData(page);
     }
 
-// setInterval(stripData(pageArray[0]),SACtimeremaining*1000);
-// setInterval(stripData(pageArray[1]),WMtimeremaining*1000);
-// setInterval(stripData(pageArray[2]),CLtimeremaining*1000);
+// setTimeout(stripData(pageArray[0]),SACtimeremaining*1000);
+// setTimeout(stripData(pageArray[1]),WMtimeremaining*1000);
+// setTimeout(stripData(pageArray[2]),CLtimeremaining*1000);
 
 
 } else {
