@@ -82,7 +82,7 @@ var stripData=function(pageObj){
 	    if (pageObj.previous.odatId != parsedDetailsJSON.odatId) {
 		console.log("Entering SAC data:"+pageObj.previous.odatId+' -> '+parsedDetailsJSON.odatId);
 		pageObj.previous = parsedDetailsJSON;
-//		enterData(parsedDetailsJSON);
+		enterData(parsedDetailsJSON);
 	    }
 	    break;
 	case "WM":
@@ -103,7 +103,7 @@ var stripData=function(pageObj){
 		pageObj.previous = parsedDetailsJSON;
 		console.log("Entering WM data:"+pageObj.previous.odat_id+' -> '+parsedDetailsJSON.odat_id);
 		pageObj.previous = parsedDetailsJSON;
-//		enterData(parsedDetailsJSON);
+		enterData(parsedDetailsJSON);
 	    }
 	    break;
 	case "CL":
@@ -121,7 +121,7 @@ var stripData=function(pageObj){
 	    if (pageObj.previous.odat_id != parsedDetailsJSON.odat_id) {
 		console.log("Entering CL data:"+pageObj.previous.odat_id+' -> '+parsedDetailsJSON.odat_id);
 		pageObj.previous = parsedDetailsJSON;
-//		enterData(parsedDetailsJSON);
+		enterData(parsedDetailsJSON);
 	    }
 	    break;
 	default: 
