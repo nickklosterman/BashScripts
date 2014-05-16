@@ -23,25 +23,28 @@ var getLastEntry=function(Obj){
 //using findOne was causing sort to not work. 
 	collection.find({site:Obj.site}).sort({_id:-1}).limit(1).toArray(function(err,data) {
             if (err) { throw err;}
-            else {
-                switch(Obj.site){
-                case "WM":
-		    console.log("WM:"+data[0].productTitle);
-		    pageArray[1].previous=data[0];
-		    break;
-                case "CL":
-		    console.log("CL:"+data[0].productTitle);
-		    pageArray[2].previous=data[0];
-                    break;
-                case "SAC":
-		    console.log("SAC:"+data[0].brand.name+' '+data[0].name);
-		    pageArray[0].previous=data[0];
-                    break;
-		default:
-		    console.log("no site match");
-		    break;
-                }
-            }
+            else { 
+		if (typeof data !== 'undefined' && data.length > 0) {
+                    switch(Obj.site){
+                    case "WM":
+			console.log("WM:"+data[0].productTitle);
+			pageArray[1].previous=data[0];
+			break;
+                    case "CL":
+			console.log("CL:"+data[0].productTitle);
+			pageArray[2].previous=data[0];
+			break;
+                    case "SAC":
+			console.log("SAC:"+data[0]);
+			console.log("SAC:"+data[0].brand.name+' '+data[0].name);
+			pageArray[0].previous=data[0];
+			break;
+		    default:
+			console.log("no site match");
+			break;
+                    }
+		}
+	    }
             db.close();//node will hang without this
 	});
     });
