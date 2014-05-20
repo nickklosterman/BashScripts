@@ -1,0 +1,25 @@
+version() 
+show dbs
+use some_database
+show collections
+
+
+db.deal.distinct('productTitle') #return distinct records
+db.deal.find({productTitle:"Altamont Peacock Pocket Tank Top - Men's" },{_id:1,price:1}) #return only _id and price 
+db.deal.find({productTitle:"Altamont Peacock Pocket Tank Top - Men's" }).count() #return count matching the query parameters
+
+http://docs.mongodb.org/manual/reference/object-id/
+http://docs.mongodb.org/manual/reference/method/ObjectId.getTimestamp/#ObjectId.getTimestamp
+
+stick the following code in a file and execute as such: 
+./Sandbox/Node/JumpStartNodejs/mongodb-linux-i686-2.4.1/bin/mongo bc mongoscript.js  //where bc is the name of the table you want to use
+
+
+//mongoscript.js
+//use bc; you specify the db on the command line
+db.deal.distinct('productTitle').forEach(function(product){
+    var count=db.deal.find({productTitle:product}).count();
+    if (count > 5 ) {
+        print(product,count);
+    }
+});
