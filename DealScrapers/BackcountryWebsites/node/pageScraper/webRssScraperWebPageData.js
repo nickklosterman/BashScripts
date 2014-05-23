@@ -1,3 +1,7 @@
+/*
+This program scrapes the 3 Backcountry deals websites and enters the data into the local
+mongo database. If multiple instances are running they will all write the data to the mongo db.
+*/
 var request = require('request')
 , fs = require('fs')
 , mongoClient = require('mongodb').MongoClient;
@@ -19,8 +23,8 @@ var getLastEntry=function(Obj){
         //deals will be the name of the table/colleciton
         var collection  = db.collection('deal');
 
-//	if (typeof collection !== 'undefined')	{console.log(site);}
-//using findOne was causing sort to not work. 
+	//	if (typeof collection !== 'undefined')	{console.log(site);}
+	//using findOne was causing sort to not work. 
 	collection.find({site:Obj.site}).sort({_id:-1}).limit(1).toArray(function(err,data) {
             if (err) { throw err;}
             else { 
@@ -67,7 +71,7 @@ var stripData=function(pageObj){
 	var currentStealEnd = body.indexOf("};",currentStealStart);
 	var detailsJSON = body.substring(currentStealStart+offset,currentStealEnd+1);
 	var parsedDetailsJSON = JSON.parse(detailsJSON);
-	if (parsedDetailsJSON.hasOwnProperty('prev_items')){
+	if (typeof parsedDetailsJSON !== 'undefined' && parsedDetailsJSON.hasOwnProperty('prev_items')){
 	    delete parsedDetailsJSON['prev_items'];
 	}
 
@@ -75,11 +79,11 @@ var stripData=function(pageObj){
 	case "SAC":
 	    SACtimeremaining = parseInt(parsedDetailsJSON.timeRemaining,10);
 	    if ( SACtimeremaining < 5) { SACtimeremaining = 5;}
-// if (typeof SACtimeremaining === 'number') { 
-// console.log("Number"); 
-// }else {
-// console.log("not number");
-// }
+	    // if (typeof SACtimeremaining === 'number') { 
+	    // console.log("Number"); 
+	    // }else {
+	    // console.log("not number");
+	    // }
 	    console.log(parsedDetailsJSON.name+" SACtr:"+SACtimeremaining);
 	    setTimeout(stripData,SACtimeremaining*1000,pageArray[0]);
 	    if (pageObj.previous.odatId != parsedDetailsJSON.odatId) {
@@ -102,7 +106,7 @@ var stripData=function(pageObj){
 	    setTimeout(stripData,WMtimeremaining*1000,pageArray[1]);
 
 	    if (pageObj.previous.odat_id !== parsedDetailsJSON.odat_id) {
-	    //if (parseInt(pageObj.previous.odat_id,10) !== parseInt(parsedDetailsJSON.odat_id,10)) {
+		//if (parseInt(pageObj.previous.odat_id,10) !== parseInt(parsedDetailsJSON.odat_id,10)) {
 		pageObj.previous = parsedDetailsJSON;
 		console.log("Entering WM data:"+pageObj.previous.odat_id+' -> '+parsedDetailsJSON.odat_id);
 		pageObj.previous = parsedDetailsJSON;
@@ -140,22 +144,37 @@ var stripData=function(pageObj){
 
 };
 
-    var enterData = function(data){
-	//bc will be the name of the database
-	mongoClient.connect('mongodb://127.0.0.1:27017/bc',function(err,db){
-	    if (err) {throw err;}
-	    //deals will be the name of the table/colleciton
-	    var collection  = db.collection('deal');
-	    if (data  !== undefined) {
-		//console.log(data)
-		collection.insert(data,function(err,data) {
-		    if (err) { throw err;}
-		    db.close();//node will hang without this 
-		});
-	    }
+//Write the date and site to a file. Another node app watches this file and 
+//triggers a socket event when it is updated getting the latest data from mongo
+var flagFile = function(site) {
+    var time = new Date().toJSON();
+    fs.writeFile('/tmp/BackCountryHeartbeat.txt', site+','+time, function(err) {
+        if(err) {
+            console.log(err);
+        } else {
+            console.log("The file was saved!");
+        }
+    });
+};
 
-	});
-    }
+var enterData = function(data){
+    //bc will be the name of the database
+    mongoClient.connect('mongodb://127.0.0.1:27017/bc',function(err,db){
+	if (err) {throw err;}
+	//deals will be the name of the table/colleciton
+	var collection  = db.collection('deal');
+	if (data  !== undefined) {
+	    //console.log(data)
+	    collection.insert(data,function(err,doc) {
+		if (err) { throw err;}
+		console.log('data.site:'+data.site);
+		flagFile(data.site);//
+		db.close();//node will hang without this 
+	    });
+	}
+
+    });
+}
 
 if ( 1===1){
 
@@ -165,7 +184,7 @@ if ( 1===1){
 	getLastEntry(pageArray[cntr]);
     }
 
-//Delay the start so that the previous fields are populated.
+    //Delay the start so that the previous fields are populated.
     var delayed = function() {
 	for (var counter = 0; counter < pageArray.length; counter++) {
     	    var page = pageArray[counter];

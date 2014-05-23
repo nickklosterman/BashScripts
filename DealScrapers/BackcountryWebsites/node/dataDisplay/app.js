@@ -29,6 +29,7 @@ function getRecordsFromDB(site,callback) {
 			    } else { image = ":(";}
 			}
 //			console.log(data[counter].productTitle+' $'+data[counter].price);
+			//If it is the first element (i.e. the current deal) make the image a link to the site
 			var link="";
 			if (counter===0 ) {
 			    switch (site){
@@ -55,6 +56,7 @@ function getRecordsFromDB(site,callback) {
 			} else if (data[counter].defaultImage && data[counter].defaultImage.url.tiny) {
 			    image = data[counter].defaultImage.url.url.tiny;
 			}
+			//If it is the first element (i.e. the current deal) make the image a link to the site
 			if (counter===0) {
 			    output+='<li> <a href="http://www.steepandcheap.com/current-steal"> <img height="100" width="100" src="'+image+'"> </a>'+data[counter].brand.name+' '+data[counter].name+' $'+data[counter].price+' duration:'+data[counter].duration+' quantity:'+data[counter].qtyInitial+'</li>';
 			} else {
@@ -69,12 +71,9 @@ function getRecordsFromDB(site,callback) {
 	output+="</ul>";
 //	console.log(output);
 	console.log("finish up getRecordsFromDB");
-	callback( output);
-
+	callback( output );
 	});
-
     });
-
 };
 
 app.get('/data/',function(req, res) {
@@ -87,6 +86,7 @@ app.get('/data/',function(req, res) {
 	console.log("send resp: ctr:"+counter);
 	counter+=1;
 	if (counter===3) {  
+//	    console.log(output);
 	    res.send(output); // I need this to wait until the output is all returned 
 	}
     }
