@@ -5,6 +5,12 @@ show collections
 
 
 db.deal.distinct('productTitle') #return distinct records
+db.deal.distinct('productTitle',{site:'WM'}) #return distinct records for a certain site
+#http://stackoverflow.com/questions/22118210/using-findone-in-mongodb-to-get-element-with-max-id
+# this doesn't do what I wanted it to do --> db.deal.aggregate([ { $group: { _id : {productTitle:'$productTitle'}}}, {$group: {_id:'$_id.productTitle',productCount:{ $sum: 1}}}, {$project: { _id: 0, product: '$_id', productCount: 1}}]); # from http://stackoverflow.com/questions/13240039/group-count-with-mongodb-using-aggregation-framework
+
+db.deal.group({ key: {'productTitle':true}, initial: {sum: 0}, reduce: function(doc,prev) { prev.sum+=1}}); #return count of distinct records; http://wiki.summercode.com/mongodb_aggregation_functions_and_ruby_counting_and_grouping http://dbamohsin.wordpress.com/2012/02/10/aggregation-mapreduce-in-mongo/
+
 db.deal.find({productTitle:"Altamont Peacock Pocket Tank Top - Men's" },{_id:1,price:1}) #return only _id and price 
 db.deal.find({productTitle:"Altamont Peacock Pocket Tank Top - Men's" }).count() #return count matching the query parameters
 

@@ -2789,3 +2789,31 @@ this then prevented me from C-x C-s in emacs.
 another C-a f 
 put things back to normal and everything was ok. 
 http://www.gnu.org/software/screen/manual/html_node/Flow-Control-Summary.html
+
+Sat May 17 13:21:15 EDT 2014
+Straight from https://wiki.archlinux.org/index.php/USB_Flash_Installation_Media#How_to_restore_the_USB_drive
+How to restore the USB drive
+
+Because the ISO image is a hybrid which can either be burned to a disc or directly written to a USB drive, it does not include a standard partition table.
+
+After you install Arch Linux and you are done with the USB drive, you should zero out its first 512 bytes (meaning the boot code from the MBR and the non-standard partition table) if you want to restore it to full capacity:
+
+# dd count=1 bs=512 if=/dev/zero of=/dev/sdx && sync
+
+Then create a new partition table (e.g. "msdos") and filesystem (e.g. EXT4, FAT32) using gparted, or from a terminal:
+
+    For EXT2/3/4 (adjust accordingly), it would be:
+
+# cfdisk /dev/sdx
+# mkfs.ext4 /dev/sdx1
+# e2label /dev/sdx1 USB_STICK
+
+    For FAT32, install the dosfstools package and run:
+
+# cfdisk /dev/sdx
+# mkfs.vfat -F32 /dev/sdx1
+# dosfslabel /dev/sdx1 USB_STICK
+
+When the partition is created it'll still be owned by root so you'll need to 
+
+sudo chown $(whoami) /media/Foo
