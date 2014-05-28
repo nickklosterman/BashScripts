@@ -20,11 +20,7 @@ var pageArray = [
 var getLastEntry=function(Obj){
     mongoClient.connect('mongodb://127.0.0.1:27017/bc',function(err,db){
         if (err) {throw err;}
-        //deals will be the name of the table/colleciton
         var collection  = db.collection('deal');
-
-	//	if (typeof collection !== 'undefined')	{console.log(site);}
-	//using findOne was causing sort to not work. 
 	collection.find({site:Obj.site}).sort({_id:-1}).limit(1).toArray(function(err,data) {
             if (err) { throw err;}
             else { 
@@ -78,19 +74,19 @@ var stripData=function(pageObj){
 	switch (pageObj.site) {
 	case "SAC":
 	    SACtimeremaining = parseInt(parsedDetailsJSON.timeRemaining,10);
-	    if ( SACtimeremaining < 5) { SACtimeremaining = 5;}
-	    // if (typeof SACtimeremaining === 'number') { 
-	    // console.log("Number"); 
-	    // }else {
-	    // console.log("not number");
-	    // }
-	    console.log(parsedDetailsJSON.name+" SACtr:"+SACtimeremaining);
-	    setTimeout(stripData,SACtimeremaining*1000,pageArray[0]);
 	    if (pageObj.previous.odatId != parsedDetailsJSON.odatId) {
 		console.log("Entering SAC data:"+pageObj.previous.odatId+' -> '+parsedDetailsJSON.odatId);
 		pageObj.previous = parsedDetailsJSON;
 		enterData(parsedDetailsJSON);
+	    } else { // the product hasn't changed
+		//ignore whatever the time remaining we parsed from the webpage and set to a small value
+		//I haven't seen a case where a product appears twice with the timer 'refreshed'
+		//I *have* seen a case where the product stays and the timer is 'refreshed' to then be replaced seconds later.
+		//this logic is to prevent such a case where we wait another 10minutes before checking again even though a new product just appeared seconds after our last check.
+		SACtimeremaining = 5;
 	    }
+	    console.log(parsedDetailsJSON.name+" SACtr:"+SACtimeremaining);
+	    setTimeout(stripData,SACtimeremaining*1000,pageArray[0]);
 	    break;
 	case "WM":
 	    var searchString = "setupWMTimerBar(";
@@ -101,17 +97,16 @@ var stripData=function(pageObj){
 	    end = body.indexOf(')',start+1);
 	    WMduration = parseInt(body.substring(start+1,end),10);
 	    parsedDetailsJSON.duration=WMduration;
-	    if ( WMtimeremaining < 5) { WMtimeremaining = 5;}
-	    console.log(parsedDetailsJSON.productTitle+"WMtr:"+WMtimeremaining+' /'+WMduration);
-	    setTimeout(stripData,WMtimeremaining*1000,pageArray[1]);
-
 	    if (pageObj.previous.odat_id !== parsedDetailsJSON.odat_id) {
-		//if (parseInt(pageObj.previous.odat_id,10) !== parseInt(parsedDetailsJSON.odat_id,10)) {
 		pageObj.previous = parsedDetailsJSON;
 		console.log("Entering WM data:"+pageObj.previous.odat_id+' -> '+parsedDetailsJSON.odat_id);
 		pageObj.previous = parsedDetailsJSON;
 		enterData(parsedDetailsJSON);
+	    } else { 
+		WMtimeremaining = 5;
 	    }
+	    console.log(parsedDetailsJSON.productTitle+"WMtr:"+WMtimeremaining+' /'+WMduration);
+	    setTimeout(stripData,WMtimeremaining*1000,pageArray[1]);
 	    break;
 	case "CL":
 	    var searchString = "setupTimerBar(";
@@ -121,15 +116,16 @@ var stripData=function(pageObj){
 	    start = end;
 	    end = body.indexOf(')',start+1);
 	    CLduration = parseInt(body.substring(start+1,end),10);
-	    if ( CLtimeremaining < 5) { CLtimeremaining = 5;}
-	    console.log(parsedDetailsJSON.productTitle+"CLtr:"+CLtimeremaining+' /'+CLduration);
-	    setTimeout(stripData,CLtimeremaining*1000,pageArray[2]);
 	    parsedDetailsJSON.duration=CLduration;
 	    if (pageObj.previous.odat_id != parsedDetailsJSON.odat_id) {
 		console.log("Entering CL data:"+pageObj.previous.odat_id+' -> '+parsedDetailsJSON.odat_id);
 		pageObj.previous = parsedDetailsJSON;
 		enterData(parsedDetailsJSON);
+	    } else {
+		CLtimeremaining = 5;
 	    }
+	    console.log(parsedDetailsJSON.productTitle+"CLtr:"+CLtimeremaining+' /'+CLduration);
+	    setTimeout(stripData,CLtimeremaining*1000,pageArray[2]);
 	    break;
 	default: 
 	    SACtimeremaining=10;
@@ -137,11 +133,7 @@ var stripData=function(pageObj){
 	    CLtimeremaining=10;
 	}
 	parsedDetailsJSON.site=pageObj.site;
-
-	//  console.log(detailsJSON);
-
     })
-
 };
 
 //Write the date and site to a file. Another node app watches this file and 
@@ -164,7 +156,6 @@ var enterData = function(data){
 	//deals will be the name of the table/colleciton
 	var collection  = db.collection('deal');
 	if (data  !== undefined) {
-	    //console.log(data)
 	    collection.insert(data,function(err,doc) {
 		if (err) { throw err;}
 		console.log('data.site:'+data.site);
@@ -176,33 +167,22 @@ var enterData = function(data){
     });
 }
 
-if ( 1===1){
 
-    //get the most recent entries from the database
 
-    for (var cntr = 0; cntr < pageArray.length; cntr++) {
-	getLastEntry(pageArray[cntr]);
-    }
-
-    //Delay the start so that the previous fields are populated.
-    var delayed = function() {
-	for (var counter = 0; counter < pageArray.length; counter++) {
-    	    var page = pageArray[counter];
-    	    stripData(page);
-	}
-    }
-    setTimeout(delayed,500);
-
-} else {
-
-    mongoClient.connect('mongodb://127.0.0.1:27017/bc',function(err,db){
-   	if (err) {throw err;}
-	var collection  = db.collection('deal');
-	collection.find().toArray(function(err,results) {
-	    console.log('----=====----');
-   	    console.log(results);
-   	    db.close();
-   	});
-    });
+function Main() {
+//get the most recent entries from the database
+for (var cntr = 0; cntr < pageArray.length; cntr++) {
+    getLastEntry(pageArray[cntr]);
 }
 
+//Delay the start so that data for the last entries can be extracted from the database.
+var delayed = function() {
+    for (var counter = 0; counter < pageArray.length; counter++) {
+    	var page = pageArray[counter];
+    	stripData(page);
+    }
+}
+setTimeout(delayed,500);
+};
+
+Main();
