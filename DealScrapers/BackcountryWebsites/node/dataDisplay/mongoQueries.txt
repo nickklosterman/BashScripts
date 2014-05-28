@@ -29,3 +29,16 @@ db.deal.distinct('productTitle').forEach(function(product){
         print(product,count);
     }
 });
+
+in mongo to easily get the time of entry for an object:
+> ObjectId("53736cd89be105fb17cbc22a").getTimestamp()
+ISODate("2014-05-14T13:17:12Z")
+so query and get the _id field and it will show as a ObjectId("blah") so copy and paste and add on the .getTimestamp()
+
+
+Querying with wildcards; really there aren't wildcards so you query with regex
+http://docs.mongodb.org/manual/reference/operator/query/regex/
+db.authors.find({name: {$regex: 'all', $options: 'i'}});
+-> i option will make it case insensitive. This query will match "Edgar Allan Poe" and "David Hall"
+
+
