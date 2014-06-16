@@ -6,6 +6,20 @@ var request = require('request')
 , fs = require('fs')
 , mongoClient = require('mongodb').MongoClient;
 
+var shortWaitTime = 15;
+
+//the countdown is done on the client so we have no control over that part :/
+
+var db, collection;
+mongoClient.connect('mongodb://127.0.0.1:27017/bc',function(err,database){
+    if (err) {throw err;}
+    db = database;
+    //deals will be the name of the table/colleciton
+    collection  = db.collection('deal');
+    console.log('initialized database');
+    Main();
+});
+
 var SACtimeremaining = 0.001
 , WMtimeremaining = 0.001
 , CLtimeremaining = 0.001;
@@ -18,35 +32,31 @@ var pageArray = [
 
 
 var getLastEntry=function(Obj){
-    mongoClient.connect('mongodb://127.0.0.1:27017/bc',function(err,db){
-        if (err) {throw err;}
-        var collection  = db.collection('deal');
-	collection.find({site:Obj.site}).sort({_id:-1}).limit(1).toArray(function(err,data) {
-            if (err) { throw err;}
-            else { 
-		if (typeof data !== 'undefined' && data.length > 0) {
-                    switch(Obj.site){
-                    case "WM":
-			console.log("WM:"+data[0].productTitle);
-			pageArray[1].previous=data[0];
-			break;
-                    case "CL":
-			console.log("CL:"+data[0].productTitle);
-			pageArray[2].previous=data[0];
-			break;
-                    case "SAC":
-			console.log("SAC:"+data[0]);
-			console.log("SAC:"+data[0].brand.name+' '+data[0].name);
-			pageArray[0].previous=data[0];
-			break;
-		    default:
-			console.log("no site match");
-			break;
-                    }
-		}
+    collection.find({site:Obj.site}).sort({_id:-1}).limit(1).toArray(function(err,data) {
+        if (err) { throw err;}
+        else { 
+	    if (typeof data !== 'undefined' && data.length > 0) {
+                switch(Obj.site){
+                case "WM":
+		    console.log("WM:"+data[0].productTitle);
+		    pageArray[1].previous=data[0];
+		    break;
+                case "CL":
+		    console.log("CL:"+data[0].productTitle);
+		    pageArray[2].previous=data[0];
+		    break;
+                case "SAC":
+		    console.log("SAC:"+data[0]);
+		    console.log("SAC:"+data[0].brand.name+' '+data[0].name);
+		    pageArray[0].previous=data[0];
+		    break;
+		default:
+		    console.log("no site match");
+		    break;
+                }
 	    }
-            db.close();//node will hang without this
-	});
+	}
+//        db.close();//node will hang without this
     });
 };
 
@@ -62,7 +72,7 @@ var stripData=function(pageObj){
 
     request(pageObj.url, function(err, resp, body) {
 	if (err)
-    	    throw err;
+    	    throw err; //I need to more gracefully handle errors especially if the webpage isn't accessible, they are blocking our scraping or some other reason. 
 
 	var offset = searchStringStart.length;
 	var currentStealStart = body.indexOf(searchStringStart);
@@ -85,7 +95,7 @@ var stripData=function(pageObj){
 		//I haven't seen a case where a product appears twice with the timer 'refreshed'
 		//I *have* seen a case where the product stays and the timer is 'refreshed' to then be replaced seconds later.
 		//this logic is to prevent such a case where we wait another 10minutes before checking again even though a new product just appeared seconds after our last check.
-		SACtimeremaining = 5;
+		SACtimeremaining = shortWaitTime;
 	    }
 	    console.log(parsedDetailsJSON.name+" SACtr:"+SACtimeremaining);
 	    setTimeout(stripData,SACtimeremaining*1000,pageArray[0]);
@@ -105,7 +115,7 @@ var stripData=function(pageObj){
 		pageObj.previous = parsedDetailsJSON;
 		enterData(parsedDetailsJSON);
 	    } else { 
-		WMtimeremaining = 5;
+		WMtimeremaining = shortWaitTime;
 	    }
 	    console.log(parsedDetailsJSON.productTitle+"WMtr:"+WMtimeremaining+' /'+WMduration);
 	    setTimeout(stripData,WMtimeremaining*1000,pageArray[1]);
@@ -124,7 +134,7 @@ var stripData=function(pageObj){
 		pageObj.previous = parsedDetailsJSON;
 		enterData(parsedDetailsJSON);
 	    } else {
-		CLtimeremaining = 5;
+		CLtimeremaining = shortWaitTime;
 	    }
 	    console.log(parsedDetailsJSON.productTitle+"CLtr:"+CLtimeremaining+' /'+CLduration);
 	    setTimeout(stripData,CLtimeremaining*1000,pageArray[2]);
@@ -174,7 +184,6 @@ var timeoutInterval = 45;  //number of seconds to wait before checking for chang
 		//I haven't seen a case where a product appears twice with the timer 'refreshed'
 		//I *have* seen a case where the product stays and the timer is 'refreshed' to then be replaced seconds later.
 		//this logic is to prevent such a case where we wait another 10minutes before checking again even though a new product just appeared seconds after our last check.
-		SACtimeremaining = 5;
 	    }
 	    console.log(parsedDetailsJSON.name+" SACtr:"+SACtimeremaining);
 	    setTimeout(stripDataCyclic,timeoutInterval*1000,pageArray[0]);
@@ -194,7 +203,7 @@ var timeoutInterval = 45;  //number of seconds to wait before checking for chang
 		pageObj.previous = parsedDetailsJSON;
 		enterData(parsedDetailsJSON);
 	    } else { 
-		WMtimeremaining = 5;
+
 	    }
 	    console.log(parsedDetailsJSON.productTitle+"WMtr:"+WMtimeremaining+' /'+WMduration);
 	    setTimeout(stripDataCyclic,timeoutInterval*1000,pageArray[1]);
@@ -213,7 +222,7 @@ var timeoutInterval = 45;  //number of seconds to wait before checking for chang
 		pageObj.previous = parsedDetailsJSON;
 		enterData(parsedDetailsJSON);
 	    } else {
-		CLtimeremaining = 5;
+
 	    }
 	    console.log(parsedDetailsJSON.productTitle+"CLtr:"+CLtimeremaining+' /'+CLduration);
 	    setTimeout(stripDataCyclic,timeoutInterval*1000,pageArray[2]);
@@ -242,39 +251,34 @@ var flagFile = function(site) {
 
 var enterData = function(data){
     //bc will be the name of the database
-    mongoClient.connect('mongodb://127.0.0.1:27017/bc',function(err,db){
-	if (err) {throw err;}
-	//deals will be the name of the table/colleciton
-	var collection  = db.collection('deal');
-	if (data  !== undefined) {
-	    collection.insert(data,function(err,doc) {
-		if (err) { throw err;}
-		console.log('data.site:'+data.site);
-		flagFile(data.site);//
-		db.close();//node will hang without this 
-	    });
-	}
-
-    });
+    if (data  !== undefined) {
+	collection.insert(data,function(err,doc) {
+	    if (err) { throw err;}
+	    console.log('data.site:'+data.site);
+	    flagFile(data.site);//
+//	    db.close();//node will hang without this 
+	});
+    }
 }
 
 
 
 function Main() {
-//get the most recent entries from the database
-for (var cntr = 0; cntr < pageArray.length; cntr++) {
-    getLastEntry(pageArray[cntr]);
-}
-
-//Delay the start so that data for the last entries can be extracted from the database.
-var delayed = function() {
-    for (var counter = 0; counter < pageArray.length; counter++) {
-    	var page = pageArray[counter];
-    	stripData(page);
-	stripDataCyclic(page);
+    //get the most recent entries from the database
+    for (var cntr = 0; cntr < pageArray.length; cntr++) {
+	getLastEntry(pageArray[cntr]);
     }
-}
-setTimeout(delayed,500);
+
+    //Delay the start so that data for the last entries can be extracted from the database.
+    var delayed = function() {
+	for (var counter = 0; counter < pageArray.length; counter++) {
+    	    var page = pageArray[counter];
+    	    stripData(page);
+	    //stripDataCyclic(page);
+	}
+    }
+    setTimeout(delayed,500);
 };
 
-Main();
+
+    // Main() is called from the callback for mongoClient initing, otherwise the mongo variables aren't initialized yet.
