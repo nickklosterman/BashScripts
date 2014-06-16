@@ -79,6 +79,7 @@ var stripData=function(pageObj){
 	var currentStealEnd = body.indexOf("};",currentStealStart);
 	var detailsJSON = body.substring(currentStealStart+offset,currentStealEnd+1);
 	var parsedDetailsJSON = JSON.parse(detailsJSON);
+	parsedDetailsJSON.site=pageObj.site;
 	if (typeof parsedDetailsJSON !== 'undefined' && parsedDetailsJSON.hasOwnProperty('prev_items')){
 	    delete parsedDetailsJSON['prev_items'];
 	}
@@ -144,7 +145,7 @@ var stripData=function(pageObj){
 	    WMtimeremaining=10;
 	    CLtimeremaining=10;
 	}
-	parsedDetailsJSON.site=pageObj.site;
+//	parsedDetailsJSON.site=pageObj.site;
     })
 };
 
@@ -228,6 +229,7 @@ var timeoutInterval = 45;  //number of seconds to wait before checking for chang
 	    setTimeout(stripDataCyclic,timeoutInterval*1000,pageArray[2]);
 	    break;
 	default: 
+	    console.log("pageObj.site isn't set to CL,WM,SAC");
 	    SACtimeremaining=10;
 	    WMtimeremaining=10;
 	    CLtimeremaining=10;
