@@ -2855,3 +2855,24 @@ ffmpeg -i input.flv -f image2 -vf "select='eq(pict_type,PICT_TYPE_I)'" -vsync vf
 Explanation: By telling FFmpeg to set the output file's FPS option (frames per second) to some very low value, we made FFmpeg drop a lot of frames at the output, in order to achieve such a low frame rate, effectively having our thumbnails generated every X seconds :) 
 
 http://linuxers.org/tutorial/how-extract-images-video-using-ffmpeg <-- talks about using the -s flag to define the size of the output image
+
+Thu Jun 19 09:28:38 EDT 2014
+http://stackoverflow.com/questions/216995/how-can-i-use-inverse-or-negative-wildcards-when-pattern-matching-in-a-unix-linu
+In Bash you can do it by enabling the extglob option, like this (replace ls for cp and add the target directory, of course)
+
+~/foobar> shopt extglob
+extglob         off
+~/foobar> ls
+abar  afoo  bbar  bfoo
+~/foobar> ls !(b*)
+-bash: !: event not found
+~/foobar> shopt -s extglob  #Enables extglob
+~/foobar> ls !(b*)
+abar  afoo
+~/foobar> ls !(a*)
+bbar  bfoo
+~/foobar> ls !(*foo)
+abar  bbar
+You can later disable extglob with
+
+shopt -u extglob

@@ -10,7 +10,7 @@ var myfunc=function(url){
 	$ = cheerio.load(body.replace(/<!\[CDATA\[([^\]]+)]\]>/ig,''), {xmlMode:true});
 	var priceArray=$('title').slice(1).eq(0).text(); //https:www.npmjs.org/package/cheerio 
 	$('title').each(function(i, xmlItem){
-	    if ( i > 0 && i < 10 )
+	    if ( i > 1 && i < 10 ) //the 0th element is just the page title
 		console.log($(this).text());
 	});
     })
