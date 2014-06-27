@@ -1,6 +1,6 @@
 /*
-This program scrapes the 3 Backcountry deals websites and enters the data into the local
-mongo database. If multiple instances are running they will all write the data to the mongo db.
+  This program scrapes the 3 Backcountry deals websites and enters the data into the local
+  mongo database. If multiple instances are running they will all write the data to the mongo db.
 */
 var request = require('request')
 , fs = require('fs')
@@ -56,7 +56,7 @@ var getLastEntry=function(Obj){
                 }
 	    }
 	}
-//        db.close();//node will hang without this
+	//        db.close();//node will hang without this
     });
 };
 
@@ -77,82 +77,90 @@ var stripData=function(pageObj){
 	var offset = searchStringStart.length;
 	var currentStealStart = body.indexOf(searchStringStart);
 	var currentStealEnd = body.indexOf("};",currentStealStart);
-	var detailsJSON = body.substring(currentStealStart+offset,currentStealEnd+1);
-	var parsedDetailsJSON = JSON.parse(detailsJSON);
-	parsedDetailsJSON.site=pageObj.site;
-	if (typeof parsedDetailsJSON !== 'undefined' && parsedDetailsJSON.hasOwnProperty('prev_items')){
-	    delete parsedDetailsJSON['prev_items'];
-	}
+	if (currentStealStart !== -1 && currentStealEnd !== -1 ) {
+	    var detailsJSON = body.substring(currentStealStart+offset,currentStealEnd+1);
+	    if (typeof detailsJSON !== 'undefined') {
+		var parsedDetailsJSON = JSON.parse(detailsJSON);
+		parsedDetailsJSON.site=pageObj.site;
+		if (typeof parsedDetailsJSON !== 'undefined' && parsedDetailsJSON.hasOwnProperty('prev_items')){
+		    delete parsedDetailsJSON['prev_items'];
+		}
 
-	switch (pageObj.site) {
-	case "SAC":
-	    SACtimeremaining = parseInt(parsedDetailsJSON.timeRemaining,10);
-	    if (pageObj.previous.odatId != parsedDetailsJSON.odatId) {
-		console.log("Entering SAC data:"+pageObj.previous.odatId+' -> '+parsedDetailsJSON.odatId);
-		pageObj.previous = parsedDetailsJSON;
-		enterData(parsedDetailsJSON);
-	    } else { // the product hasn't changed
-		//ignore whatever the time remaining we parsed from the webpage and set to a small value
-		//I haven't seen a case where a product appears twice with the timer 'refreshed'
-		//I *have* seen a case where the product stays and the timer is 'refreshed' to then be replaced seconds later.
-		//this logic is to prevent such a case where we wait another 10minutes before checking again even though a new product just appeared seconds after our last check.
-		SACtimeremaining = shortWaitTime;
-	    }
-	    console.log(parsedDetailsJSON.name+" SACtr:"+SACtimeremaining);
-	    setTimeout(stripData,SACtimeremaining*1000,pageArray[0]);
-	    break;
-	case "WM":
-	    var searchString = "setupWMTimerBar(";
-	    var start = body.indexOf(searchString);
-	    var end = body.indexOf(",",start+1);
-	    WMtimeremaining = parseInt(body.substring(start+searchString.length,end),10);
-	    start = end;
-	    end = body.indexOf(')',start+1);
-	    WMduration = parseInt(body.substring(start+1,end),10);
-	    parsedDetailsJSON.duration=WMduration;
-	    if (pageObj.previous.odat_id !== parsedDetailsJSON.odat_id) {
-		pageObj.previous = parsedDetailsJSON;
-		console.log("Entering WM data:"+pageObj.previous.odat_id+' -> '+parsedDetailsJSON.odat_id);
-		pageObj.previous = parsedDetailsJSON;
-		enterData(parsedDetailsJSON);
-	    } else { 
-		WMtimeremaining = shortWaitTime;
-	    }
-	    console.log(parsedDetailsJSON.productTitle+"WMtr:"+WMtimeremaining+' /'+WMduration);
-	    setTimeout(stripData,WMtimeremaining*1000,pageArray[1]);
-	    break;
-	case "CL":
-	    var searchString = "setupTimerBar(";
-	    var start = body.indexOf("setupTimerBar(");
-	    var end = body.indexOf(",",start+1);
-	    CLtimeremaining = parseInt(body.substring(start+searchString.length,end),10);
-	    start = end;
-	    end = body.indexOf(')',start+1);
-	    CLduration = parseInt(body.substring(start+1,end),10);
-	    parsedDetailsJSON.duration=CLduration;
-	    if (pageObj.previous.odat_id != parsedDetailsJSON.odat_id) {
-		console.log("Entering CL data:"+pageObj.previous.odat_id+' -> '+parsedDetailsJSON.odat_id);
-		pageObj.previous = parsedDetailsJSON;
-		enterData(parsedDetailsJSON);
+		switch (pageObj.site) {
+		case "SAC":
+		    SACtimeremaining = parseInt(parsedDetailsJSON.timeRemaining,10);
+		    if (pageObj.previous.odatId != parsedDetailsJSON.odatId) {
+			console.log("Entering SAC data:"+pageObj.previous.odatId+' -> '+parsedDetailsJSON.odatId);
+			pageObj.previous = parsedDetailsJSON;
+			enterData(parsedDetailsJSON);
+		    } else { // the product hasn't changed
+			//ignore whatever the time remaining we parsed from the webpage and set to a small value
+			//I haven't seen a case where a product appears twice with the timer 'refreshed'
+			//I *have* seen a case where the product stays and the timer is 'refreshed' to then be replaced seconds later.
+			//this logic is to prevent such a case where we wait another 10minutes before checking again even though a new product just appeared seconds after our last check.
+			SACtimeremaining = shortWaitTime;
+		    }
+		    console.log(parsedDetailsJSON.name+" SACtr:"+SACtimeremaining);
+		    setTimeout(stripData,SACtimeremaining*1000,pageArray[0]);
+		    break;
+		case "WM":
+		    var searchString = "setupWMTimerBar(";
+		    var start = body.indexOf(searchString);
+		    var end = body.indexOf(",",start+1);
+		    WMtimeremaining = parseInt(body.substring(start+searchString.length,end),10);
+		    start = end;
+		    end = body.indexOf(')',start+1);
+		    WMduration = parseInt(body.substring(start+1,end),10);
+		    parsedDetailsJSON.duration=WMduration;
+		    if (pageObj.previous.odat_id !== parsedDetailsJSON.odat_id) {
+			pageObj.previous = parsedDetailsJSON;
+			console.log("Entering WM data:"+pageObj.previous.odat_id+' -> '+parsedDetailsJSON.odat_id);
+			pageObj.previous = parsedDetailsJSON;
+			enterData(parsedDetailsJSON);
+		    } else { 
+			WMtimeremaining = shortWaitTime;
+		    }
+		    console.log(parsedDetailsJSON.productTitle+"WMtr:"+WMtimeremaining+' /'+WMduration);
+		    setTimeout(stripData,WMtimeremaining*1000,pageArray[1]);
+		    break;
+		case "CL":
+		    var searchString = "setupTimerBar(";
+		    var start = body.indexOf("setupTimerBar(");
+		    var end = body.indexOf(",",start+1);
+		    CLtimeremaining = parseInt(body.substring(start+searchString.length,end),10);
+		    start = end;
+		    end = body.indexOf(')',start+1);
+		    CLduration = parseInt(body.substring(start+1,end),10);
+		    parsedDetailsJSON.duration=CLduration;
+		    if (pageObj.previous.odat_id != parsedDetailsJSON.odat_id) {
+			console.log("Entering CL data:"+pageObj.previous.odat_id+' -> '+parsedDetailsJSON.odat_id);
+			pageObj.previous = parsedDetailsJSON;
+			enterData(parsedDetailsJSON);
+		    } else {
+			CLtimeremaining = shortWaitTime;
+		    }
+		    console.log(parsedDetailsJSON.productTitle+"CLtr:"+CLtimeremaining+' /'+CLduration);
+		    setTimeout(stripData,CLtimeremaining*1000,pageArray[2]);
+		    break;
+		default: 
+		    SACtimeremaining=10;
+		    WMtimeremaining=10;
+		    CLtimeremaining=10;
+		}
+		//	parsedDetailsJSON.site=pageObj.site;
 	    } else {
-		CLtimeremaining = shortWaitTime;
+		stripData(pageObj);
 	    }
-	    console.log(parsedDetailsJSON.productTitle+"CLtr:"+CLtimeremaining+' /'+CLduration);
-	    setTimeout(stripData,CLtimeremaining*1000,pageArray[2]);
-	    break;
-	default: 
-	    SACtimeremaining=10;
-	    WMtimeremaining=10;
-	    CLtimeremaining=10;
+	} else {
+	    stripData(pageObj);
 	}
-//	parsedDetailsJSON.site=pageObj.site;
     })
 };
 
 
 //Checks the websites for updates every timeoutInterval seconds. 
 function stripDataCyclic(pageObj){
-var timeoutInterval = 45;  //number of seconds to wait before checking for changes.
+    var timeoutInterval = 45;  //number of seconds to wait before checking for changes.
     //find index of our string for our json, find the index of the EOL starting from where we found our first search text. 
     var searchStringStart = "BCNTRY.page_data = ";
     
@@ -258,7 +266,7 @@ var enterData = function(data){
 	    if (err) { throw err;}
 	    console.log('data.site:'+data.site);
 	    flagFile(data.site);//
-//	    db.close();//node will hang without this 
+	    //	    db.close();//node will hang without this 
 	});
     }
 }
@@ -283,4 +291,4 @@ function Main() {
 };
 
 
-    // Main() is called from the callback for mongoClient initing, otherwise the mongo variables aren't initialized yet.
+// Main() is called from the callback for mongoClient initing, otherwise the mongo variables aren't initialized yet.
