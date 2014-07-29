@@ -2876,3 +2876,15 @@ abar  bbar
 You can later disable extglob with
 
 shopt -u extglob
+
+Tue Jul 29 10:47:35 EDT 2014
+
+;; http://superuser.com/questions/341723/how-can-disable-emacs-vc-integration-on-mounted-volumes
+;; I had done a cygwin update and now when I tried to load files in SVN controlled directories emacs would freeze at "Loading svn-vc...done" and not get past. So I added this to my .emacs to disable the svn-vc thinger.
+
+;; Disable git backend to speed up sshfs file load among other things
+(setq vc-handled-backends (quote ( )))
+
+Emacs get list of functions to jump to easily:
+M-. will give a menu and then let you jump to them easily. 
+--> other options : http://stackoverflow.com/questions/2130209/in-emacs-how-can-i-jump-between-functions-in-the-current-file
