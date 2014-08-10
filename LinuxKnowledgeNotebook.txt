@@ -2888,3 +2888,15 @@ Tue Jul 29 10:47:35 EDT 2014
 Emacs get list of functions to jump to easily:
 M-. will give a menu and then let you jump to them easily. 
 --> other options : http://stackoverflow.com/questions/2130209/in-emacs-how-can-i-jump-between-functions-in-the-current-file
+
+Sun Aug 10 19:20:42 EDT 2014
+Taking still images with webcam : 
+ffmpeg -f video4linux2 -i /dev/v4l/by-id/usb-0c45_USB_camera-video-index0 -vframes 1 test.jpeg
+Prefer taking two frames and using the second one:
+ffmpeg -f video4linux2 -i /dev/v4l/by-id/usb-0c45_USB_camera-video-index0 -vframes 2 test%3d.jpeg
+mplayer tv:// -tv driver=v4l2:device=/dev/video0:width=1600:height=1200:outfmt=rgb24 -frames 3 -vo jpeg
+mplayer tv:// -tv driver=v4l2:device=/dev/video0:width=1600:height=1200:outfmt=rgb24 -frames 3 -vo jpeg
+also https://wiki.archlinux.org/index.php/FFmpeg#Recording_webcam
+https://trac.ffmpeg.org/wiki/Capture/Webcam
+
+http://elinux.org/RPi_Easy_SD_Card_Setup#Adding_a_data_partition_.28Optional.29
