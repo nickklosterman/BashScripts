@@ -2042,6 +2042,9 @@ sync using the ntp daemon
 sudo ntpd -q  
 
 Tue Jul 30 17:49:10 EDT 2013
+NOTE: Tue Aug 12 09:13:03 EDT 2014
+-The cable makes a difference. The one that came with my Amazon Kindle works such that you can connect to the device. That shitty one that Corey Blanton gave me as a replacement for my good one doesn't. Motherfucker.
+
 getting my aknotepad notes without the crappy export method setting all the timestamps the same.
 You have to download the android developer toolkit to get the adb shell tools.
 The instructions I read stated to get the java 32bit jdk as well adn install it (even if you are running a 64bit OS). I suppose this has to do with Android being 32 bit. I got the 64bit version of the Android dev kit. 
