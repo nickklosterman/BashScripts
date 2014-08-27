@@ -2903,3 +2903,40 @@ also https://wiki.archlinux.org/index.php/FFmpeg#Recording_webcam
 https://trac.ffmpeg.org/wiki/Capture/Webcam
 
 http://elinux.org/RPi_Easy_SD_Card_Setup#Adding_a_data_partition_.28Optional.29
+
+
+Wed Aug 13 12:21:42 EDT 2014
+gpg encryption and emacs
+On Arch-nicky I was still getting a grpahical dialog asking for my password. I'm not really sure how much tinkering I did to get it to work previously. 
+In the end, creating a .gnupg/gpg-agent.conf file with these contents (https://wiki.archlinux.org/index.php/SSH_Keys):
+ # Environment file
+  write-env-file /home/username/.gpg-agent-info
+  
+  # Keyboard control
+  #no-grab
+    
+  # PIN entry program
+  pinentry-program /usr/bin/pinentry-curses
+  #pinentry-program /usr/bin/pinentry-qt4
+  #pinentry-program /usr/bin/pinentry-kwallet
+  #pinentry-program /usr/bin/pinentry-gtk-2
+and then calling:
+  echo RELOADAGENT | gpg-connect-agent
+If you decrypt a file (gpg -d somefile) it'll ask for your password and decrypt the file. Since gpg-agent holds onto the key for a limited amount of time, you can then load a .gpg file in emacs and it'll auto decrypt the file on load. ..... so the problem isn't solved. :(  But this is promising if I use keychain to hold the keys. then I'd not need to decrypt inside emacs. 
+
+Mon Aug 18 09:29:46 EDT 2014
+FFMpeg kernel problems:
+I was trying to take pictures with arch-nicky and ffmpeg would just hang. You couldn't kill the process and the only way you could kill the process was with a reboot. Finally I found via 'dmesg' that there was a kernel error. I then put in the error message I was seeing into google and found out that there was a kernel bug that was being worked on. https://bbs.archlinux.org/viewtopic.php?id=183064 : v4l2 capture with ffmpeg causes kernel oops with 3.15.1
+BUG: unable to handle kernel paging request  __vb2_queue_alloc [videobuf2_core]
+https://www.google.com/search?q=BUG%3A+unable+to+handle+kernel+paging+request+at+5163dd40+%5B11097.992242%5D+IP%3A+%5B%3Cf81b8be1%3E%5D+__vb2_queue_alloc%2B0x71%2F0x460+%5Bvideobuf2_core%5D&oq=BUG%3A+unable+to+handle+kernel+paging+request+at+5163dd40+%5B11097.992242%5D+IP%3A+%5B%3Cf81b8be1%3E%5D+__vb2_queue_alloc%2B0x71%2F0x460+%5Bvideobuf2_core%5D&aqs=chrome..69i57j69i58.328j0j7&sourceid=chrome&es_sm=93&ie=UTF-8#q=BUG%3A+unable+to+handle+kernel+paging+request++__vb2_queue_alloc+%5Bvideobuf2_core%5D
+
+Wed Aug 20 10:34:01 EDT 2014
+to change the file to be served by default on the server, create a .htaccess file in the directory you want to have redirected.
+add:
+DirectoryIndex MyNewFile.ext
+Now when you hit: www.example.com/ you will be served www.example.com/MyNewFile.ext 
+
+Wed Aug 27 13:27:39 EDT 2014
+Git: how to view diff of commit that you just added 
+if you want to see already-added changes
+git diff --cached -- myfile.txt
