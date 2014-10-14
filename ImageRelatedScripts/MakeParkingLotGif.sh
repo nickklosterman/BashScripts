@@ -26,6 +26,8 @@ then
     #create animated gif with $delay between frames
     inputFilename="${inputDate}"_*.gif
     outputFilename="${inputDate}"-anim_${delay}.gif
+    #delete images smaller than 20kB
+    find "./${inputfilename}" -type f -size -20k -print0 | xargs  -0 rm
     gifsicle --delay ${delay} --loopcount  ${inputDate}_*.gif > "${inputDate}-anim_${delay}.gif"
     #gifsicle --delay ${delay} --loopcount  $inputFilename > $outputFilename
 fi

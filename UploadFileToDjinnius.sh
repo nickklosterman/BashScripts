@@ -1,5 +1,5 @@
 #!/bin/bash
-#if you want to upload multiple files than specfy a pattern and use mput instead of put
+#if you want to upload multiple files then specify a pattern and use mput instead of put
 
 HOST='djinnius.com'
 USER=${1}
