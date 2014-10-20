@@ -17,6 +17,7 @@ mongoClient.connect('mongodb://127.0.0.1:27017/bc',function(err,database){
     //deals will be the name of the table/colleciton
     collection  = db.collection('deal');
     console.log('initialized database');
+    //Only run the main loop once the db is set up
     Main();
 });
 
