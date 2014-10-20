@@ -99,7 +99,7 @@ var  urlRE= new RegExp("(((http?|ftp|file)+://)?(?:[a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)
     var match = urlRE.exec(line);
     if ( match !== null ) {
 //	console.log(match)
-	var url=match[1] //match[1]+match[2]+match[3]+match[4]+match[5]+match[6]
+	var url=(match[1]).trim() //match[1]+match[2]+match[3]+match[4]+match[5]+match[6]
 	var description=match[3]//match[2]
 //	console.log("---------:\\nmatch[0]:"+match[0] + "\\nmatch[1]:" + match[1] + "\\nmatch[2]:" + match[2]);
 	if (typeof description !== 'undefined' 

@@ -14,8 +14,6 @@ I'm not sure this is the best solution because right now the last two+ images wi
 I was thiking of setting a counter that is incremented when the request for the image goes out but and checking to see if the number of completed requests equals the number of initiated requests. Hmm I suppose I could use that method in conjunction with my 'done flag' method.
 */
 
-
-
 var request = require('request'),
 cheerio = require('cheerio'),
 fs = require('fs');
@@ -37,10 +35,11 @@ engine: optional to see what type of engine the author is using.
 webcomicArray = [
 //{starturl:"http://shiverbureau.com/2012/04/04/welcome-to-london-chapter-1-page-1/", title:"ShiverBureau",fileextension:"jpg",baseurl:"",engine:"",activelyupdated:"no"} //seems to work fine; no longer active
 //http://cucumber.gigidigi.com/cq/page-498/ http://cucumber.gigidigi.com/cq/page-1/
-//,{starturl:"http://cucumber.gigidigi.com/cq/page-1/", title:"CucumberQuest",fileextension:"jpg",baseurl:"",engine:""}, // worked fine
+
+{starturl:"http://cucumber.gigidigi.com/cq/page-1/", title:"CucumberQuest",fileextension:"jpg",baseurl:"",engine:""}, // worked fine
 
 // test: {starturl:"http://gingerhaze.com/nimona/comic/nimona-chapter-10-page-40", title:"Nimona",fileextension:"jpg",baseurl:"http://gingerhaze.com",engine:"Drupal 7"}
-//{starturl:"http://gingerhaze.com/nimona/comic/page-1", title:"Nimona",fileextension:"jpg",baseurl:"http://gingerhaze.com",engine:"Drupal 7",activelyupdate:"yes"}  //get that doneFlag is undefined at the end; it is not coming up w undefined for the last page !!fix put in place
+{starturl:"http://gingerhaze.com/nimona/comic/page-1", title:"Nimona",fileextension:"jpg",baseurl:"http://gingerhaze.com",engine:"Drupal 7",activelyupdated:"yes"}  //get that doneFlag is undefined at the end; it is not coming up w undefined for the last page !!fix put in place
 //{starturl:"http://thebbrofoz.webcomic.ws/comics/1", title:"TheBlackBrickRoadOfOZ",fileextension:"png",baseurl:"http://thebbrofoz.webcomic.ws",engine:"",activelyupdate:"yes"} 
 //,{starturl:"http://www.allnightcomic.com/all-night-page-01/", title:"AllNightComic",fileextension:"jpg",baseurl:"",engine:"",activelyupdated:"no"} //last update nov 2013
 
@@ -48,7 +47,7 @@ webcomicArray = [
 //test {starturl:"http://catandgirl.com/?p=4433", title:"CatAndGirl",fileextension:"gif",baseurl:"",engine:"",activelyupdated:"yes",archiveurl:"http://catandgirl.com/?page_id=14"} 
 //,{starturl:"http://www.happletea.com/2009/04/29/fallacies/", title:"HappleTea",fileextension:"jpg",baseurl:"",engine:"",activelyupdated:"",archiveurl:""}  //works.
 
-{starturl:"http://www.meekcomic.com/2008/12/27/chapter-1-cover/", title:"TheMeek",fileextension:"jpg",baseurl:"",engine:"",activelyupdated:"no",archiveurl:"http://www.meekcomic.com/archives/"}
+//{starturl:"http://www.meekcomic.com/2008/12/27/chapter-1-cover/", title:"TheMeek",fileextension:"jpg",baseurl:"",engine:"",activelyupdated:"no",archiveurl:"http://www.meekcomic.com/archives/"}
 ];
 
 
@@ -82,6 +81,16 @@ var  packageIntoArchive = function(title,fileextension) {
 	    console.log('exec error: ' + error);
 	}
     });
+
+console.log('-----------------------------------------')
+console.log('-----------------------------------------')
+console.log(' This isn''t being called for each object')
+console.log('-----------------------------------------')
+console.log('-----------------------------------------')
+console.log('-----------------------------------------')
+
+
+
 };
 
 function WebcomicScrape(starturl,title,baseurl,fileextension) {
