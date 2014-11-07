@@ -2940,3 +2940,62 @@ Wed Aug 27 13:27:39 EDT 2014
 Git: how to view diff of commit that you just added 
 if you want to see already-added changes
 git diff --cached -- myfile.txt
+
+Wed Oct 22 18:13:01 EDT 2014
+Setting Environment Variables: 
+# Append to the end of the file
+$ echo "export AS='name'" >> ~/.bash_profile
+
+# Update shell 
+$ source ~/.bash_profile
+
+Difference between .bash_profile and .bashrc:
+from `man bash`
+~/.bash_profile
+       The personal initialization file, executed for login shells --> this is the script run when you first log in to a system
+~/.bashrc
+       The individual per-interactive-shell startup file --> this is the script run whenever you instantiate a new shell
+
+per http://www.joshstaiger.org/archives/2005/07/bash_profile_vs.html
+"Most of the time you don’t want to maintain two separate config files for login and non-login shells — when you set a PATH, you want it to apply to both. You can fix this by sourcing .bashrc from your .bash_profile file, then putting PATH and common settings in .bashrc.
+
+To do this, add the following lines to .bash_profile:
+if [ -f ~/.bashrc ]; then
+   source ~/.bashrc
+fi
+Now when you login to your machine from a console .bashrc will be called."
+
+Doing a quick test and using putty to login to arch-nicky, I saw .bash_profile and .bashrc being executed upon login.
+However from within X, launching a new xterm only ran .bashrc
+
+In node, environment variables are accessed via `process.env.ENV_VARIABLE`
+
+Tue Oct 28 14:46:26 EDT 2014
+
+To hide/prevent unauthorized access or crawling of a file on a server there are multiple things you can do:
+prevent web crawling http://www.robotstxt.org/
+prevent certain types of files being accessed via http:// by using htaccess files http://httpd.apache.org/docs/2.2/howto/htaccess.html
+http://stackoverflow.com/questions/18637456/preventing-a-file-being-downloaded-or-accessed-on-a-server
+<FilesMatch "\.(doc|txt)">
+  Order deny,allow
+    Deny from all
+    </FilesMatch>
+
+or simply use the /private directory on djinnius where http access isn't allowed and its meant for ftp and script access only
+"You can access the contents of this directory using FTP or using scripts on your web site. For example, you can use the /private directory to store files which contain sensitive information such as mysql connection details, or other data of yours that is meant to be private and not accessible in a web browser directly."
+or upload and download&erase within a small window such that discovery of the file has a very small probability.
+Or just ssl into the computer from home
+or email to self and make sure email is deleted off server. Although you don't control the email server so that is a vulnerability.
+
+Fri Nov  7 15:05:06 EST 2014
+http://www.thegeekstuff.com/2010/05/unix-background-job/
+background a job by appending '&' to command
+Sending the current foreground job to the background using CTRL-Z and bg command
+View all the background jobs using `jobs` command
+Taking a job from the background to the foreground using fg command
+# jobs
+[1]   Running                 bash download-file.sh &
+[2]-  Running                 evolution &
+[3]+  Done                    nautilus .
+
+# fg %2
