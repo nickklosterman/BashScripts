@@ -72,8 +72,10 @@ var stripData=function(pageObj){
     }
 
     request(pageObj.url, function(err, resp, body) {
-	if (err)
-    	    throw err; //I need to more gracefully handle errors especially if the webpage isn't accessible, they are blocking our scraping or some other reason. 
+      if (err) {
+    	//throw err; //I need to more gracefully handle errors especially if the webpage isn't accessible, they are blocking our scraping or some other reason. 
+        console.log(err)
+      }
 
 	var offset = searchStringStart.length;
 	var currentStealStart = body.indexOf(searchStringStart);
