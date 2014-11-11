@@ -2999,3 +2999,39 @@ Taking a job from the background to the foreground using fg command
 [3]+  Done                    nautilus .
 
 # fg %2
+
+
+Tue Nov 11 12:07:45 EST 2014
+I was getting on arch-nicky that mysql(mariadb) wasn't able to start.
+When I tried to login I received this error message:
+   ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/run/mysqld/mysqld.sock' (2 "No such file or directory")
+This was because mysql wasn't running.
+When I attempted to run the service I received this error:
+   Failed to start mysql.service: Unit mysql.service failed to load: No such file or directory.
+In the end I was getting the error bc the OS partition was full. Once I ran my pacmanclean and cleared out the packages then everything worked.
+To get to the root of the problem:
+first see if mysqld is running:
+   ps aux | grep mysqld
+then run
+   systemctl start myqsld.service
+if it isn't successful, run
+   systemctl status mysqld.service
+   journalctl -xn
+and see what output messages were output.
+Check for extraneous characters in
+   /etc/mysql/my.cnf
+Attempt to login to the mysql instance
+   mysql -u nicolae -p SheriffSales
+
+I'm receiving this error when trying to decrypt my gpg files:
+   gpg -d SecretSauce.gpg
+It would list the key it was going to use and then give this message   
+   gpg: problem with the agent: Timeout
+and say that the decryption failed.
+I don't now how I stumbled on it but I ran
+   gpg2 -d SecretSauce.gpg
+and that worked without issue.
+I rebooted and attempted the old gpg -d ... but didn't get the message again.
+Not sure what the deal was.
+I checked in the /var/log/pacman.log and gpg had an update on 9-30 but I would've seen the behavior before today. I didn't really see any updates to keychain or gpg-agent recently either.
+   
