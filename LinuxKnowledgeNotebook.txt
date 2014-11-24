@@ -1981,7 +1981,7 @@ There have been several breaking changes to node that broke the sockets.io porti
 I needed to use an older version of node. I therefore installed nvm, the node version manager and installed v0.8.22.
 I then needed to delete my node_modules directory and reperform the node install.
 However, my system's python points to python3 and not python2. This was a problem for node-gyp. 
-I therefore had to run "node install --python=/usr/bin/python2". After the install all worked nicely.
+I therefore had to run "node install --python=/usr/bin/python2". After the install all worked nicely. EDIT Mon Nov 17 16:20:38 EST 2014: I think this should be "npm install --python=/usr/bin/python2", not "node ...."
 
 Fri May 10 15:16:41 EDT 2013
 Revert a git file if you accidentally make mistakes to an uncommitted change:
@@ -3035,3 +3035,48 @@ I rebooted and attempted the old gpg -d ... but didn't get the message again.
 Not sure what the deal was.
 I checked in the /var/log/pacman.log and gpg had an update on 9-30 but I would've seen the behavior before today. I didn't really see any updates to keychain or gpg-agent recently either.
    
+
+Wed Nov 19 12:19:51 EST 2014
+compare contents of two directories
+diff dir1/ dir2/
+this will print a list of files which are only in one or the other directory.
+
+
+Mon Nov 24 09:17:58 EST 2014
+Find and delete all files without extensions witin a folder and its subfolders
+find . -type f  ! -name "*.*"  -delete
+However, note that the above will not delete files whose name ends in a ., for example foo.. To delete those as well, use this instead:
+find . -type f  ! -name "*.?*" -delete
+
+Don't parse ls, use find,python...just not bash
+http://mywiki.wooledge.org/ParsingLs
+http://mywiki.wooledge.org/DontReadLinesWithFor
+http://mywiki.wooledge.org/BashFAQ/001 How can I read a file (data stream, variable) line-by-line (and/or field-by-field)?
+https://news.ycombinator.com/item?id=7994720
+http://unix.stackexchange.com/questions/128985/why-not-parse-ls
+ for f in *; do
+       [[ -e $f ]] || continue
+             ...
+	       done
+
+import os, sys
+for subdir, files, dirs in os.walk("."):
+    for f in dirs + files:
+          ino = os.lstat(os.path.join(subdir, f)).st_ino
+	        sys.stdout.write("%d %s %s\n" % (ino, subdir, f))
+
+exclude dotfiles and editor backups, and to process everything in alphabetical order by basename:
+import os, sys
+filelist = []
+for subdir, files, dirs in os.walk("."):
+    for f in dirs + files:
+            if f[0] == '.' || f[-1] == '~': continue
+	            ino = os.lstat(os.path.join(subdir, f)).st_ino
+		            filelist.append((f, subdir, ino))
+
+filelist.sort(key = lambda x: x[0])
+for f, path, ino in filelist:
+   sys.stdout.write("%d %s %s\n" % (ino, subdir, f))
+
+Learn a new command every day or so: http://askubuntu.com/questions/337300/are-there-any-games-which-can-train-people-to-learn-terminal-commands/337382#337382
+echo "Did you know that:"; whatis $(ls /bin | shuf -n 1)
