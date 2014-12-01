@@ -74,8 +74,14 @@ function getImageName()
 #	echo "${counter}"
 	if [ $1 -eq 0 ]
 	then #Zip 
-	    imageToExtract=$( unzip -Z -1 "${2}" | sed "${counter}!d" )
-	    unzip -Z -1 "${2}" >> filelist.txt
+	    unzip -t -qq "${2}"
+	    if [ $? -eq 0 ] #if the test ran and exited fine, proceed
+	    then 
+		imageToExtract=$( unzip -Z -1 "${2}" | sed "${counter}!d" )
+		unzip -Z -1 "${2}" >> filelist.txt
+	    else
+		imageToExtract="UnZipTestFailure"
+	    fi
 	fi
 	if [ $1 -eq 1 ] 
 	then #Rar
@@ -115,18 +121,21 @@ IFS=$'\n'
 unset a i
 while IFS= read -r -d $'\0' file; do
     echo "$file"        # or however you want to process each file
-	archiveType=$( determineArchiveType "${file}" )
-	echo $archiveType
-	if [ $archiveType -eq 1 ] || [ $archiveType -eq 0 ] 
-	then
-#	imageName=$( extractFirstImageFromArchive ${archiveType}  "${file}" )
+    archiveType=$( determineArchiveType "${file}" )
+    echo $archiveType
+    if [ $archiveType -eq 1 ] || [ $archiveType -eq 0 ] 
+    then
+	#	imageName=$( extractFirstImageFromArchive ${archiveType}  "${file}" )
 	imageName=$( getImageName ${archiveType}  "${file}" )
-	echo ${imageName} 
-	extractImageFromArchive ${archiveType}  "${file}" "${imageName}" 
-	addArchiveLabelToImage "${imageName##*/}" "${file}" #pass in the filename that is stripped of the path. needed since we extract the files without path; I suppose if I didn't extract wo path then I wouldn't need to do this. 
+	if [ "${imageName}" != "UnZipTestFailure" ]
+	then 
+	    echo ${imageName} 
+	    extractImageFromArchive ${archiveType}  "${file}" "${imageName}" 
+	    addArchiveLabelToImage "${imageName##*/}" "${file}" #pass in the filename that is stripped of the path. needed since we extract the files without path; I suppose if I didn't extract wo path then I wouldn't need to do this. 
 	else 
 	    echo "$file not identifed as rar or zip: ${archiveType}"
 	fi
+    fi
 done < <(find . -type f -name "*.[Cc][Bb][RrZz]" -print0)
 #zip CoverImages *.png #*.jpg *.png *.gif *.JPG *.PNG *.GIF *.JPEG
 zip CoverImages _comic*

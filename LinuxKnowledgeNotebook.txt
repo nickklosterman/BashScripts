@@ -1084,7 +1084,7 @@ useful to look for story files still hanging around after a mv operation like th
 
 find
 find files between two dates
-find ~/some/dir -type f -newrmt 2010-10-29 ! -newermt 20120-10-31
+find ~/some/dir -type f -newermt 2010-10-29 ! -newermt 2010-10-31
 find files from 29th and  30th
 
 xorg update -> low resolution 
