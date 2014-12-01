@@ -12,5 +12,5 @@ else
     then
 	imagenumber=7
     fi
-    wget -q -O /tmp/${radarStation}Radar http://radar.weather.gov/lite/N0R/${radarStation}_${imagenumber}.png
+    wget -q -O /tmp/${radarStation}Radar http://radar.weather.gov/ridge/lite/NCR/${radarStation}_${imagenumber}.png
 fi
