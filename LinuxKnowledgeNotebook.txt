@@ -3080,3 +3080,14 @@ for f, path, ino in filelist:
 
 Learn a new command every day or so: http://askubuntu.com/questions/337300/are-there-any-games-which-can-train-people-to-learn-terminal-commands/337382#337382
 echo "Did you know that:"; whatis $(ls /bin | shuf -n 1)
+
+
+Tue Dec  2 17:58:01 EST 2014
+Merge two repos into one:
+I merged my GH/JobHunt.git repo into my BB/JobHunt.git repo so that I would have all my modifications in my private repo.
+git clone git@bitbucket.org:kklostermanoglu/jobhunt.git
+cd jobhunt/
+git remote add GH https://github.com/nickklosterman/JobHunt.git (could've used a diff alias, I simply used GH here)
+git fetch GH
+git merge GH/master
+This  also preserves the history and merges it for the two repos such that git log showed commits from both repos.
