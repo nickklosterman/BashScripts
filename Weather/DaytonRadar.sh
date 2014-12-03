@@ -1,6 +1,6 @@
 #!/bin/bash
 
-feh http://radar.weather.gov/lite/N0R/ILN_0.png "http://aviationweather.gov/data/obs/sat/goes/vis_goesE.jpg" "http://aviationweather.gov/data/obs/sat/goes/vis_goesW.jpg" http://www.goes.noaa.gov/GIFS/ECI8.JPG http://www.goes.noaa.gov/GIFS/ECI7.JPG http://www.goes.noaa.gov/GIFS/ECI6.JPG http://www.goes.noaa.gov/GIFS/ECI5.JPG &
+feh http://radar.weather.gov/ridge/lite/NCR/ILN_0.png "http://aviationweather.gov/data/obs/sat/goes/vis_goesE.jpg" "http://aviationweather.gov/data/obs/sat/goes/vis_goesW.jpg" http://www.goes.noaa.gov/GIFS/ECI8.JPG http://www.goes.noaa.gov/GIFS/ECI7.JPG http://www.goes.noaa.gov/GIFS/ECI6.JPG http://www.goes.noaa.gov/GIFS/ECI5.JPG &
 
 #feh http://radar.weather.gov/lite/N0R/ILN_0.png http://www.goes.noaa.gov/GIFS/ECI8.JPG http://www.goes.noaa.gov/GIFS/ECI7.JPG http://www.goes.noaa.gov/GIFS/ECI6.JPG http://www.goes.noaa.gov/GIFS/ECI5.JPG &
 #wget "http://forecast.weather.gov/MapClick.php?lat=39.722504198231405&lon=-84.1549301147461&site=iln&unit=0&lg=en&FcstType=text" -O /tmp/forecast.html
