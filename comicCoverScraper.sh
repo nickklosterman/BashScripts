@@ -20,7 +20,9 @@ function determineArchiveType()
 function addArchiveLabelToImage() {
 #1=filename 2=archive
     mytext="${1}"-"${2}"
-    outputfile=_comic"${1}"
+    outputfile=_comic"${1}" #this was using the filename, which maybe named gobbledygook and not be a helpful identifier
+    outputfile=_comic"${2##*/}" #this was using the filename, now use the archive as that is a better filename, file extensions are for humans and less for the machine so having an image filename as X.cb{r|z} doesn't really matter since it will be hidden in the resultant cb[rz] file
+    
     echo "addArchiveLabelToImage:" $mytext " -filename:" "${1}" " -archive" "${2}"
 #    convert "${1}" -background White -fill Black -font Courier -pointsize 24 label:"${mytext}" -gravity South -append comiccovers"${1}"
 #    convert "${1}" -background White -fill Black -font Courier -pointsize 24 label:"${2}" -gravity South -append _comiccovers"${1}"
@@ -67,7 +69,7 @@ function extractImageFromArchive()
 
 function getImageName()
 {
-    counter=1
+    counter=1 #used to determine which image to grab. Here we assume the cover is the first image. 
     imageToExtract=""
     while [ "${imageToExtract}" = "" ]
     do
@@ -77,7 +79,7 @@ function getImageName()
 	    unzip -t -qq "${2}"
 	    if [ $? -eq 0 ] #if the test ran and exited fine, proceed
 	    then 
-		imageToExtract=$( unzip -Z -1 "${2}" | sed "${counter}!d" )
+		imageToExtract=$( unzip -Z -1 "${2}" | sort | sed "${counter}!d" ) #run the filelist through 'sort' to put the files in order. Use the fact that the scanner image is typically the last image if present.
 		unzip -Z -1 "${2}" >> filelist.txt
 	    else
 		imageToExtract="UnZipTestFailure"
@@ -85,7 +87,7 @@ function getImageName()
 	fi
 	if [ $1 -eq 1 ] 
 	then #Rar
-	    imageToExtract=$( unrar lb "${2}" | sed "${counter}!d" )
+	    imageToExtract=$( unrar lb "${2}" | sort | sed "${counter}!d" ) #run the filelist through 'sort' to put the files in order. Use the fact that the scanner image is typically the last image if present.
 	    unrar lb "${2}" >> filelist.txt
 	fi
 	extension_=${imageToExtract##*.}
@@ -120,7 +122,7 @@ IFS=$'\n'
 #from: http://stackoverflow.com/questions/1116992/capturing-output-of-find-print0-into-a-bash-array
 unset a i
 while IFS= read -r -d $'\0' file; do
-    echo "$file"        # or however you want to process each file
+    echo "$file"   #file is the archive file we are operating on      # or however you want to process each file
     archiveType=$( determineArchiveType "${file}" )
     echo $archiveType
     if [ $archiveType -eq 1 ] || [ $archiveType -eq 0 ] 
