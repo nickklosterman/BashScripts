@@ -3091,3 +3091,11 @@ git remote add GH https://github.com/nickklosterman/JobHunt.git (could've used a
 git fetch GH
 git merge GH/master
 This  also preserves the history and merges it for the two repos such that git log showed commits from both repos.
+
+Sat Dec 13 09:18:51 EST 2014
+I know this one is in my notebook, not sure why it never made it here:
+resize resereved space on HDD:
+sudo tune2fs -m Y /dev/sdaX : set reserve space to Y% on sdaX
+e.g:
+sudo tune2fs -m 0 /dev/sda2 : no reserve space on sda2
+

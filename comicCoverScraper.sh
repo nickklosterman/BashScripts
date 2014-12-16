@@ -21,7 +21,7 @@ function addArchiveLabelToImage() {
 #1=filename 2=archive
     mytext="${1}"-"${2}"
     outputfile=_comic"${1}" #this was using the filename, which maybe named gobbledygook and not be a helpful identifier
-    outputfile=_comic"${2##*/}".jpg #this was using the filename, now use the archive as that is a better filename, file extensions are for humans and less for the machine so having an image filename as X.cb{r|z} doesn't really matter since it will be hidden in the resultant cb[rz] file
+    outputfile=_comic"${2##*/}".jpg #this was using the filename, now use the archive as that is a better filename, file extensions are for humans and less for the machine so having an image filename as X.cb{r|z} doesn't really matter since it will be hidden in the resultant cb[rz] file....errr it seems evince doesn't like it without proper image filenames
     
     echo "addArchiveLabelToImage:" $mytext " -filename:" "${1}" " -archive" "${2}"
 #    convert "${1}" -background White -fill Black -font Courier -pointsize 24 label:"${mytext}" -gravity South -append comiccovers"${1}"
