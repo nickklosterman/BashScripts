@@ -3109,3 +3109,8 @@ then on the new machine:
 gpg --import gpgSecretKeys.asc
 you will be prompted for the passphrase for that file.
 running gpg --list-keys on both machines should have entries in common for the keys that were transferred.
+
+If you get a 'secret key not available' you most likely did a 'gpg --export-keys' and not a 'gpg --export-SECRET-keys';  A mismatch in gpg versions may also cause this problem however.
+
+You may also want to change the trust status of the key(s) you just added. do this with 'gpg --edit-key <keyID>'
+then type 'trust' and select '5' to ultimately trust the key.
