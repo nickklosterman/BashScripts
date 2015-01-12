@@ -3099,6 +3099,22 @@ sudo tune2fs -m Y /dev/sdaX : set reserve space to Y% on sdaX
 e.g:
 sudo tune2fs -m 0 /dev/sda2 : no reserve space on sda2
 
+Fri Dec 26 20:58:49 EST 2014
+Export and import gpg keys
+on the exporting machine:
+gpg --export-secret-keys --output gpgSecretKeys.asc
+I tried exporting a single key and listing its id (or what I thought was its id) from gpg --list-keys but that never worked. I had to keep rebooting as I think the gpg agent was gumming things up.
+Then copy that exported file to the new machine using scp or whatever method.
+then on the new machine:
+gpg --import gpgSecretKeys.asc
+you will be prompted for the passphrase for that file.
+running gpg --list-keys on both machines should have entries in common for the keys that were transferred.
+
+If you get a 'secret key not available' you most likely did a 'gpg --export-keys' and not a 'gpg --export-SECRET-keys';  A mismatch in gpg versions may also cause this problem however.
+
+You may also want to change the trust status of the key(s) you just added. do this with 'gpg --edit-key <keyID>'
+then type 'trust' and select '5' to ultimately trust the key.
+
 Sun Jan 11 11:22:28 EST 2015
 there is currently a problem with gpg use in emacs.
 Workaround: place the following code in a buffer and C-x eval-buffer and you will be able to save wo issue
