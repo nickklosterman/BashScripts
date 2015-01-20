@@ -3114,3 +3114,49 @@ If you get a 'secret key not available' you most likely did a 'gpg --export-keys
 
 You may also want to change the trust status of the key(s) you just added. do this with 'gpg --edit-key <keyID>'
 then type 'trust' and select '5' to ultimately trust the key.
+
+Sun Jan 11 11:22:28 EST 2015
+there is currently a problem with gpg use in emacs.
+Workaround: place the following code in a buffer and C-x eval-buffer and you will be able to save wo issue
+(defun epg--list-keys-1 (context name mode)
+(let ((args (append (if (epg-context-home-directory context)
+(list "--homedir"
+(epg-context-home-directory context)))
+'("--with-colons" "--no-greeting" "--batch"
+"--with-fingerprint" "--with-fingerprint")
+(unless (eq (epg-context-protocol context) 'CMS)
+'("--fixed-list-mode"))))
+(list-keys-option (if (memq mode '(t secret))
+"--list-secret-keys"
+(if (memq mode '(nil public))
+"--list-keys"
+"--list-sigs")))
+(coding-system-for-read 'binary)
+keys string field index)
+(if name
+(progn
+(unless (listp name)
+(setq name (list name)))
+(while name
+(setq args (append args (list list-keys-option (car name)))
+name (cdr name))))
+(setq args (append args (list list-keys-option))))
+(with-temp-buffer
+(apply #'call-process
+(epg-context-program context)
+nil (list t nil) nil args)
+(goto-char (point-min))
+(while (re-search-forward "^[a-z][a-z][a-z]:.*" nil t)
+(setq keys (cons (make-vector 15 nil) keys)
+string (match-string 0)
+index 0
+field 0)
+(while (and (< field (length (car keys)))
+(eq index
+(string-match "\\([^:]+\\)?:" string index)))
+(setq index (match-end 0))
+(aset (car keys) field (match-string 1 string))
+(setq field (1+ field))))
+(nreverse keys))))
+https://bbs.archlinux.org/viewtopic.php?pid=1484413#p1484413
+https://bbs.archlinux.org/viewtopic.php?id=191007
