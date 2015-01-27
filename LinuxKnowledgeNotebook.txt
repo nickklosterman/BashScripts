@@ -3160,3 +3160,9 @@ field 0)
 (nreverse keys))))
 https://bbs.archlinux.org/viewtopic.php?pid=1484413#p1484413
 https://bbs.archlinux.org/viewtopic.php?id=191007
+
+
+Tue Jan 27 16:27:51 EST 2015
+http://www.masteringemacs.org/article/removing-blank-lines-buffer
+
+M-x flush-lines RET ^\s-*$ RET <-- this will remove blank lines which contain whitespace
