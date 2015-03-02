@@ -3117,7 +3117,7 @@ then type 'trust' and select '5' to ultimately trust the key.
 
 Sun Jan 11 11:22:28 EST 2015
 there is currently a problem with gpg use in emacs.
-Workaround: place the following code in a buffer and C-x eval-buffer and you will be able to save wo issue
+Workaround: place the following code in a buffer and M-x eval-buffer and you will be able to save wo issue
 (defun epg--list-keys-1 (context name mode)
 (let ((args (append (if (epg-context-home-directory context)
 (list "--homedir"
