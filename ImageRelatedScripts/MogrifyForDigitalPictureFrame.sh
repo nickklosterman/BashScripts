@@ -4,7 +4,7 @@ IFS=$( echo -en "\n\b" )  #this changes the file delimiter which is normally a s
 
 echo "This program will delete gifs and pngs in the conversion process."
 echo "Only run this on a directory on a flashdrive after copying the files."
-echo "You have 5 seconds to cancel this before the process will commence."
+echo "You have 5 seconds to cancel (Ctrl-C) this before the process will commence."
 #echo "I think this was somehow going into the directories because of the 'ls *' instead of the ls *.* which I have now"
 
 sleep 5s
