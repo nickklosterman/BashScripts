@@ -25,7 +25,8 @@ echo $filename
 while [ ! -f $filename ]; do
 #    let "datemonthstring=datemonthstring_formatted"
 #    let "datedaystring=datedaystring_formatted'"
-    wget http://www.sinfest.net/comikaze/comics/$filename
+    #    wget http://www.sinfest.net/comikaze/comics/$filename
+        wget http://www.sinfest.net/btphp/comics/$filename -U "Mozilla"
     let "datedaystring-=1"
 #    let "datedaystring-=10#1"
 #    let "datedaystring=10#$datedaystring-1"
@@ -63,7 +64,8 @@ do
 			then echo File  all ready downloaded!
 			else
 #				echo wget http://www.sinfest.net/comikaze/comics/$year-$temp_month-$temp_day.gif
-				wget http://www.sinfest.net/comikaze/comics/$i-$temp_month-$temp_day.gif
+			    #				wget http://www.sinfest.net/comikaze/comics/$i-$temp_month-$temp_day.gif
+			    				wget http://www.sinfest.net/btphp/comics/$i-$temp_month-$temp_day.gif
 			fi
 #k++
 #j++
