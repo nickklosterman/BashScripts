@@ -3166,3 +3166,21 @@ Tue Jan 27 16:27:51 EST 2015
 http://www.masteringemacs.org/article/removing-blank-lines-buffer
 
 M-x flush-lines RET ^\s-*$ RET <-- this will remove blank lines which contain whitespace
+
+
+Thu Mar 12 14:52:29 EDT 2015
+Matching non-greedily:
+I was trying to change
+<area shape="rect" coords="11,-3,65,20" href="https://${servername}/bras" title="Bras" alt="Bras">
+<area shape="rect" coords="11,-8,65,25" href="https://${servername}/bras" title="Bras" alt="Bras">
+to
+<a href="....">
+I needed to use
+`rea shape="rect" coords".*?"`
+to match up to the first " and not be greedy and go all the way to the end
+http://stackoverflow.com/questions/11898998/regex-match-non-greedy
+
+emacs:
+`query-replace-regexp` does not work the same as `replace-regexp`
+specifically `query-replace-regexp` doesn't seem to honor $,^ markers
+http://stackoverflow.com/questions/4870704/appending-characters-to-the-end-of-each-line-in-emacs
