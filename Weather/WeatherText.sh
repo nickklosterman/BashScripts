@@ -27,4 +27,7 @@ wget -q "http://www.nws.noaa.gov/view/prodsByState.php?state=OH&prodtype=hourly"
 echo "--------============----------"
 # on the mac I had to do -m 2 (stop after max count reached) otherwise I didn't get any text output
 
-wget -q "http://forecast.weather.gov/MapClick.php?zoneid=${zone}&TextType=1" -O /tmp/fc.html && awk '/${zone}/{found=1} found{print; if(/\$\$/) exit}' /tmp/fc.html 
+# I believe that the weather format changed in ~2014/2015 such that the text weather is no longer simply raw text.
+#wget -q "http://forecast.weather.gov/MapClick.php?zoneid=${zone}&TextType=1" -O /tmp/fc.html && awk '/${zone}/{found=1} found{print; if(/\$\$/) exit}' /tmp/fc.html 
+
+grep "able><table" /tmp/fc.html -A 15 | sed 's/<[^>]*>//g'
