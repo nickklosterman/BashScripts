@@ -3184,3 +3184,25 @@ emacs:
 `query-replace-regexp` does not work the same as `replace-regexp`
 specifically `query-replace-regexp` doesn't seem to honor $,^ markers
 http://stackoverflow.com/questions/4870704/appending-characters-to-the-end-of-each-line-in-emacs
+
+Fri Mar 20 09:59:29 EDT 2015
+I was running the following script in the command line to overcome broken files breaking the globbing of this: `unrar e *.rar` .
+for item in *.rar; do unrar e ${item} ; rm Readme.png ; done
+this was causing annoying bc the Readme.png was asking to be overwritten each archive and I had to answer the prompt.
+But I couldn't kill the job bc it would only kill the current rar of the loop.
+The solution is to suspend the job and then kill the job.
+Ctrl-Z
+kill %%
+
+press Ctrl-Z to suspend the script
+kill %%
+The %% tells the bash built-in kill that you want to send a signal (SIGTERM by default) to the most recently suspended background job in the current shell, not to a process-id.
+
+You can also specify jobs by number or by name. e.g. when you suspend a job with ^Z, bash will tell you what its job number is with something like [n]+  Stopped, where the n inside the square brackets is the job number.
+
+For more info on job control and on killing jobs, run help jobs, help fg, help bg, and help kill in bash, and search for JOB CONTROL (all caps) or jobspec in the bash man page.
+(http://unix.stackexchange.com/questions/48425/how-to-stop-the-loop-bash-script-in-terminal)
+
+I then successfully executed the following script to get the result I desired:
+for item in *.rar; do unrar e -f -y ${item} ; done
+(unrar extract freshen assume-yes)
