@@ -77,16 +77,18 @@ else
     #    identify -format "%w %h" ${tempfile}
     identify  ${tempfile}
 
-    convert ${tempfile} -crop ${outputPageWidth}x${outputPageHeight} output%02d.jpg
+    convert ${tempfile} -crop ${outputPageWidth}x${outputPageHeight} /tmp/output%02d.jpg
 
-    for image in output*.jpg
+    for image in /tmp/output*.jpg
     do
 	#NOTE this is for the 1/2 margin case only!! for the margin on all sides case we would need to use -gravity center
 	outputPageWidth=$(echo "scale=9; $printResolution*$pageWidth" | bc )
 	outputPageHeight=$(echo "scale=9; $printResolution*$pageHeight" | bc )
-	convert ${image} -background blue -extent ${outputPageWidth}x${outputPageHeight} ${image}_extent.jpg
-	identify ${image}_extent.jpg
+	convert ${image} -background blue -extent ${outputPageWidth}x${outputPageHeight} ${image}_extent.pdf
+#	identify ${image}_extent.jpg
     done
+    pdfjoin /tmp/output*.pdf --outfile /tmp/Output.pdf
     
 fi
-feh ${tempfile} output*.jpg
+#feh ${tempfile} output*.jpg
+evince /tmp/Output.pdf
