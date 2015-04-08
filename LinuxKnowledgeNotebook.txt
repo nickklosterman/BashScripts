@@ -3206,3 +3206,92 @@ For more info on job control and on killing jobs, run help jobs, help fg, help b
 I then successfully executed the following script to get the result I desired:
 for item in *.rar; do unrar e -f -y ${item} ; done
 (unrar extract freshen assume-yes)
+
+Thu Mar 26 18:54:21 EDT 2015
+run shell command in emacs:
+M-!
+
+To get bash aliases to be used when invokign shell commands from emacs:
+Put the following in your .emacs or evaluate the expressions
+(setq shell-file-name "bash")
+(setq shell-command-switch "-ic")
+I notice that after evaluation of the above, .bashrc aliases are picked up for use by both M-x shell-command
+
+
+Fri Mar 27 10:58:23 EDT 2015
+When the dock at the bottom for the Mac seems to randomly move, its because there is a 'feature' that when you move to another monitors space and first go to the center of the screen and then move down to the bottom, then the dock moves to that monitors space.
+
+http://www.commandlinefu.com/commands/view/2144/validate-and-pretty-print-json-expressions.
+echo '{"json":"obj"}' | python -m simplejson.tool
+cat file | python -m json.tool  #python2.6
+
+Wrong json expression example:
+echo '{ 1.2:3.4}' | python -m simplejson.tool
+Expecting property name: line 1 column 2 (char 2)
+
+
+Fri Apr  3 11:38:08 EDT 2015
+
+http://stackoverflow.com/questions/10725729/git-see-whats-in-a-stash-without-applying-stash
+From the man git-stash page:
+
+    The modifications stashed away by this command can be listed with git stash list, inspected with git stash show
+
+show [<stash>]
+       Show the changes recorded in the stash as a diff between the stashed state and
+              its original parent. When no <stash> is given, shows the latest one. By default,
+                     the command shows the diffstat, but it will accept any format known to git diff
+                            (e.g., git stash show -p stash@{1} to view the second most recent stash in patch
+                                   form).
+
+So, to view the content of the most recent stash, run
+
+git stash show -p stash@{0}
+
+http://ergoemacs.org/emacs/emacs-tip_mode_on_off_toggle.html
+Turn off mode in emacs
+A mode always has to be on. So to turn off a major mode, M-x fundamental-mode will get you to the most basic editor.
+
+Git recover dropped stash: http://stackoverflow.com/questions/89332/recover-dropped-stash-in-git
+If you have only just popped it and the terminal is still open, you will still have the hash value printed by git stash pop on screen (thanks, Dolda).
+The just : If you have only just popped it and the terminal is still open, you will still have the hash value printed by git stash pop on screen (thanks, Dolda).
+
+Otherwise, you can find it using this:
+
+git fsck --no-reflog | awk '/dangling commit/ {print $3}'
+This will show you all the commits at the tips of your commit graph which are no longer referenced from any branch or tag – every lost commit, including every stash commit you’ve ever created, will be somewhere in that graph.
+
+The easiest way to find the stash commit you want is probably to pass that list to gitk:
+
+gitk --all $( git fsck --no-reflog | awk '/dangling commit/ {print $3}' )
+This will launch a repository browser showing you every single commit in the repository ever, regardless of whether it is reachable or not.
+
+You can replace gitk there with something like git log --graph --oneline --decorate if you prefer a nice graph on the console over a separate GUI app.
+
+To spot stash commits, look for commit messages of this form:
+
+        WIP on somebranch: commithash Some old commit message
+
+Once you know the hash of the commit you want, you can apply it as a stash:
+
+git stash apply $stash_hash
+
+Otherwise, you can find it using this:
+
+git fsck --no-reflog | awk '/dangling commit/ {print $3}'
+This will show you all the commits at the tips of your commit graph which are no longer referenced from any branch or tag – every lost commit, including every stash commit you’ve ever created, will be somewhere in that graph.
+
+The easiest way to find the stash commit you want is probably to pass that list to gitk:
+
+gitk --all $( git fsck --no-reflog | awk '/dangling commit/ {print $3}' )
+This will launch a repository browser showing you every single commit in the repository ever, regardless of whether it is reachable or not.
+
+You can replace gitk there with something like git log --graph --oneline --decorate if you prefer a nice graph on the console over a separate GUI app.
+
+To spot stash commits, look for commit messages of this form:
+
+        WIP on somebranch: commithash Some old commit message
+
+Once you know the hash of the commit you want, you can apply it as a stash:
+
+git stash apply $stash_hash
