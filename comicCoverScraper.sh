@@ -194,6 +194,7 @@ while IFS= read -r -d $'\0' file; do
     fi
     echo "------"
 done < <(find . -type f -name "*.[Cc][Bb][RrZz]" -print0)
+
 #having a known prefix helps us to prevent including unwanted images in our archive and in our rm'ing
 zip CoverImages _comic*
 rm _comic*
