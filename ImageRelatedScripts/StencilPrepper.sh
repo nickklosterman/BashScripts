@@ -3,23 +3,48 @@
 inputfilename=${1}
 numberOfColors=${2}
 
+#Will this break if the file has the full path or mutliple periods in the name?
+_tempfile=${1##*/}
+tempoutputfilename=${_tempfile%.*} 
+fileExtension=".png"
+
 #reduce number of colors
-convert ${inputfilename} -dither none -colors ${numberOfColors} ${tempoutputfilename}
-#obtain pallette / colormap
-#we need to capture this output, ideally we want to use cut? to grab just the column of hex characters
-convert ${tempoutputfilename} -format %c histogram:info:-
-     37494: (  0, 85, 25) #005519 srgb(0,85,25)
-      6986: (  8,130, 18) #088212 srgb(8,130,18)
-    318322: ( 21,165, 60) #15A53C srgb(21,165,60)
+#http://www.imagemagick.org/Usage/quantize/#colors
+convert ${inputfilename} -dither none -colors ${numberOfColors} ${tempoutputfilename}.${fileExtension} #NOTE: to get the number of desired output colors you must specify an output that uses indexed colors.  JPG will muck things up as it will do its DCT for compression
 
-#we need to replace all but 1 color for each stencil , the color that remains should be turned to black
-#loop over the colors and replace with white FFFFFF/ black 000000
-# the fill is the replacement color, the opaque is the color to replace
-mogrify -fill "#FF00FF" -opaque "#15A5C3" ${tempfilename_loop} #fuzz option allows for greater coverage
-convert ${rempoutputfilename} -fill "#FF00FF" -opaque "#15A5C3" -fuzz 20% ${tempfilename loop} #not sure this works.
+#http://www.imagemagick.org/Usage/quantize/#extract
+#the sed command gives us the hex representation of the color. we also use sed to strip the blank lines.
+convert ${tempoutputfilename}.${fileExtension} -format %c histogram:info:- |  sed 's/^.*#/#/;s/ .*//;/^ *$/d' > ${tempoutputfilename}_colormap.txt 
 
-#mogrify -fill "#5F005F" -opaque "#15A53C" -fuzz 20% pokemonTemp2.gif can use fuzz for imprecise colors
+#http://stackoverflow.com/questions/11393817/bash-read-lines-in-file-into-an-array
+IFS=$'\r\n' GLOBIGNORE='*' :; colorArray=($(cat ${tempoutputfilename}_colormap.txt ))
 
+loopCounter=1
+#read the histogram output and create a separate image for each of the separate colors.
+#For each color we blank out the non-target colors as white and set our target color as black.
+while read LINE
+do 
+    colorReplaceString=""
+    colorArrayCounter=1
+    for i in "${colorArray[@]}"
+    do
+	if [ $colorArrayCounter != $loopCounter ]
+	then 
+	    colorReplaceString+="-fill #FFFFFF -opaque $i " #replace our non target colors with white
+	else 
+	    colorReplaceString+="-fill #000000 -opaque $i " #make our target color black
+	fi
+	let 'colorArrayCounter+=1'
+    done
+
+#http://www.imagemagick.org/Usage/color_basics/#replace
+#we don't need to use the -fuzz since we are in indexed color space so we know we are replacing the color fully
+    convert ${tempoutputfilename}.${fileExtension} $colorReplaceString ${tempoutputfilename}_${loopCounter}.${fileExtension} 
+    let 'loopCounter+=1'
+done <  ${tempoutputfilename}_colormap.txt
+
+#if three colors are given, I feel like I should skin it like a Shepard Fairey poster.
 
 #ALTERNATE METHOD USING INKSCAPE 
 #write script to loop over the image and clear out all but one path node and output the files sequentially
+ 

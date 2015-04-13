@@ -1,0 +1,8 @@
+In Gimp, take an image, (leave it in color mode) 
+Filters->Newsprint
+Set Screen to CMYK
+For the Black Channel: (the others don't matter we will discard them later)
+Angle 45 degrees
+Spot Function Line
+Done
+Image->Indexed two color (this effectively discards the CMY channels)

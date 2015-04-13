@@ -30,8 +30,18 @@ function addArchiveLabelToImage() {
     
     echo "addArchiveLabelToImage:" $mytext " -filename:" "${1}" " -archive" "${2}"
 
-    convert "${1}" -resize 1600x1200 -background White -fill Black -font Courier -pointsize 24 label:"${2}" -gravity South -append "${outputfile}" 2>> errorlog.txt
-    rm "${1}" #hmm performing rm seems risk, yet is needed.
+#deal with asshats who name files starting with a dash. Fucktards.
+    if [[ ${str:0:1} == "-" ]] 
+    then 
+echo "c here"
+	convert "./${1}" -resize 1600x1200 -background White -fill Black -font Courier -pointsize 24 label:"${2}" -gravity South -append "${outputfile}" 2>> errorlog.txt
+	rm "./${1}" #hmm performing rm seems risk, yet is needed.
+    else
+echo "c no here"
+	convert "${1}" -resize 1600x1200 -background White -fill Black -font Courier -pointsize 24 label:"${2}" -gravity South -append "${outputfile}" 2>> errorlog.txt
+	rm "${1}" #hmm performing rm seems risk, yet is needed.
+	
+fi
 }
 
 
@@ -64,6 +74,9 @@ function checkFilenameDoesntExist() {
 function extractImageFromArchive() 
 {
     imageToExtract="${3}"
+echo "extractImageFromArchive:${3}"
+
+#we use the `b` variable to caputre output.  I imagine I should be piping stdout and stderr to someplace useful instead of doing this. 
     case  "$1" in
 	0)
 	    #Zip 
@@ -73,7 +86,18 @@ function extractImageFromArchive()
 	    
 	    #Rar
 	    #b=$( unrar -o+ e "${2}" "${imageToExtract}" )#force overwriting of exisitng files
-	    b=$( unrar e -y "${2}" "${imageToExtract}" ) #assume yes on questions (overwrites...and who knows what eles)
+
+#deal with those asshats that name files with an initial dash. May they all rot in hell. 
+	    if [[ ${str:0:1} == "-" ]]  # why doesn't this work?
+	    then 
+echo "here"
+		b=$( unrar e -y "${2}" -- "${imageToExtract}" ) 
+		 unrar e  "${2}" -- "${imageToExtract}" 
+	    else 
+echo "no here ${imageToExtract:0:1}"
+
+		b=$( unrar e -y "${2}" -- "${imageToExtract}" ) #assume yes on questions (overwrites...and who knows what else)
+	    fi
 	    ;;
 	2)
 	    b=$( unace e "${2}" "${imageToExtract}" )
@@ -87,7 +111,7 @@ function getImageName()
 {
     counter=1 #used to determine which image to grab. Here we assume the cover is the first image. 
     imageToExtract=""
-    while [ "${imageToExtract}" = "" ]
+    while [ "${imageToExtract}" == "" ] 
     do
 	#	echo "${counter}"
 	case "$1" in
@@ -109,7 +133,10 @@ function getImageName()
 		fi
 		;;
 	    1) #Rar
-		imageToExtract=$( unrar lb "${2}" | sort | sed "${counter}!d" ) #run the filelist through 'sort' to put the files in order. Use the fact that the scanner image is typically the last image if present.
+#rar is shitty in that it doesn't nicely list the full path with the file to be extracted. 
+#we use the verbose listing, just grab the lines with image extensions, ignoring case, sort, use sed to only print one line and due to unrar's shitty output we have to strip the leading space otherwise when we pass the string in as the filename it will fail bc the leading space will be respected as if it was part of the filename
+		imageToExtract=$( unrar v "${2}" | grep -i 'jpg\|png\|gif' | sort | sed "${counter}!d;s/^[[:space:]]//" ) #run the filelist through 'sort' to put the files in order. Use the fact that the scanner image is typically the last image if present.
+#		imageToExtract=$( unrar lb "${2}" | sort | sed "${counter}!d" ) #run the filelist through 'sort' to put the files in order. Use the fact that the scanner image is typically the last image if present.
 		unrar lb "${2}" >> filelist.txt
 		;;
 	    2) #Ace
@@ -125,7 +152,7 @@ function getImageName()
 	#if we found an "image" (really just a filename for extraction) then check to make sure it was an image; if it wasn't an image incrememnt the coutner and go round again
 	if [ "${imageToExtract}" != "UnZipTestFailure" ]
 	then 
-	    if [ "${extension}" = "JPG" ] ||  [ "${extension}" = "PNG" ] || [ "${extension}" = "GIF" ] || [ "${extension}" = "JPEG" ]
+	    if [ "${extension}" == "JPG" ] ||  [ "${extension}" == "PNG" ] || [ "${extension}" == "GIF" ] || [ "${extension}" == "JPEG" ]
 	    then
 		echo "${2} : $imageToExtract" >> imageExtract.txt 
 		
@@ -154,13 +181,24 @@ function getImageName()
 ##  MAIN
 ####
 
+#check if specified a output filename on command line
+
 if [ -e CoverImages.cbz  ]
 then
     echo "A CoverImages.cbz already exists."
-    echo "please rename or delete and run this script again" #make this an interactive menu.
-    echo "or we just need to exclude that archive from being processed."
-    exit 1
-
+    echo "Would you like to overwrite it? (y/n)"
+    read -n 1 response
+    while [ "$response" != "y" ] && [ "$response" != "n" ] 
+    do
+	echo "please enter y/n"
+	read -n 1 response
+    done
+    if [ "$response" == 'n' ] 
+    then 
+	exit 1
+    else 
+	rm CoverImages.cbz
+    fi
 fi
 
 OIFS="$IFS" #needed for the processing of files with spaces in them
@@ -184,6 +222,8 @@ while IFS= read -r -d $'\0' file; do
 	    then 
 		echo  "ImageName to extract: ${imageName}"
 		extractImageFromArchive ${archiveType}  "${file}" "${imageName}" 
+echo "${imageToExtract}"
+
 		addArchiveLabelToImage "${imageName##*/}" "${file}" #pass in the filename that is stripped of the path. needed since we extract the files without path; I suppose if I didn't extract wo path then I wouldn't need to do this. 
 	    else 
 		echo "$file archive type identified but extraction failed"
@@ -202,9 +242,8 @@ mv CoverImages.zip CoverImages.cbz
 
 IFS="$OIFS"
 
+echo "In Evince, have the image highlighted in the left sidebar and use the arrow keys. This will keep the image scrolling nicely such that it is always at the top and on screen"
 
-#echo "NOTE: The current problem is that I'm extracting the files locally, so no path is present. Yet if there is a path I'm still passing it along to the archive labeling procedure. This fails because the 
-
-
-#switch to turn off IM convert/mogrify calls ....hmm I thought I was resizing, but doesn't appear that I am
+#switch to turn off IM convert/mogrify calls
 #switch to progressively zip (i.e. zip after each extraction vs zip after all extractions, i.e. for disk space limited systems.
+#perform du check
