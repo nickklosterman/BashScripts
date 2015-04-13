@@ -3295,3 +3295,11 @@ To spot stash commits, look for commit messages of this form:
 Once you know the hash of the commit you want, you can apply it as a stash:
 
 git stash apply $stash_hash
+
+
+Wed Apr  8 09:15:32 EDT 2015
+When you string a set of commands together with && instead of ; then if the previous command fails you own't execute the rest of the commands
+
+For a tmux.conf to be applied, all instances of tmux must be dead. I.e. you must restart the tmux server.
+I didn't fully appreciate that tmux is a server and you then attach and create sessions as a client. As that goes, I was trying to load a conf even though a session was already running. This wasn't taking effect because it already had a conf loaded and being run by the server. I could only source a tmux and have it take effect. That makes sense that it would behave this way.  The server was ignoring the new tmux command with the config being specified on the command line as it was already running one. The only way to overcome this was to source a file and therefore tell the server ot start using a different config.
+https://bbs.archlinux.org/viewtopic.php?id=195781  my exploits are chronicled here.
