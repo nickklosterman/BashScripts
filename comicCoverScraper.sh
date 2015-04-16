@@ -117,17 +117,23 @@ function getImageName()
 	case "$1" in
 	    0)
 		#Zip 
+#archiveListing=$( unzip -Z -1 "${2}" | sort )
 		unzip -t -qq "${2}" > /dev/null 2>& 1 # test the archive # there was a problem where the archive was identified but failed this test. The error was sent to stdout which was caught by the function imageName=( ) which was breaking my check for UnZipTestFailure
 		exitCode=$?
+
 		if [ $exitCode -eq 0 ] #if the test ran and exited fine, proceed
 		then 
+#echo "hereyo"
+#for performance I should save off the sorted file list
 		    imageToExtract=$( unzip -Z -1 "${2}" | sort | sed "${counter}!d" ) #run the filelist through 'sort' to put the files in order. Use the fact that the scanner image is typically the last image if present.
+	#	    imageToExtract=$( echo ${archiveListing} | sed "${counter}!d" ) #run the filelist through 'sort' to put the files in order. Use the fact that the scanner image is typically the last image if present.
 		    unzip -Z -1 "${2}" >> filelist.txt
 		    # echo "${2} : $imageToExtract" >> imageExtract.txt 
 		else
 		    imageToExtract="UnZipTestFailure"
 		    echo "${2} :${imageToExtract}: $exitCode" >> imageExtractFail.txt
 		    # return $imageToExtract
+#echo "fail extract"
 		    echo -n "$imageToExtract"  #echo our value....
 		    return 0 #.. and fire off our return code
 		fi
@@ -135,7 +141,8 @@ function getImageName()
 	    1) #Rar
 #rar is shitty in that it doesn't nicely list the full path with the file to be extracted. 
 #we use the verbose listing, just grab the lines with image extensions, ignoring case, sort, use sed to only print one line and due to unrar's shitty output we have to strip the leading space otherwise when we pass the string in as the filename it will fail bc the leading space will be respected as if it was part of the filename
-		imageToExtract=$( unrar v "${2}" | grep -i 'jpg\|png\|gif' | sort | sed "${counter}!d;s/^[[:space:]]//" ) #run the filelist through 'sort' to put the files in order. Use the fact that the scanner image is typically the last image if present.
+		imageToExtract=$( unrar v "${2}" | grep -i 'jpg\|png\|gif\|jpeg' | sort | sed "${counter}!d;s/^[[:space:]]//" ) #run the filelist through 'sort' to put the files in order. Use the fact that the scanner image is typically the last image if present.
+#echo ${imageToExtract}
 #		imageToExtract=$( unrar lb "${2}" | sort | sed "${counter}!d" ) #run the filelist through 'sort' to put the files in order. Use the fact that the scanner image is typically the last image if present.
 		unrar lb "${2}" >> filelist.txt
 		;;
@@ -157,7 +164,7 @@ function getImageName()
 		echo "${2} : $imageToExtract" >> imageExtract.txt 
 		
 	    else
-		#	    echo "fail: ${imageToExtract} ext:${extension}"
+			    echo "fail: ${imageToExtract} ext:${extension}"
 		imageToExtract="" # reset this so we stay in the loop
 		let 'counter+=1'
 	    fi
@@ -212,10 +219,11 @@ while IFS= read -r -d $'\0' file; do
     echo "$file archive Type: $archiveType"
 
     re='^[0-9]+$'
-    if [[ $archiveType =~ $re ]] ; then #make sure the archiveType returned a number otherwise throw error
+    if [[ $archiveType =~ $re ]] 
+    then #make sure the archiveType returned a number otherwise throw error
 	if [ $archiveType -gt -1 ] 
 	then
-	    # getImageName ${archiveType}  "${file}" #run it just to see the echo
+	     getImageName ${archiveType}  "${file}" #run it just to see the echo
 	    imageName=$( getImageName ${archiveType}  "${file}" ) #old method using echo to return stuff
 	    #echo "-----${file}:${imageName}=================="
 	    if [[ "${imageName}" != "UnZipTestFailure" ]] 
