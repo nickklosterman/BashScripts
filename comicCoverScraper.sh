@@ -33,15 +33,15 @@ function addArchiveLabelToImage() {
 #deal with asshats who name files starting with a dash. Fucktards.
     if [[ ${str:0:1} == "-" ]] 
     then 
-echo "c here"
+	echo "c here"
 	convert "./${1}" -resize 1600x1200 -background White -fill Black -font Courier -pointsize 24 label:"${2}" -gravity South -append "${outputfile}" 2>> errorlog.txt
 	rm "./${1}" #hmm performing rm seems risk, yet is needed.
     else
-echo "c no here"
+	echo "c no here"
 	convert "${1}" -resize 1600x1200 -background White -fill Black -font Courier -pointsize 24 label:"${2}" -gravity South -append "${outputfile}" 2>> errorlog.txt
 	rm "${1}" #hmm performing rm seems risk, yet is needed.
 	
-fi
+    fi
 }
 
 
@@ -74,7 +74,7 @@ function checkFilenameDoesntExist() {
 function extractImageFromArchive() 
 {
     imageToExtract="${3}"
-echo "extractImageFromArchive:${3}"
+    echo "extractImageFromArchive:${3}"
 
 #we use the `b` variable to caputre output.  I imagine I should be piping stdout and stderr to someplace useful instead of doing this. 
     case  "$1" in
@@ -88,14 +88,12 @@ echo "extractImageFromArchive:${3}"
 	    #b=$( unrar -o+ e "${2}" "${imageToExtract}" )#force overwriting of exisitng files
 
 #deal with those asshats that name files with an initial dash. May they all rot in hell. 
-	    if [[ ${str:0:1} == "-" ]]  # why doesn't this work?
+	    if [[ ${str:0:1} == "-" ]]  # http://stackoverflow.com/questions/18488270/how-to-check-the-first-character-in-a-string-in-unix
 	    then 
-echo "here"
+#http://stackoverflow.com/questions/29572756/unrar-file-from-archive-that-starts-with-a-dash/29572757#29572757
 		b=$( unrar e -y "${2}" -- "${imageToExtract}" ) 
-		 unrar e  "${2}" -- "${imageToExtract}" 
+#		 unrar e  "${2}" -- "${imageToExtract}" 
 	    else 
-echo "no here ${imageToExtract:0:1}"
-
 		b=$( unrar e -y "${2}" -- "${imageToExtract}" ) #assume yes on questions (overwrites...and who knows what else)
 	    fi
 	    ;;
@@ -125,7 +123,7 @@ function getImageName()
 		then 
 #echo "hereyo"
 #for performance I should save off the sorted file list
-		    imageToExtract=$( unzip -Z -1 "${2}" | sort | sed "${counter}!d" ) #run the filelist through 'sort' to put the files in order. Use the fact that the scanner image is typically the last image if present.
+		    imageToExtract=$( unzip -Z -1 "${2}" | grep -i 'jpg\|png\|gif\|jpeg' | sort | sed "${counter}!d" ) #run the filelist through 'sort' to put the files in order. Use the fact that the scanner image is typically the last image if present.
 	#	    imageToExtract=$( echo ${archiveListing} | sed "${counter}!d" ) #run the filelist through 'sort' to put the files in order. Use the fact that the scanner image is typically the last image if present.
 		    unzip -Z -1 "${2}" >> filelist.txt
 		    # echo "${2} : $imageToExtract" >> imageExtract.txt 
@@ -164,7 +162,7 @@ function getImageName()
 		echo "${2} : $imageToExtract" >> imageExtract.txt 
 		
 	    else
-			    echo "fail: ${imageToExtract} ext:${extension}"
+		echo "fail: ${imageToExtract} ext:${extension}"
 		imageToExtract="" # reset this so we stay in the loop
 		let 'counter+=1'
 	    fi
@@ -194,6 +192,7 @@ if [ -e CoverImages.cbz  ]
 then
     echo "A CoverImages.cbz already exists."
     echo "Would you like to overwrite it? (y/n)"
+#http://www.tldp.org/LDP/Bash-Beginners-Guide/html/sect_08_02.html
     read -n 1 response
     while [ "$response" != "y" ] && [ "$response" != "n" ] 
     do
@@ -223,14 +222,14 @@ while IFS= read -r -d $'\0' file; do
     then #make sure the archiveType returned a number otherwise throw error
 	if [ $archiveType -gt -1 ] 
 	then
-	     getImageName ${archiveType}  "${file}" #run it just to see the echo
+	    getImageName ${archiveType}  "${file}" #run it just to see the echo
 	    imageName=$( getImageName ${archiveType}  "${file}" ) #old method using echo to return stuff
 	    #echo "-----${file}:${imageName}=================="
 	    if [[ "${imageName}" != "UnZipTestFailure" ]] 
 	    then 
 		echo  "ImageName to extract: ${imageName}"
 		extractImageFromArchive ${archiveType}  "${file}" "${imageName}" 
-echo "${imageToExtract}"
+		echo "${imageToExtract}"
 
 		addArchiveLabelToImage "${imageName##*/}" "${file}" #pass in the filename that is stripped of the path. needed since we extract the files without path; I suppose if I didn't extract wo path then I wouldn't need to do this. 
 	    else 
