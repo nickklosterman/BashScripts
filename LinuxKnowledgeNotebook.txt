@@ -3336,3 +3336,11 @@ passwd: password updated successfully
 
 
 use .netrc to store credentials for github.
+https://confluence.atlassian.com/display/STASH/Permanently+authenticating+with+Git+repositories
+.netrc:
+machine github.com
+login username
+password mypassword
+machine other.place
+login otheruser
+password otheruser
