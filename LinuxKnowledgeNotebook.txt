@@ -3334,3 +3334,5 @@ Retype new UNIX password:
 passwd: password updated successfully
 [bignicky@localhost Sat Apr 18 20:47:03 ~ 16]$
 
+
+use .netrc to store credentials for github.
