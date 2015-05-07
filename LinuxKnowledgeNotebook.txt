@@ -3348,3 +3348,21 @@ password otheruser
 I then had problems with nicky. I was logging in and then being dropped into a tmux session.  trying to exit out of the tmux session would log me out. I was poking around trying to muck with the tmux.confs but I really needed to look into what was, on login, sending me into tmux.  I checked .bashrc and found nothing. I was sourcing my .aliases and there was no .bash_profile. There was a .profile  whose last line looked suspicious:
 case "$-" in *i*) byobu-launcher && exit 0; esac;
 commenting this out then solved my problem and I was able to get to a prompt where I could launch X. 
+
+Wed May  6 21:39:56 EDT 2015
+to determine if png images are corrupt  use pngcheck http://www.libpng.org/pub/png/apps/pngcheck.html
+jpeginfo : http://photo.stackexchange.com/questions/46919/is-there-a-tool-to-check-the-file-integrity-of-a-series-of-images
+
+
+extract audio from video using ffmpeg: http://superuser.com/questions/332347/how-can-i-convert-mp4-video-to-mp3-audio-with-ffmpeg
+ffmpeg -i filename.mp4 filename.mp3 
+or
+ffmpeg -i video.mp4 -b:a 192K -vn music.mp3
+ffmpeg -i k.mp4 -q:a 0 -map a k.mp3; for variable bitrate.
+
+find longest,shortest filename in a directory: http://www.linuxquestions.org/questions/linux-newbie-8/longest-filename-in-a-directory-516244/
+longest:
+wc -L
+ls | gawk '{ print length, $0 }' | sort -rn | head -1
+shortest:
+ls | gawk '{ print length, $0 }' | sort -n | head -1
