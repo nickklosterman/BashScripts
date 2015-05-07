@@ -3349,6 +3349,26 @@ I then had problems with nicky. I was logging in and then being dropped into a t
 case "$-" in *i*) byobu-launcher && exit 0; esac;
 commenting this out then solved my problem and I was able to get to a prompt where I could launch X. 
 
+I don't really have enough space left on arch-nicky on Cam's old laptop and i'm running into problems.
+To do an upgrade I attempted to do it piecemeal and run pacmanclean in between, but I think this got me into more trouble than necessary.
+Removing some heavy progs like `chromium` and `inkscape` and then reinstalling them after the upgrade seemed to work out nicely.
+I think one of the problems that came about from the piecemeal installation is that I had some of the crypto libraries out of sync so I would get this error when attempting to upgrade:
+warning: GPGME error: Invalid crypto engine
+Fuck this isn't solved
+To get around the above, I had to change SigLevel to Never in `/etc/pacman.conf` this bypasses the keycheck. Putting the keycheck back and attempting to remove a package and add it back keep failing. :(
+
+
+with physical access to a box, you can interrupt the boot process and make a users/roots password anything.
+edit the boot options (GRUB) and add
+init=/bin/bash
+to the command line.
+after booting, it'll drop you into a shell.
+At the shell
+mount -o remount,rw /
+then
+password <user>
+and there you go. You just bypassed root security and set the user password. 
+
 Wed May  6 21:39:56 EDT 2015
 to determine if png images are corrupt  use pngcheck http://www.libpng.org/pub/png/apps/pngcheck.html
 jpeginfo : http://photo.stackexchange.com/questions/46919/is-there-a-tool-to-check-the-file-integrity-of-a-series-of-images
