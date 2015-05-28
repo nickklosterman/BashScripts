@@ -1,0 +1,96 @@
+<!DOCTYPE html>   
+
+<html lang="en" ng-app>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script><!-- for some reason it didn't like having the protocol left out....duh bc it was looking for localhost since it wasn't on web derrrr -->
+<script src="js/stockbondmix.js"></script>
+<title>JavaScript Stock Bond Mix  Calculator</title>
+<style> /* This is a CSS style sheet: it adds style to the program output */
+.output { font-weight: bold; }           /* Calculated values in bold */
+#payment { text-decoration: underline; } /* For element with id="payment" */
+#graph { border: solid black 1px; }      /* Chart has a simple border */
+th, td { vertical-align: top; }          /* Don't center table cells */
+span {border-style: inset;}
+  div { border-style: ridge;}
+  input { float:right;}
+  #Warning { color: black; background: red; visibility:hidden; }
+</style>
+</head>
+<body ng-controller="AmortizationTable">
+<!-- originally found here: http://examples.oreilly.com/9780596805531/examples/01.01.loancalc.html
+  This is an HTML table with <input> elements that allow the user to enter data
+  and <span> elements in which the program can display its results.
+  These elements have ids like "interest" and "years". These ids are used
+  in the JavaScript code that follows the table. Note that some of the input
+  elements define "onchange" or "onclick" event handlers. These specify strings
+  of JavaScript code to be executed when the user enters data or clicks.
+  -->
+<div>
+  <p>This is a js calculator to simulate depletion of your retirement savings. You can split your principal between stocks and bonds as well as entering an average return rate for each investment type. I also allow for simulation of a one time catastrophic stock market correction. You can specify the percentage amount and what year the catastrophe occurs. Your yearly expenditures and yearly growth in expenditures can be simulated as well.  You also have the option to enter in any benefits, such as social security, that help counteract eating away your retirement savings.
+  </div>
+<table>
+  <tr>
+    <td>
+      <div> principal<input id="principal" onchange="computation();" value="1000000"></div>
+      <div>stock percent of principal<input id="stockPercentOfPrincipal" value="50"></div>
+      <div>bond percent of principal<input id="bondPercentOfPrincipal" value="50"></div> <!-- make this a slider since the percentage needs to add up to 100% -->
+      <div>average stock return percent<input id="averageStockReturnPercent" value="9"></div>
+      <div>average bond return percent<input id="averageBondReturnPercent" value="6"></div>
+      <div>investment timeline in years<input id="investmentTimelineInYears" value="20"></div>
+      <div>stock market dip percentage<input id="stockMarketDipPercentage" value="45"></div>
+      <div>stock market dip year<input id="stockMarketDipYear" value="18"></div>
+      <div>yearly expenses<input id="yearlyExpenses" value="45000"></div>
+      <div>yearly expenses appreciation rate<input id="yearlyExpensesAppreciationRate" value="5"></div>
+      <!--have a checkbox to allow for mimicking of the yearlyExpensePercentFrom{Stock|Bond}Portfolio from {stock|bond}PercentOfPrincipal-->
+      <div>yearly expense percent from stock portfolio<input id="yearlyExpensePercentFromStockPortfolio" value="50"></div>
+      <div>yearly expense percent from bond portfolio<input id="yearlyExpensePercentFromBondPortfolio" value="50"></div> really you want to take it out of the worst performing so this should be 100
+      <div>yearly benefits (SS, pension)<input id="yearlyBenefit" value="7500"></div>
+                  <div>yearly benefits COLA<input id="yearlyBenefitCOLA" value="2.5"></div>
+    </td>
+  </tr>
+  <tr>
+    <td><button onclick="calculate();">Calculate</button>
+    <td><button onclick="computation();">Computation</button>
+      <input type="Button" value="Click" ng-click="computeAmortizationTable()"/></td></tr> 
+</table>
+
+
+<table  class="AmortizationTable">
+  <th>Value in Stocks</th>
+  <th>Stock pct of Total</th>
+  <th>Value in Bonds</th>
+  <th>Bond pct of Total</th>
+  <th>Total Portfolio</th>
+  
+<tr ng-repeat="item in amortizationTable">
+<td>{{item.payPeriod}}</td>
+<td>${{item.principalRemaining}}</td>
+<td>${{item.paymentTowardsPrincipal}}</td>
+<td>${{item.paymentTowardsInterest}}</td>
+<td>${{item.totalInterestPaid}}</td>
+<td>${{item.equity}}</td>
+<td>${{item.monthlyTax}}</td>
+</tr>
+</table>
+
+<div ng-repeat="item in amortizationTable">
+  <!-- why isn't the {{item.payPeriod}} not ${{item.payPeriod}}? -->
+<span>{{item.payPeriod}}</span>
+<span>${{item.principalRemaining}}</span>
+<span>${{item.paymentTowardsPrincipal}}</span>
+<span>${{item.paymentTowardsInterest}}</span>
+<span>${{item.totalInterestPaid}}</span>
+<span>${{item.equity}}</span>
+</div>
+
+<div>
+  <div><span>Stock Portfolio</span><span id="stockPortfolio"></span></div>
+  <div><span>Bond Portfolio</span><span id="bondPortfolio"></span></div>
+  <div><span>Total Portfolio</span><span id="totalPortfolio"></span><span id="Warning">You ran out of money :(</span></div>
+  
+  </div>
+<!-- The rest of this example is JavaScript code in the <script> tag below -->
+<!-- Normally, this script would go in the document <head> above but it -->
+<!-- is easier to understand here, after you've seen its HTML context. -->
+</body>
+</html>
