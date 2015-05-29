@@ -221,6 +221,6 @@ function numberWithCommas(x) {
 }
 /**  TODO
  * introduce some way to have a random / jitter market return. But have it statistically in line with the historical mean / std dev. 
- * add in SS benefits and or any other fixed income (not security related) that can help offset costs.
- * create a calculator that given basic inputs determines if you will be able to retire or if you will run out of money; Is there a formula or is the only solution to do it iteratively
+ * create a calculator that given basic inputs determines if you will be able to retire or if you will run out of money; Is there a formula or is the only solution to do it iteratively; Is there a closed form solution to such finite sum type equations? I need to pull out my sums/series text book stuff.
+ * 
  */

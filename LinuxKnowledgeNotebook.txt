@@ -3386,3 +3386,17 @@ wc -L
 ls | gawk '{ print length, $0 }' | sort -rn | head -1
 shortest:
 ls | gawk '{ print length, $0 }' | sort -n | head -1
+
+Fri May 29 09:54:28 EDT 2015
+Use crontab  with whatever editor you want. 
+export EDITOR="emacs -nw"
+
+cron is run by root, so any environment variables are not seen by the root user.  You need to source the .bash_profile before running the script that relies on the environment variables
+http://stackoverflow.com/questions/2229825/where-can-i-set-environment-variables-that-crontab-will-use
+http://stackoverflow.com/questions/15557777/crontab-job-does-not-get-the-environment-variables-set-in-bashrc-file?lq=1 this talks about source .bashrc and how `# If not running interactively, don't do anything
+[ -z "$PS1" ] && return` will dork stuff up for cron since it will exit and not source. 
+
+google "cron environment variable"  plenty of good resource of cron idiosyncracies
+http://krisjordan.com/essays/timesaving-crontab-tips these are good.
+use
+* * * * * env > /tmp/cronenv #this will dump out the cron env variables which aren't those used by the cron user when executing the script. 
