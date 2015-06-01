@@ -1,3 +1,6 @@
+/**
+ * Parse muddles into date separated json and parse links into description followed by link
+ */
 var readline=require('readline')
 var fs=require('fs')
 
