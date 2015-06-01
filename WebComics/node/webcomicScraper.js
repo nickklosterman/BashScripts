@@ -84,7 +84,7 @@ var  packageIntoArchive = function(title,fileextension) {
 
 console.log('-----------------------------------------')
 console.log('-----------------------------------------')
-console.log(' This isn''t being called for each object')
+console.log(' This isn\'t being called for each object')
 console.log('-----------------------------------------')
 console.log('-----------------------------------------')
 console.log('-----------------------------------------')
