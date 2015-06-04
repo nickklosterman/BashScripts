@@ -3400,3 +3400,13 @@ google "cron environment variable"  plenty of good resource of cron idiosyncraci
 http://krisjordan.com/essays/timesaving-crontab-tips these are good.
 use
 * * * * * env > /tmp/cronenv #this will dump out the cron env variables which aren't those used by the cron user when executing the script. 
+
+Mon Jun  1 10:16:10 EDT 2015
+It appears that the Jan 11th workaround for saving using gpg in emacs is fixed with a recent arch update.
+
+Cron gotcha:
+* */2 * * * /path-to-script  #you'd think this script would run every two hours but....
+An asterisk in the minute (first) field tells it to run every minute, regardless of the other fields.
+You need to specify an exact minute to run within the hour. Be that on the hour (0), half past (30), etc..
+0 */2 * * * /path-to-script
+from http://serverfault.com/questions/43510/running-cron-every-2-hours 
