@@ -1,62 +1,20 @@
 //I was failing to trigger the function bc the ng-click was outside of the controller scope in the html
 // I also was trying to iterate over years which is a dom object insted of iterating over its value/the # of payments.
 
-function AmortizationTable($scope){
-  //var Amortizationtable= [];
-  $scope.amortizationTable = [{payPeriod:0, principalRemaining:0, paymentTowardsPrincipal:0, paymentTowardsInterest:0, totalInterestPaid:0, equity:0 }];//computeAmortizationTable();
+function OutputTable($scope){
+  
+  $scope.outputTable = [{payPeriod:0, principalRemaining:0, paymentTowardsPrincipal:0, paymentTowardsInterest:0, totalInterestPaid:0, equity:0 }];
 
   $scope.stuff= function() {
     console.log("stuff");
   }
-  $scope.computeAmortizationTable = function(){
-    var amount = document.getElementById("amount");
-    var apr = document.getElementById("apr");
-    var years = document.getElementById("years");
-    var principal = parseFloat(amount.value);
-    var interest = parseFloat(apr.value) / 100 / 12;
-    var payments = parseFloat(years.value) * 12;
-    var yearlyTaxes =  document.getElementById("taxes");
-    console.log(principal, interest,payments);
 
-    //	calculate();
-    var table=[];
-    var tableItem={};
-
-    var x = Math.pow(1 + interest, payments);   
-    var monthly = (principal*x*interest)/(x-1);
-
-    var equity = 0;
-    var bal = principal;
-
-    var thisMonthsInterest = bal*interest;
-
-    var totalInterestPaid = 0;
-    var currentDate = new Date();
-    for (var idx = 1 ; idx <= payments; idx++) {
-      var thisMonthsInterest = (principal-equity)*interest;
-      equity += (monthly - thisMonthsInterest);  // The rest goes to equity
-      bal -= (monthly - thisMonthsInterest);     // The rest goes to equity
-      //	    computeTaxIncrease(idx,parseFloat(yearlyTaxes.value));
-      totalInterestPaid+=thisMonthsInterest;//.toFixed(2); <-- doing it this way treats it as a string. 
-      tableItem.payPeriod=idx; //get current year and month and perform date math adding a month at a time? and reformat ?
-      tableItem.payPeriod=payPeriodDate(idx,currentDate);
-      tableItem.principalRemaining=bal.toFixed(2);
-      tableItem.paymentTowardsPrincipal=(monthly-thisMonthsInterest).toFixed(2);
-      tableItem.paymentTowardsInterest=thisMonthsInterest.toFixed(2);
-      tableItem.totalInterestPaid=totalInterestPaid.toFixed(2);
-      tableItem.equity=equity.toFixed(2);
-      tableItem.monthlyTax=computeTaxIncrease(idx,parseFloat(yearlyTaxes.value));
-      //console.log(tableItem);
-      table.push(tableItem);
-      tableItem = {}; //clear out for next iteration
-    }
-    //return table;
-    $scope.amortizationTable = table;
+    $scope.computeOutputTable = function(){
+	$scope.outputTable = computation();//table;
   }
 }
 
 "use strict"; // Use ECMAScript 5 strict mode in browsers that support it
-
 
 // Save the user's input as properties of the localStorage object. Those
 // properties will still be there when the user visits in the future
@@ -107,9 +65,11 @@ function computation(){
       domStockPortfolio = document.getElementById("stockPortfolio"),
       domBondPortfolio = document.getElementById("bondPortfolio"),
       domTotalPortfolio = document.getElementById("totalPortfolio"),
-      domWarning = document.getElementById("Warning");
+      domWarning = document.getElementById("Warning"),
+      outputArray=[];
 
-  //arrgg, I really need to validate all of the entries and perform the percentage splits correctly. 
+    //arrgg, I really need to validate all of the entries and perform the percentage splits correctly.
+    //I'm handling that a bit with handleSplit() 
   if (typeof stockPercentOfPrincipal === 'undefined') {
     stockPercentOfPrincipal = 1;
   }
@@ -139,7 +99,8 @@ function computation(){
   investmentObj.yearlyExpensePercentFromStockPortfolio = yearlyExpensePercentFromStockPortfolio;
   investmentObj.yearlyExpensePercentFromBondPortfolio = yearlyExpensePercentFromBondPortfolio;
 
-  for (loopCounter = 0; loopCounter < investmentTimelineInYears; loopCounter++) {
+    for (loopCounter = 0; loopCounter < investmentTimelineInYears; loopCounter++) {
+	var iO = {};
     if (loopCounter === stockMarketDipYear) {
       console.log("dip");
       investmentObj.stockPrincipal = investmentObj.stockPrincipal * (1 - stockMarketDipPercentage);
@@ -199,9 +160,16 @@ investmentObj.accountDepleted = true;
     // up the expenses for next year; COLA
     // or should I do these at the beginning of each loop and just not apply for year 0?
     investmentObj.yearlyExpenses = investmentObj.yearlyExpenses * (1+yearlyExpensesAppreciationRate);
-    yearlyBenefit = yearlyBenefit * (1+yearlyBenefitCOLA); //to test the yearly benefit have the yearly benefit cancel out the yearly expenses with the cola canceling the appreciation rate, this should match a test run without any expenses or benefits.
-    // array.push(investmentObj) plot or display using angular
-
+      yearlyBenefit = yearlyBenefit * (1+yearlyBenefitCOLA); //to test the yearly benefit have the yearly benefit cancel out the yearly expenses with the cola canceling the appreciation rate, this should match a test run without any expenses or benefits.
+      investmentObj.yearlyBenefit=yearlyBenefit;
+	// array.push(investmentObj) plot or display using angular
+	
+	iO.stockPrincipal = numberWithCommas(investmentObj.stockPrincipal.toFixed(2));
+	iO.bondPrincipal = numberWithCommas(investmentObj.bondPrincipal.toFixed(2));
+	iO.yearlyExpenses = numberWithCommas(investmentObj.yearlyExpenses.toFixed(2));
+	iO.yearlyBenefit = numberWithCommas(investmentObj.yearlyBenefit.toFixed(2));
+//	iO = investmentObj;
+      outputArray.push(iO);
   }
   domStockPortfolio.innerHTML = numberWithCommas(investmentObj.stockPrincipal.toFixed(2));
   domBondPortfolio.innerHTML = numberWithCommas(investmentObj.bondPrincipal.toFixed(2));
@@ -213,12 +181,31 @@ domWarning.innerHTML="You ran out of money in year "+loopCounter+" of retirement
    domWarning.style.visibility="hidden";
   }
   console.log("lC:"+loopCounter);
+    return outputArray;
 }
 
 //http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
 function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
+//http://stackoverflow.com/questions/6335399/sending-this-on-an-onchange-on-the-current-element
+function handleSplit(t,target){
+    var num = parseFloat(this.value);//console.log(this.value);
+
+    
+    num = num > 100 ? 100 : num;
+    num = num < 0 ? 0 : num; 
+
+    if (!isNaN(num)){
+	document.getElementById(target).value = 100-num;//parseFloat(this.value)  ;
+    } else {
+	num=0;
+	this.value=num;
+	document.getElementById(target).value = 100-num;//parseFloat(this.value)  ;
+    }
+}
+
 /**  TODO
  * introduce some way to have a random / jitter market return. But have it statistically in line with the historical mean / std dev. 
  * create a calculator that given basic inputs determines if you will be able to retire or if you will run out of money; Is there a formula or is the only solution to do it iteratively; Is there a closed form solution to such finite sum type equations? I need to pull out my sums/series text book stuff.
