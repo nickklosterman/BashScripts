@@ -1396,6 +1396,7 @@ ln: failed to create symbolic link ‘BB/ConfigFiles/.screenrc’: File exists
 4 -rw-r--r-- 1 arch-nicky users 139 May  1 11:29 .screenrc~
 0 lrwxrwxrwx 1 arch-nicky users  24 May  1 13:03 .screenrc -> BB/ConfigFiles/.screenrc
 The above command set seems to conflict with what I wrote earlier.
+note on Tue Jul 28 12:49:40 EDT 2015 --> might I be misinterpreting dest and src?
 
 
 
@@ -3410,3 +3411,7 @@ An asterisk in the minute (first) field tells it to run every minute, regardless
 You need to specify an exact minute to run within the hour. Be that on the hour (0), half past (30), etc..
 0 */2 * * * /path-to-script
 from http://serverfault.com/questions/43510/running-cron-every-2-hours 
+
+
+Tue Jul 28 12:18:23 EDT 2015
+Alternatively In one of the above SO posts it had you add in a line to the script to source the bash_profile or wherever you had the env variables being set. 
