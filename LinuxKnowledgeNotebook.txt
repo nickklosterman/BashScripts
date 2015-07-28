@@ -3415,3 +3415,19 @@ from http://serverfault.com/questions/43510/running-cron-every-2-hours
 
 Tue Jul 28 12:18:23 EDT 2015
 Alternatively In one of the above SO posts it had you add in a line to the script to source the bash_profile or wherever you had the env variables being set. 
+
+ git config user.name "nickklosterman"
+ ➜  BashScripts git:(master) git config -l
+ core.repositoryformatversion=0
+ core.filemode=true
+ core.bare=false
+ core.logallrefupdates=true
+ core.ignorecase=true
+ core.precomposeunicode=true
+ remote.origin.url=https://github.com/nickklosterman/BashScripts.git
+ remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
+ branch.master.remote=origin
+ branch.master.merge=refs/heads/master
+ user.name=nickklosterman
+ ➜  BashScripts git:(master) git config remote.origin.url git@github.com:nickklosterman/BashScripts.git
+ Setting the remote.origin.url will make it so that you no longer have to enter login credentials.  This was due to the fact that you had the protocol as https instead of ssh.
