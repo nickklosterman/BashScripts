@@ -3431,3 +3431,10 @@ Alternatively In one of the above SO posts it had you add in a line to the scrip
  user.name=nickklosterman
  ➜  BashScripts git:(master) git config remote.origin.url git@github.com:nickklosterman/BashScripts.git
  Setting the remote.origin.url will make it so that you no longer have to enter login credentials.  This was due to the fact that you had the protocol as https instead of ssh.
+
+http://superuser.com/questions/199507/how-do-i-ensure-git-doesnt-ask-me-for-my-github-username-and-password
+http://stackoverflow.com/questions/1595848/configuring-git-over-ssh-to-login-once
+--> As these suggest, use the ssh protocol when cloning the repo instead of the https and then you won't have to go through this step. 
+
+Cron examples
+http://alvinalexander.com/linux/unix-linux-crontab-every-minute-hour-day-syntax
