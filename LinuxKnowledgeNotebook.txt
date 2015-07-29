@@ -3412,6 +3412,8 @@ You need to specify an exact minute to run within the hour. Be that on the hour 
 0 */2 * * * /path-to-script
 from http://serverfault.com/questions/43510/running-cron-every-2-hours 
 
+Thu Jul 23 07:39:50 EDT 2015
+Enter newline into replace-regexp in emacs: Ctrlq Ctrl-j
 
 Tue Jul 28 12:18:23 EDT 2015
 Alternatively In one of the above SO posts it had you add in a line to the script to source the bash_profile or wherever you had the env variables being set. 
@@ -3435,6 +3437,7 @@ Alternatively In one of the above SO posts it had you add in a line to the scrip
 http://superuser.com/questions/199507/how-do-i-ensure-git-doesnt-ask-me-for-my-github-username-and-password
 http://stackoverflow.com/questions/1595848/configuring-git-over-ssh-to-login-once
 --> As these suggest, use the ssh protocol when cloning the repo instead of the https and then you won't have to go through this step. 
+Arrrgggg I think this only works on Mac (or at least I haven't correctly set it up on Arch.  I think the key was automagically added to the ssh keyring in the Mac.
 
 Cron examples
 http://alvinalexander.com/linux/unix-linux-crontab-every-minute-hour-day-syntax

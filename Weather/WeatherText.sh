@@ -29,5 +29,4 @@ echo "--------============----------"
 
 # I believe that the weather format changed in ~2014/2015 such that the text weather is no longer simply raw text.
 #wget -q "http://forecast.weather.gov/MapClick.php?zoneid=${zone}&TextType=1" -O /tmp/fc.html && awk '/${zone}/{found=1} found{print; if(/\$\$/) exit}' /tmp/fc.html 
-
-grep "able><table" /tmp/fc.html -A 15 | sed 's/<[^>]*>//g'
+#grep "able><table" /tmp/fc.html -A 15 | sed 's/<[^>]*>//g'
