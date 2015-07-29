@@ -1,5 +1,5 @@
 #!/bin/bash
-# this script is meant to loop over Git repos and check the status
+# this script is meant to loop over Git repos all stored in a 'master' directory and check the status
 for item in `ls -d */`
 do cd $item
    echo "$item"
@@ -9,18 +9,14 @@ do cd $item
    else
        echo "-- clean; no tracked or untracked files in need of attention."
    fi
-   #git status
-   #echo $?
    
    git diff --exit-code 1>/dev/null
    if [ $? -ne 0 ]
    then
        echo "-- has tracked files with changes to be committed."      
    else
-       echo "-- all tracked files have been committed." # I use clean to mean that no tracked files are in need of being committed.
+       echo "-- all tracked files have been committed." 
    fi
-   
-   #   echo $?
    cd .. 
 done
 
