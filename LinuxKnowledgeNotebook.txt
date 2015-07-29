@@ -3441,3 +3441,6 @@ Arrrgggg I think this only works on Mac (or at least I haven't correctly set it 
 
 Cron examples
 http://alvinalexander.com/linux/unix-linux-crontab-every-minute-hour-day-syntax
+
+Wed Jul 29 09:12:18 EDT 2015
+Yeah the Mac Keychain Access is invoked and asks for a password when attempting to access the Git Repos. 
