@@ -2317,7 +2317,7 @@ re-read the fstab file:
 sudo mount -a 
 This isn't the recommended way.  It is best to call each entry. mount -a would do the trick but its best to just mount each mount manually..
 
-										    Say you have one in there to mount /data/one from another source.. a simple:
+Say you have one in there to mount /data/one from another source.. a simple:
 
 mount /data/one
 
@@ -2349,9 +2349,7 @@ Posted on May 3, 2012
 A very quick cheat sheet for getting a user setup quickly on archlinux-arm
 
 Create a user called ‘myuser’ (obviously replace this with your desired username)
-# useradd -m -g users -G \
-audio,lp,optical,storage,video,wheel,games,power,scanner \
--s /bin/bash myuser
+# useradd -m -g users -G audio,lp,optical,storage,video,wheel,games,power,scanner -s /bin/bash myuser
 
 Set the password
 # passwd myuser
@@ -3444,3 +3442,63 @@ http://alvinalexander.com/linux/unix-linux-crontab-every-minute-hour-day-syntax
 
 Wed Jul 29 09:12:18 EDT 2015
 Yeah the Mac Keychain Access is invoked and asks for a password when attempting to access the Git Repos. 
+
+Sun Aug  2 12:33:53 EDT 2015
+I posteed here : http://archlinuxarm.org/forum/viewtopic.php?f=60&t=9115&p=47862
+There was a power outage which killed the BBB. I decided to update. That turned out to be a bad idea as there is a package that breaks the system.
+The easiest solution seems to be to flash a stable version of the OS onto a SD card and boot into that operational OS.  To boot from the SD card, hold down the small button on the BBB on the obverse of the SD card holder before powering up. Once the lights start flashing, you can release the button
+You can recover your home directory as well as anything else that was on the eMMC, like your home directory and any config files, by ssh'ing into the BBB and using dd to copy off the contents of the eMMC using ssh:
+copy off the entire eMMC block using dd:
+
+    dd if=/dev/mmcblk1p2 bs=1M | ssh puffjay@192.168.1.139 -p 522 'dd of=/home/puffjay/backup.BBB.img bs=1M'
+
+I found my system to be on
+
+    /dev/mmcblk1p2
+
+, yours may be different.
+On your host system, you can mount the image using mount
+
+Code: Select all
+     sudo mount -v backup.BBB.img /some/mount/point -o loop -t ext4
+
+You may need to change the filesystem (-t) parameter if you setup your system differently.
+cd on over to the mount point and off you go exploring and recovering files!
+
+Helpful resources:
+http://www.berriman.co.uk/how-to-backup-bbb-emmc-card/
+http://www.linuxquestions.org/questions/linux-general-1/mounting-a-dd-image-file-95579/
+
+I copied off /dev/mmcbkl0 mmcblk1 and attempted to mount those. They only mounted when identified as sysfs but there was no content. There was a directory structure but du came back with all 0s not even 4k as is typical of directories. 
+
+I had mounted the image and was trying to look for the /etc/fstab so I could restore that bc I was afraid it'd be a PITA to redo. Well I never found what I thought I would find in /et/fstab bc I kept grabbing the /etc/fstab from the computer I was on (puffjay) instead of the one I had mounted because I was so used to typing `less /etc/fstab` when I only needed to do `less etc/fstab` since I was in the mount point :sigh:
+
+http://archlinuxarm.org/platforms/armv7/ti/beaglebone-black
+The following are the instructions for writing the OS to eMMC but with the sdX replaced by mmcblk1. I was missing the fine point of sdX vs sdX1 as I zoomed through the instructions.
+dd if=/dev/zero of=/dev/mmcblk1 bs=1M count=8
+#Start fdisk to partition the SD card:
+fdisk /dev/mmcblk1
+At the fdisk prompt, delete old partitions and create a new one:
+
+    Type o. This will clear out any partitions on the drive.
+        Type p to list partitions. There should be no partitions left.
+    Now type n, then p for primary, 1 for the first partition on the drive, 2048 for the first sector, and then press ENTER to accept the default last sector.
+        Write the partition table and exit by typing w.
+
+#Create and mount the ext4 filesystem:
+mkfs.ext4 /dev/mmcblk11
+mkdir mnt
+mount /dev/mmcblk11 mnt
+#Download and extract the root filesystem:
+wget http://archlinuxarm.org/os/ArchLinuxARM-am33x-latest.tar.gz
+bsdtar -xpf ArchLinuxARM-am33x-latest.tar.gz -C mnt
+sync 
+dd if=mnt/boot/MLO of=/dev/mmcblk1 count=1 seek=1 conv=notrunc bs=128k
+dd if=mnt/boot/u-boot.img of=/dev/mmcblk1 count=2 seek=1 conv=notrunc bs=384k
+umount mnt
+sync
+poweroff
+
+Kodi on Acer Aspire:
+I was getting the screen to stutter every second. It was like it was dropping a frame or something.
+It turned out that I could get rid of the stutter by turning off the setting where Kodi tried to sync output with the vsync of the monitor (tv).
