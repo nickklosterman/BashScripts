@@ -3502,3 +3502,19 @@ poweroff
 Kodi on Acer Aspire:
 I was getting the screen to stutter every second. It was like it was dropping a frame or something.
 It turned out that I could get rid of the stutter by turning off the setting where Kodi tried to sync output with the vsync of the monitor (tv).
+
+Fri Aug  7 12:09:11 EDT 2015
+I imported the gpg keys to the mac successfully, but when I imported there was no prompt for the key as i stated there would be in my Dec 26 2015 post. I attempted to open my encrypted gpg file, but the passphrase I entered wasn't accepted. 
+gpg (GnuPG) 1.4.19 <-- version on the mac.
+I then went to delete the secret key.
+The key id that I needed to input to delete the key wasn't listed with
+gpg --list-keys
+it was output when I imported the key and I used that to delete, but I couldn't find how to display the key that I needed to input to delete the key. 
+After I deleted the key I attempted to open the encrypted gpg file and it stated that there was no secret key and the decryption failed. 
+
+Fri Aug 21 15:16:08 EDT 2015
+You can use git checkout to check a single file out of the stash:
+
+$ git checkout stash@{0} -- <filename>
+from:http://stackoverflow.com/questions/1105253/how-would-i-extract-a-single-file-or-changes-to-a-file-from-a-git-stash
+
