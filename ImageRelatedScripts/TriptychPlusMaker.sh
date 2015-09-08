@@ -4,9 +4,11 @@
 #allow specifiying the desired resultant height/width and center the triptych in that area.
 numberOfRequiredArguments=4
 
+#default to no rotate
+
 echo "This script takes an image and splits it evenly into sections with a border in between each section"
 #echo "$#"
-if [ $# -ne $numberOfRequiredArguments ]
+if [ $# -lt $numberOfRequiredArguments ]
 then 
     echo "usage: TriptychPlusMaker.sh inputfilename numberOfPanels borderWidth outputfilename"
 else 
@@ -15,7 +17,7 @@ else
     numberOfPanels=${2}
     borderWidth=${3}
     outputfilename=${4}
-    rotate=1
+    rotate=${5} #1
 
     #echo "$inputfile $numberOfPanels $borderWidth"
 
