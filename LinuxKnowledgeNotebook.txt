@@ -3518,3 +3518,10 @@ You can use git checkout to check a single file out of the stash:
 $ git checkout stash@{0} -- <filename>
 from:http://stackoverflow.com/questions/1105253/how-would-i-extract-a-single-file-or-changes-to-a-file-from-a-git-stash
 
+Mon Sep 21 23:50:25 EDT 2015
+Firefox sessionstore has changed to be more reliable in recovery.
+https://dutherenverseauborddelatable.wordpress.com/2014/06/26/firefox-the-browser-that-has-your-backup/
+basically there is a sessionstore, a 15s backup a 30s backup and a previous good recovery backup.
+I hadstarted a shutdown while I had closed FF. I think this corrupted the sessionstore.
+I copied the recovery files off so I didn't overwrite them. I think I had to go back to previous.js to get a working copy.
+Even though I was greeted with a new session that sessionstore was 9MB and 20MB at various times. I opened the sessionstore and it still had contents of my previous session, but when it loaded it only showed the fresh start. So I'm not sure what is going on there since it was still keeping stuff from the previous session but it wasn't actually restoring that tab. Meh whatever.
