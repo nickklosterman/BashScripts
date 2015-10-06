@@ -18,16 +18,24 @@ def fill(text, width):
     else:
         return text
 def ObtainEmailFeed(user,password):
+    print(user,password)
     string = bytes("%s:%s" % (user,password), 'utf-8')
     b64bytes = base64.encodebytes(string)
     b64auth = b64bytes.decode('ascii')
-    auth = "Basic " + b64auth
-# Build the request
-    req = urllib.request.Request("https://mail.google.com/mail/feed/atom/")
-    req.add_header("Authorization", auth)
+    #auth = "Basic " + b64auth
+    passman=urllib.request.HTTPPasswordMgrWithDefaultRealm()
+    passman.add_password(None,'https;//mail.google.com/mail/feed/atom' , user, password)
+    auth = urllib.request.HTTPBasicAuthHandler(passman)
+# http://pythonhosted.org/feedparser/search.html?q=https&check_keywords=yes&area=default https://github.com/kurtmckee/feedparser/commits/develop https://docs.python.org/3/library/urllib.html https://search.yahoo.com/yhs/search;_ylt=A0LEV7oPGxNWtxAAAygnnIlQ;_ylc=X1MDMTM1MTE5NTY4NwRfcgMyBGZyA3locy1tb3ppbGxhLTAwMgRncHJpZANPb0RmeDJZelJGQ0dWREV6NXVtOFdBBG5fcnNsdAMwBG5fc3VnZwMwBG9yaWdpbgNzZWFyY2gueWFob28uY29tBHBvcwMwBHBxc3RyAwRwcXN0cmwDBHFzdHJsAzM1BHF1ZXJ5A3VybGxpYi5yZXF1ZXN0LkhUVFBCYXNpY0F1dGhIYW5kbGVyBHRfc3RtcAMxNDQ0MDkzMTQz?p=urllib.request.HTTPBasicAuthHandler&fr2=sb-top-search&hspart=mozilla&hsimp=yhs-002 https://docs.python.org/3.0/library/urllib.request.html http://www.programcreek.com/python/example/85895/urllib.request.HTTPBasicAuthHandler    
+#    auth.add_password('BasicAuth', 'mail.google.com', user,password)
+  # Build the request
+    #req = urllib.request.Request("https://mail.google.com/mail/feed/atom/")
+    #req.add_header("Authorization", auth)
     try:
-        handle = urllib.request.urlopen(req)
-        atom=feedparser.parse( handle) 
+        #handle = urllib.request.urlopen(req)
+        #atom=feedparser.parse('https;//mail.google.com/mail/feed/atom',handlers=[auth])
+        atom=feedparser.parse('https;//nick.klosterman:Kazim&*Antalya@mail.google.com/mail/feed/atom')
+        print(atom)
         return atom
     except urllib.error.URLError as e:
         if hasattr(e, 'reason'):
