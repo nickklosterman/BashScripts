@@ -3525,3 +3525,22 @@ basically there is a sessionstore, a 15s backup a 30s backup and a previous good
 I hadstarted a shutdown while I had closed FF. I think this corrupted the sessionstore.
 I copied the recovery files off so I didn't overwrite them. I think I had to go back to previous.js to get a working copy.
 Even though I was greeted with a new session that sessionstore was 9MB and 20MB at various times. I opened the sessionstore and it still had contents of my previous session, but when it loaded it only showed the fresh start. So I'm not sure what is going on there since it was still keeping stuff from the previous session but it wasn't actually restoring that tab. Meh whatever.
+
+Sat Oct  3 09:23:24 EDT 2015
+fixing emacs backspace M-x  normal-erase-is-backspace-mode
+
+list duplicate lines :
+sort file.txt | uniq -d
+
+remove duplicate lines:
+sort file.txt | uniq -u 
+
+Sat Oct 10 17:15:53 EDT 2015
+copy bash array
+a=(foo bar "foo 1" "bar two")  #create an array
+b=("${a[@]}")                  #copy the array in another one
+
+for value in "${b[@]}" ; do    #print the new array
+echo "$value"
+done
+ from http://stackoverflow.com/questions/19417015/bash-copy-from-one-array-to-another

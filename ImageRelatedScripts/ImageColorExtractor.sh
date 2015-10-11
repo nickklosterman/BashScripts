@@ -15,9 +15,10 @@ fileExtension="png"
 
 #reduce number of colors
 #http://www.imagemagick.org/Usage/quantize/#colors
+#echo $#
 if [ $# -eq 2 ]
 then
-    convert ${inputfilename} -dither none -colors ${numberOfColors} ${tempoutputfilename}${fileExtension} #NOTE: to get the number of desired output colors you must specify an output that uses indexed colors.  JPG will muck things up as it will do its DCT for compression
+    convert ${inputfilename} -dither none -colors ${numberOfColors} ${tempoutputfilename}.${fileExtension} #NOTE: to get the number of desired output colors you must specify an output that uses indexed colors.  JPG will muck things up as it will do its DCT for compression
 fi
 
 #http://www.imagemagick.org/Usage/quantize/#extract
@@ -36,8 +37,10 @@ loopCounter=1
 #FIXME: we don't need to read in teh file since we have the colors in the colorArray
 colorArray2=( "${colorArray[@]}" )
 
+#wc -l ${tempoutputfilename}_colormap.txt
 for j in "${colorArray2[@]}"
 do
+
     colorReplaceString=""
     colorArrayCounter=1
     for i in "${colorArray[@]}"
