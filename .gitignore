@@ -4,3 +4,7 @@
 test.db
 index.html
 node_modules/
+ImageRelatedScripts/DD/*.jpg
+WebComics/*.cbz
+WebComics/*.png
+WebComics/node/*.cbz

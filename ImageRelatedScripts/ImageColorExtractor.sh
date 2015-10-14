@@ -2,6 +2,7 @@
 
 inputfilename=${1}
 numberOfColors=${2}
+flipColors=${3}
 
 echo "Usage: $0 filename.ext (numberOfColors)"
 echo "This script will extract an image based solely on one color."
@@ -37,6 +38,20 @@ loopCounter=1
 #FIXME: we don't need to read in teh file since we have the colors in the colorArray
 colorArray2=( "${colorArray[@]}" )
 
+#According to IM documentation: Remember "black" in a mask is transparent, while white is opaque, so all we need to do is draw black over anything we don't want visible.  from http://www.imagemagick.org/Usage/masking/
+
+nonTargetColor="#FFFFFF"
+targetColor="#000000"
+if [ $# -eq 3 ]
+then
+    if [ $flipColors == "yes" ]
+    then
+	nonTargetColor="#000000"
+	targetColor="#FFFFFF"
+    fi
+fi
+
+
 #wc -l ${tempoutputfilename}_colormap.txt
 for j in "${colorArray2[@]}"
 do
@@ -47,9 +62,9 @@ do
     do
 	if [ $colorArrayCounter != $loopCounter ]
 	then 
-	    colorReplaceString+="-fill #FFFFFF -opaque $i " #replace our non target colors with white
+	    colorReplaceString+="-fill ${nonTargetColor} -opaque $i " #replace our non target colors with $nonTargetColor
 	else 
-	    colorReplaceString+="-fill #000000 -opaque $i " #make our target color black
+	    colorReplaceString+="-fill ${targetColor} -opaque $i " #make our target color black
 	fi
 	let 'colorArrayCounter+=1'
     done
