@@ -8,3 +8,5 @@ ImageRelatedScripts/DD/*.jpg
 WebComics/*.cbz
 WebComics/*.png
 WebComics/node/*.cbz
+WebComics/node/*.jpg
+WebComics/node/*.png

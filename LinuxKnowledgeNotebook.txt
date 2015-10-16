@@ -3544,3 +3544,6 @@ for value in "${b[@]}" ; do    #print the new array
 echo "$value"
 done
  from http://stackoverflow.com/questions/19417015/bash-copy-from-one-array-to-another
+ 
+Fri Oct 16 11:33:52 EDT 2015
+Emacs: M-q to reformat based on the fill-column typically this is the 80 column width. 
