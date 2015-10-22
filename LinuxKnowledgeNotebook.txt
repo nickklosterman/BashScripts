@@ -3547,3 +3547,13 @@ done
  
 Fri Oct 16 11:33:52 EDT 2015
 Emacs: M-q to reformat based on the fill-column typically this is the 80 column width. 
+
+Thu Oct 22 12:09:49 EDT 2015
+find files older than a certain date:
+find . -type f -mtime +30 -delete
+That will delete all files 30+ days old.
+http://www.unix.com/unix-for-advanced-and-expert-users/162080-find-files-older-than-30-days-old.html
+The -delete option (if supported) is much faster and doesn't run into the arguments list length limit according to a poster.
+
+easiest way to do a multifile search and replace via CLI seems to be to write an inline script:
+for file in /some/path/*; do sed -i backupextension 's/replace/with/' $file ; done
