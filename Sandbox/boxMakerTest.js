@@ -214,7 +214,7 @@ function CreateTabbedPolygon(parameterObject){
 	    //obj=CreateTab(obj.x,obj.y,angle,parameterObject.sideLength,parameterObject.materialWidth);
 	}
     }
-    console.log('" fill="none" stroke="black" stroke-width="3" />');
+    console.log('" fill="none" stroke="#ff0000" stroke-width="0.09" />');
 }
 function CreateTabbedPolygonCCW(parameterObject){
     parameterObject.CCW=true;
@@ -310,7 +310,7 @@ function CreateTabbedSides(parameterObject) {
 			  materialWidth:parameterObject.materialWidth,
 			  numberOfSides:parameterObject.numberOfSides,
 			  tabsPerSide:parameterObject.tabsPerSide});
-	console.log('" fill="none" stroke="black" stroke-width="3" />');
+	console.log('" fill="none" stroke="#ff0000" stroke-width="0.09" />');
     }
 }
 
