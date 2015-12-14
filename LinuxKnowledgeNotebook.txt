@@ -3561,3 +3561,14 @@ for file in /some/path/*; do sed -i backupextension 's/replace/with/' $file ; do
 Fri Oct 23 15:51:47 EDT 2015
 Alternate solution for delete file if size is zero 
 find path/to/dir -type f -size 0 -delete 
+
+Mon Nov 23 10:54:08 EST 2015
+Instead of digging in to find the high res images in the dom, simply look in the network tab and R click the image and open the image in a new tab. That is a hell of a lot simpler than exploring the dom and expanding tabs.
+
+grep foo -r . | grep -v bar
+#search for files that contain `foo` but don't contain `bar`
+
+find . -r -name "*.jpg" -print0 | xargs jpeginfo -c
+find . -name "*.jpg" -type f -print0 | xargs -0 ../../../jpeginfo/jpeginfo -c
+find . -name "*.jpg" -or -name "*.jpeg" -type f -print0 | xargs -0 ../../../jpeginfo/jpeginfo -c
+The above doesn't seem to be necessary for the twitter/tumblr/instagram rippers as they don't do other formats than .jpg,.gif,.png
