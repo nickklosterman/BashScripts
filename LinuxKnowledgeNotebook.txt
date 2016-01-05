@@ -3591,6 +3591,17 @@ Or even shorter, without intermediate file:
 sqlite3 database1 .dump | sqlite database3
 sqlite3 database2 .dump | sqlite database3 
 
+Mon Nov 23 10:54:08 EST 2015
+Instead of digging in to find the high res images in the dom, simply look in the network tab and R click the image and open the image in a new tab. That is a hell of a lot simpler than exploring the dom and expanding tabs.
+
+grep foo -r . | grep -v bar
+#search for files that contain `foo` but don't contain `bar`
+
+find . -r -name "*.jpg" -print0 | xargs jpeginfo -c
+find . -name "*.jpg" -type f -print0 | xargs -0 ../../../jpeginfo/jpeginfo -c
+find . -name "*.jpg" -or -name "*.jpeg" -type f -print0 | xargs -0 ../../../jpeginfo/jpeginfo -c
+The above doesn't seem to be necessary for the twitter/tumblr/instagram rippers as they don't do other formats than .jpg,.gif,.png
+
 Mon Nov 30 06:56:13 EST 2015
 If you accidentally ran `git init` in the wrong directory no harm really done.
 
