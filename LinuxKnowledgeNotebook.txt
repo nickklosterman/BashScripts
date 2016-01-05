@@ -3616,3 +3616,9 @@ Fri Dec 11 06:48:29 EST 2015
 Fonts are no longer in ~/.fonts for the local user.
  To install fonts for only a single user, use ~/.local/share/fonts (~/.fonts/ is now deprecated).
  https://wiki.archlinux.org/index.php/Fonts
+
+Tue Dec 15 12:15:45 EST 2015
+http://stackoverflow.com/questions/15292391/is-it-possible-to-perform-a-grep-search-in-all-the-branches-of-git-project
+ git grep <regexp> $(git rev-list --all)  #for when your rev-list is small otherwise you will need to revert to using
+ git rev-list --all | (while read rev; do git grep -e <regexp> $rev; done) #when the argument list is too large.
+
