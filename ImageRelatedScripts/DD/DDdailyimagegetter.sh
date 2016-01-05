@@ -72,7 +72,7 @@ cat /tmp/BlogImages
 
 #feh is changing the contents of /tmp/BlogImages. it overwrites the links with the tmp filenames it creates/uses
 
-feh -f /tmp/BlogImages
+feh -f /tmp/BlogImages &
 #cat /tmp/BlogImages
 
 

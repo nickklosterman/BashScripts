@@ -3558,6 +3558,50 @@ The -delete option (if supported) is much faster and doesn't run into the argume
 easiest way to do a multifile search and replace via CLI seems to be to write an inline script:
 for file in /some/path/*; do sed -i backupextension 's/replace/with/' $file ; done
 
+
 Fri Oct 23 15:51:47 EDT 2015
 Alternate solution for delete file if size is zero 
 find path/to/dir -type f -size 0 -delete 
+
+Wed Oct 28 23:57:44 EDT 2015
+Why would you want to root your android phone?
+So that you can easily copy things off of it!
+I had to get SU access to my old LG MyTouch 3 Slide and it was a PITA since the screen was broken.
+I need to ask on SE, How to prevent data loss on phone.  What is easiest way to backup data etc?
+
+Tue Nov  3 20:30:33 EST 2015
+Pulling data off LG MyTouch 3G Slide
+basically I there is no easier way than using adb shell and cat'ing files to the sdcard.
+Using the androidscreencast or http://droid-at-screen.org/ or  droidscreencast jars can help if you have a dead screen. I don't think they will help if you have a cracked digitizer.
+
+Mac alternate display resolutions:
+Option+Click on 'scaled' to get all the options.
+
+Start in Recovery Partition:
+Cmd+R, hold until get to recovery area.
+
+Sun Nov 15 21:58:01 EST 2015
+http://sqlite.1065341.n5.nabble.com/How-do-you-combine-two-SQLite-databases-td19362.html
+With the command line program:
+sqlite3 database1 .dump >fileall.sql
+sqlite3 database2 .dump >>fileall.sql
+sqlite3 database3 <fileall.sql
+
+Or even shorter, without intermediate file:
+sqlite3 database1 .dump | sqlite database3
+sqlite3 database2 .dump | sqlite database3 
+
+Mon Nov 30 06:56:13 EST 2015
+If you accidentally ran `git init` in the wrong directory no harm really done.
+
+If you did it on directory which wasn't previously set up as git repository, you can just remove .git folder (assuming you're using linux):
+
+rm -rf .git
+
+Otherwise, if directory already contained repository (.git directory), than git init would have no effect (i.e. git log will show the same commits before and after git init).
+http://stackoverflow.com/questions/10135155/git-did-init-bare-in-wrong-directory
+
+Fri Dec 11 06:48:29 EST 2015
+Fonts are no longer in ~/.fonts for the local user.
+ To install fonts for only a single user, use ~/.local/share/fonts (~/.fonts/ is now deprecated).
+ https://wiki.archlinux.org/index.php/Fonts
