@@ -3622,3 +3622,7 @@ http://stackoverflow.com/questions/15292391/is-it-possible-to-perform-a-grep-sea
  git grep <regexp> $(git rev-list --all)  #for when your rev-list is small otherwise you will need to revert to using
  git rev-list --all | (while read rev; do git grep -e <regexp> $rev; done) #when the argument list is too large.
 
+
+Tue Jan  5 18:21:47 EST 2016
+rTorrent closes a torrent due to diskspace or something else and then won't start again despite hitting ctrl + s.
+Free up extra disk space and then try ctrl+r.  This will force a check of the hash and allow it to start again if able.
