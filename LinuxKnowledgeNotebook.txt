@@ -3626,3 +3626,65 @@ http://stackoverflow.com/questions/15292391/is-it-possible-to-perform-a-grep-sea
 Tue Jan  5 18:21:47 EST 2016
 rTorrent closes a torrent due to diskspace or something else and then won't start again despite hitting ctrl + s.
 Free up extra disk space and then try ctrl+r.  This will force a check of the hash and allow it to start again if able.
+
+Wed Jan  6 20:00:47 EST 2016
+I attempted to update the BBB and it borked itself. The install failed and yet it gave a message as if the system realized it fucked up and it didn't commit the changes. However, this was not the case:
+http://archlinuxarm.org/forum/viewtopic.php?f=57&t=9668
+
+Anyway I had burned the OS to the eMMC and therefore I burned an SD card with the basic Arch image in hopes that I could mount the eMMC and pull off whatever I needed/wanted. 
+
+I must have in the past created the SD card on puffjay and not on nicky Mint as nicky Mint didn't have bsdtar.  Anyway, I had trouble formatting a virgin 16gb SD card. 
+I ran the dd command and cleared the card out but I couldn't commit the fdisk partitioning and the after steps then failed. 
+I then couldn't read the card and it wouldn't show up when I did df -h. 
+The error message from fdisk stated that the system wouldn't be able to read the disk until the system was restarted.  
+I had to plug in the card reader with the card into my Mac Pro for it to bitch about being unable to read the card and to have it fix the unformatted card.
+
+I then brought the card back the the Mint and plugged it in I tried to use gparted. It threw errors as well. It again stated that a restart was in order.
+
+I gave up and restarted. I then was easily able to use gparted to create the required ext4 partition. 
+I could use the CLI for the rest of the commands. 
+
+I inserted the sd card and booted the device. I then was able to ssh in. I was able to mount the eMMC as outlined by the directions for writing the OS to the eMMC.  
+
+I however wasn't able to extract or repair the eMMC. I don't think I was even dumping it properly as the dumps were filling up the card. That seemed to indicate that something was amiss as the eMMC is only 2GB.
+
+
+Fri Jan  8 21:41:56 EST 2016
+I downloaded the jessie image from http://beagleboard.org/latest-images
+it comes down as a something.img.xz file
+Online posts stated to use tar but I received errors stating that it wasn't a tar archive.  
+Using 
+xz -d somefile.img.xz
+worked though. 
+http://www.linuxquestions.org/questions/linux-software-2/how-to-install-tar-xz-file-in-redhat-linux-4175443828/
+This left me with a .img file that I then used dd to write to the SD card.
+
+http://www.crashcourse.ca/wiki/index.php/BBB_software_update_process
+sudo dd if=some.img of=/dev/sdX bs=1M
+
+Sat Jan  9 14:04:12 EST 2016
+Kinda giving up on writitng image to the BBB eMMC as I keep failing and don't know why.  Testing to see if I can run what I need on the Pi.
+This is all done on Raspbian (i.e. uses apt-get etc)
+Run kodi & rtorrent & nfs on Raspbian
+ssh into the device:
+pi@192.168.1.113
+pwd: raspberry
+No need to su, just use sudo for any commands needed to run as su
+sudo apt-get install rtorrent tmux nfs-kernel-server nfs-common fdupes youtube-dl (may need to revert to using the official repo as it seems to fail a lot recently)
+edit /etc/exports
+export the shares
+sudo exportfs -ra (this command should be run whenever /etc/exports changes)
+make any necessary directories in /srv/nfs4/
+make those directories read/write if desired chmod 777 /srv/nfs4
+enter mounted directories in /etc/fstab
+sudo service rpcbind (alternately could install and use portmap) start #upon reading the Arch NFS wiki page it seems that rpcbind is needed for nfs v2,v3
+sudo service nfs-kernel-server start
+From a client machine check for any nfs mounts on the network
+showmount -e 192.168.1.113(ip of nfs server)
+to mount on the client:
+sudo mount -t nfs 192.168.1.113:/home/pi/Remote/SGTwo Media2
+
+
+Mon May  2 19:02:32 EDT 2016
+There was an update that b0rked RaspBMC(now OSMC). It was stuck in a reboot loop. I got out of the reboot loop by deleting all the .db files in the .kodi/userdata/Database. Then she would boot up as normal. https://www.raspberrypi.org/forums/viewtopic.php?f=28&t=94799
+So deleting those .db files allowed me to get past the boot loop, but then I couldn't get into SGOne. I could navigate SGTwo, but not SGOne. I then ran 'sudo apt-get clean' and this freed up ~100MB of free space. As it was there was no freespace. I think this might have been part of both problems.
