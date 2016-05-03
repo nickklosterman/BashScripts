@@ -3627,6 +3627,7 @@ Tue Jan  5 18:21:47 EST 2016
 rTorrent closes a torrent due to diskspace or something else and then won't start again despite hitting ctrl + s.
 Free up extra disk space and then try ctrl+r.  This will force a check of the hash and allow it to start again if able.
 
+<<<<<<< HEAD
 Wed Jan  6 20:00:47 EST 2016
 I attempted to update the BBB and it borked itself. The install failed and yet it gave a message as if the system realized it fucked up and it didn't commit the changes. However, this was not the case:
 http://archlinuxarm.org/forum/viewtopic.php?f=57&t=9668
@@ -3685,6 +3686,23 @@ to mount on the client:
 sudo mount -t nfs 192.168.1.113:/home/pi/Remote/SGTwo Media2
 
 
+Thu Mar  3 12:57:44 EST 2016
+protecting yourself against rm: http://superuser.com/questions/382407/best-practices-to-alias-the-rm-command-and-make-it-safer
+on Arch install trash-cli and add this alias
+alias rm='echo "rm is disabled, use trash or /bin/rm instead. if using /bin/rm consider the -i or -I options"'
+Basically you shouldn't alias rm to do something else as then if you move to a new system which doesn't have that alias then you will be assuming one behavior when another is actually taking place. And this could get you into hot water.
+also relevant : http://askubuntu.com/questions/465128/protection-for-rm
+
+install trash-cli : https://github.com/andreafrancia/trash-cli
+http://www.webupd8.org/2010/02/make-rm-move-files-to-trash-instead-of.html includes a script to modify the trash-put behavior since it is recursive by nature and they created a script to modify the behavior so you need to add the -r option
+
+Sun Mar 13 16:16:25 EDT 2016
+Somehow on puffjay I was trying to push the latest data for IBDs and for some reason it was trying to push the IBDdatabase.sqlite.  The db file is ~500MB so github chocked stating that it only allows up to 100mb. I tried using tig to unstage the file to no avail. I started searching online. git diff --cached didn't show the file. git checkout -- IBDdatabase.sqlite didn't work.  I ended up simply removing the file and its history.  The file gets created from the data at hand so no real point in having a local copy and committing it.
+To remove the file and its history I had to
+git filter-branch --index-filter 'git rm -r --cached --ignore-unmatch IBDdatabase.sqlite' HEAD
+http://stackoverflow.com/questions/19573031/cant-push-to-github-because-of-large-file-which-i-already-deleted
+
 Mon May  2 19:02:32 EDT 2016
 There was an update that b0rked RaspBMC(now OSMC). It was stuck in a reboot loop. I got out of the reboot loop by deleting all the .db files in the .kodi/userdata/Database. Then she would boot up as normal. https://www.raspberrypi.org/forums/viewtopic.php?f=28&t=94799
 So deleting those .db files allowed me to get past the boot loop, but then I couldn't get into SGOne. I could navigate SGTwo, but not SGOne. I then ran 'sudo apt-get clean' and this freed up ~100MB of free space. As it was there was no freespace. I think this might have been part of both problems.
+
