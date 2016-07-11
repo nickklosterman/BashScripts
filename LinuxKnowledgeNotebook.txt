@@ -3642,3 +3642,56 @@ Somehow on puffjay I was trying to push the latest data for IBDs and for some re
 To remove the file and its history I had to
 git filter-branch --index-filter 'git rm -r --cached --ignore-unmatch IBDdatabase.sqlite' HEAD
 http://stackoverflow.com/questions/19573031/cant-push-to-github-because-of-large-file-which-i-already-deleted
+
+Sun Apr 10 12:54:16 EDT 2016
+align text in code - vertical align code on a character
+https://www.emacswiki.org/emacs/AlignCommands
+http://ergoemacs.org/emacs/emacs_align_and_sort.html
+//learn to use the vertical align command
+//M-x align-regexp then type a comma to align on the commas
+var fruit = [ 'grapes', 'oranges',
+              'pineapple', 'apples',
+                    'tomatoes', 'bananas',
+                  'cherries', 'strawberries'];
+
+//M-x align-regexp  then type a space to align on the space
+lastname firstname
+bob jones
+mark andreesen
+something horowitz
+
+nice for aligning arrays and packages in package.json
+
+FIND
+using find to find certain files but excluding other ones
+time find ../Comics \( -name  "Superior*" -not -name "Superior*Spid*" \) -print0 | xargs -0 -I {} cp -r {} .
+http://www.cyberciti.biz/faq/find-command-exclude-ignore-files/
+http://www.theunixschool.com/2012/07/find-command-15-examples-to-exclude.html
+
+Mon Apr 11 10:07:34 EDT 2016
+http://stackoverflow.com/questions/8955425/how-can-i-convert-a-series-of-images-to-a-pdf-from-the-command-line-on-linux
+http://superuser.com/questions/54041/how-to-merge-pdfs-using-imagemagick-resolution-problem seems like IM has some compression going on so ghostscript might be a better bet
+gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=temp.pdf Candidate\ Application2pg1.pdf  Candidate\ Application2pg2.pdf Candidate\ Application2pg3.pdf Candidate\ Application2pg4.pdf Candidate\ Application2pg5.pdf  Candidate\ Application2pg6.pdf Candidate\ Application2pg7.pdf Candidate\ Application2pg8.pdf Candidate\ Application2pg9.pdf
+
+Mon Jul 11 14:24:03 EDT 2016
+Received this 'git loose object corrupt' error:
+puffjay@archd820 BB]$ cd configfiles/
+[puffjay@archd820 configfiles]$ git status
+error: object file .git/objects/c9/1dfe7a1eba6a1e4d25359e7206b07fc6f111a5 is empty
+error: object file .git/objects/c9/1dfe7a1eba6a1e4d25359e7206b07fc6f111a5 is empty
+fatal: loose object c91dfe7a1eba6a1e4d25359e7206b07fc6f111a5 (stored in .git/objects/c9/1dfe7a1eba6a1e4d25359e7206b07fc6f111a5) is corrupt
+[puffjay@archd820 configfiles]$ git log
+error: object file .git/objects/c9/1dfe7a1eba6a1e4d25359e7206b07fc6f111a5 is empty
+error: object file .git/objects/c9/1dfe7a1eba6a1e4d25359e7206b07fc6f111a5 is empty
+fatal: loose object c91dfe7a1eba6a1e4d25359e7206b07fc6f111a5 (stored in .git/objects/c9/1dfe7a1eba6a1e4d25359e7206b07fc6f111a5) is corrupt
+
+Solution, which blows away all stashes and record of commits that were not pushed, was to clone the repo again and cp over the .git directory from the good clone to the one with the error. Then all the git commands worked.
+http://stackoverflow.com/questions/4254389/git-corrupt-loose-object
+http://vincesalvino.blogspot.com/2013/08/git-empty-files-corrupt-objects-and.html
+others talked about unpacking objects etc and that scared me so I went this simpler way which worked fine for me.
+
+Concatenating video files
+basically follow this:
+http://trac.ffmpeg.org/wiki/Concatenate
+create a file with paths to files. don't forget the ticks and make sure the paths and files are spelled correctly.
+ffmpeg -f concat -i filelist.txt -c copy outputfile.whatever

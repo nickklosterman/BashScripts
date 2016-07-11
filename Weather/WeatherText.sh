@@ -22,9 +22,10 @@ case $1 in
         ;;
 esac
 
-wget -q "http://www.nws.noaa.gov/view/prodsByState.php?state=OH&prodtype=hourly" -O /tmp/currentconditions.html && grep -A 10 -m 2 $keyword /tmp/currentconditions.html  #| sed -n -e '3p' -e '7p' -e '8p' -e '9p'
+wget -q "http://www.nws.noaa.gov/view/prodsByState.php?state=OH&prodtype=hourly" -O /tmp/currentconditions.html && grep -A 10 -m 2 $keyword /tmp/currentconditions.html | head  #added head to remove the duplicates woot woot
+#| sed -n -e '3p' -e '7p' -e '8p' -e '9p'
 #sed -n -e '3p' -e '7p' -e '8p' -e '9p' ==> only print the 3rd,7th,8th and 9th line
-echo "--------============----------"
+#echo "--------============----------"
 # on the mac I had to do -m 2 (stop after max count reached) otherwise I didn't get any text output
 
 # I believe that the weather format changed in ~2014/2015 such that the text weather is no longer simply raw text.
