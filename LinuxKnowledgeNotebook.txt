@@ -3759,3 +3759,27 @@ basically follow this:
 http://trac.ffmpeg.org/wiki/Concatenate
 create a file with paths to files. don't forget the ticks and make sure the paths and files are spelled correctly.
 ffmpeg -f concat -i filelist.txt -c copy outputfile.whatever
+
+Mon Aug 15 13:34:42 EDT 2016
+Copying / ripping DVDs
+use dd to get the contents of the disk.
+dd if=/dev/sr0 of=/path/to/your.iso
+mount the iso file
+mount -o loop ISOFILE MNTPOINT
+ffmpeg -i VOBFILE -c:v libx264 -crf 20 -c:a libmp3lame -ac 2 -ab 192k OUTPUT.avi #this will rip the vob and accompanying audio to the desired output file
+for the mac
+diskutil list # get the mountpoint for the dvd drive
+sudo umount /dev/diskX
+dd if=/dev/diskX of=~/output.iso
+dbclick the iso to mount it and then rip the same as above.
+I wrote a script to go through and convert the VOBs to sequential output files. convertVOBtox264.sh
+
+Sat Sep 17 21:22:59 EDT 2016
+had a bitch of a time getting my aviation Checklist thingee working on the mobile FF and Chrome browsers.
+First off they were choking on having a class tag placed on the footer.
+They also choke terribly on commented html.
+Updating the FF browser finally fixed a problem it was having that Chrome wasn't.
+
+For updating things on the Mac, it seems like some of the internal software updaters work (Filezilla) but some don't (VLC).
+But FF, to do debugging on mobile devices is supposed to auto download their ADB Helper addon, but it was failing when I would launch their WebIDE.
+I eventually had to download teh file from their ftp site ( look for the xpi package) and then open that xpi file from FF. FF then figured out what to do with the file and installed it without a problem. 
