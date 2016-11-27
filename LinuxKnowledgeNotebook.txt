@@ -3783,3 +3783,14 @@ Updating the FF browser finally fixed a problem it was having that Chrome wasn't
 For updating things on the Mac, it seems like some of the internal software updaters work (Filezilla) but some don't (VLC).
 But FF, to do debugging on mobile devices is supposed to auto download their ADB Helper addon, but it was failing when I would launch their WebIDE.
 I eventually had to download teh file from their ftp site ( look for the xpi package) and then open that xpi file from FF. FF then figured out what to do with the file and installed it without a problem. 
+
+Sun Nov 27 18:41:30 EST 2016
+To remount fstab drives that for some reason haven't been mounted simply run 
+sudo mount -a
+
+If you get stuck in a 
+Relax, XBMC will restart shortly 
+loop you are most likely running with a full HDD / there is no space left on the device. 
+For the ODROID / raspbmc the likely culprit is the PVR addons that I really don't need. 
+go in and clean out the junk in the ~/.kodi/temp folders
+Just loop for some really big files that you can get rid of.
