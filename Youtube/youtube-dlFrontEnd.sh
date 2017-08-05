@@ -5,7 +5,7 @@
  #    --write-annotations              write video annotations to a .annotation file
  #    --write-thumbnail 
 
-options="--write-description --write-info-json --write-annotations --write-thumbnail --no-playlist"
+options="--write-description --write-info-json --write-annotations --write-thumbnail --no-playlist -f 'bestvideo[height<=1080]+bestaudio"
 if [ $# -lt 1 ]
 then
     echo "${0} directions;"
