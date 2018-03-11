@@ -3794,3 +3794,9 @@ loop you are most likely running with a full HDD / there is no space left on the
 For the ODROID / raspbmc the likely culprit is the PVR addons that I really don't need. 
 go in and clean out the junk in the ~/.kodi/temp folders
 Just loop for some really big files that you can get rid of.
+
+Sun 11 Mar 12:53:26 EDT 2018
+python 2:
+python -m SimpleHTTPServer
+python 3:
+python -m http.server
